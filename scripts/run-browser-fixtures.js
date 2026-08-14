@@ -482,14 +482,30 @@ async function verifyUiAccessibility(client, baseUrl) {
   process.stdout.write("✓ settings keyboard and file-import contract\n");
 }
 
+function waitForProcessExit(chromeProcess, timeoutMs) {
+  if (chromeProcess.exitCode != null || chromeProcess.signalCode != null) {
+    return Promise.resolve(true);
+  }
+
+  return new Promise((resolve) => {
+    const onExit = () => {
+      clearTimeout(timeout);
+      resolve(true);
+    };
+    const timeout = setTimeout(() => {
+      chromeProcess.off("exit", onExit);
+      resolve(false);
+    }, timeoutMs);
+    chromeProcess.once("exit", onExit);
+  });
+}
+
 async function stopChrome(chromeProcess) {
-  if (!chromeProcess || chromeProcess.exitCode != null) return;
+  if (!chromeProcess || chromeProcess.exitCode != null || chromeProcess.signalCode != null) return;
   chromeProcess.kill("SIGTERM");
-  await Promise.race([
-    new Promise((resolve) => chromeProcess.once("exit", resolve)),
-    delay(2_000)
-  ]);
-  if (chromeProcess.exitCode == null) chromeProcess.kill("SIGKILL");
+  if (await waitForProcessExit(chromeProcess, 5_000)) return;
+  chromeProcess.kill("SIGKILL");
+  await waitForProcessExit(chromeProcess, 2_000);
 }
 
 async function main() {
@@ -547,7 +563,12 @@ async function main() {
     if (client) client.close();
     if (server) await new Promise((resolve) => server.close(resolve));
     await stopChrome(chromeProcess);
-    await fsPromises.rm(profileDirectory, { recursive: true, force: true });
+    await fsPromises.rm(profileDirectory, {
+      recursive: true,
+      force: true,
+      maxRetries: 10,
+      retryDelay: 250
+    });
   }
 }
 
