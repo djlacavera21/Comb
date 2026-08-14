@@ -482,7 +482,7 @@ async function verifyUiAccessibility(client, baseUrl) {
     codes: ["SAVE10"],
     attribution: { affiliateId: "creator-secret" }
   }, {
-    extensionVersion: fixtureMatrix.engineVersion,
+    extensionVersion: ${JSON.stringify(fixtureMatrix.engineVersion)},
     generatedAt: "2026-08-14T12:00:00.000Z"
   })`);
   const parsedReport = JSON.parse(safeReport);
