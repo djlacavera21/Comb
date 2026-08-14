@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ar-AE" dir="rtl">
+  <head>
+    <meta charset="utf-8">
+    <title>Arabic right-to-left generic checkout fixture</title>
+    <link rel="stylesheet" href="fixture.css">
+  </head>
+  <body data-baseline="1234.50" data-shipping="50" data-currency="AED" data-locale="ar-AE" data-currency-display="code">
+    <main>
+      <h1>صفحة دفع تجريبية</h1>
+      <form>
+        <label for="promo_code">رمز القسيمة</label>
+        <input id="promo_code" name="promo_code" type="text" autocomplete="off" aria-label="Coupon code" data-fixture-input>
+        <button type="submit" aria-label="Apply coupon" data-fixture-apply>تطبيق الرمز</button>
+      </form>
+      <p class="coupon-status" role="alert" data-fixture-status hidden></p>
+      <div class="applied-discount" data-fixture-applied hidden>
+        <span data-fixture-applied-code></span>
+        <button type="button" class="coupon-remove" aria-label="Remove coupon" data-fixture-remove>إزالة</button>
+      </div>
+      <div class="summary">
+        <div class="subtotal-total"><span>المجموع الفرعي</span><span>AED ١٬١٢٥٫٠٠</span></div>
+        <div class="shipping-total"><span>الشحن</span><span>AED ٥٠٫٠٠</span></div>
+        <div class="tax-total"><span>الضريبة</span><span>AED ٥٩٫٥٠</span></div>
+        <div class="order-total" aria-label="Order total">
+          <span>المبلغ الإجمالي</span>
+          <strong data-fixture-total>AED ١٬٢٣٤٫٥٠</strong>
+        </div>
+      </div>
+      <div class="danger-zone">
+        <button type="button" data-fixture-danger>إتمام الطلب</button>
+      </div>
+    </main>
+    <script src="../../src/content/checkout-engine.js"></script>
+    <script src="fixture-runtime.js"></script>
+  </body>
+</html>

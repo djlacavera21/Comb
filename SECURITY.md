@@ -11,12 +11,13 @@ Do not include active checkout URLs, session cookies, payment details, addresses
 ## Design constraints
 
 - No remotely hosted executable code.
-- No required host permissions in the v0.4 manifest and no install-time access to shopping sites.
+- No required host permissions in the v0.5 manifest and no install-time access to shopping sites.
 - Optional feed-origin access is granted at runtime for one user-selected HTTPS origin and removed when its last source is removed.
 - No cookie or traffic-interception permissions.
 - No affiliate-link or attribution mutation.
 - No order-submission automation.
-- No collection of page contents, payment data, browsing history, or identities.
+- No developer receipt or broad persistence of page content; only coupon controls/messages and the displayed payable amount/currency are handled locally for the active run.
+- No payment credentials, address/identity fields, browser-history API access, or general browsing-history log.
 - Merchant codes remain in extension-local storage unless a user explicitly exports them.
 - Community-feed JSON must verify against an explicitly imported P-256 public key before it becomes eligible for checkout use.
 - Feed sequence numbers cannot move backward or reuse a sequence for different content.
@@ -24,5 +25,5 @@ Do not include active checkout URLs, session cookies, payment details, addresses
 - Network-source message handlers accept calls only from Comb's settings page, never from checkout content.
 - A coupon removal is successful only when coupon markers disappear and the original total and currency return; otherwise the run stops before another code can stack.
 - Currency or unexplained payable-total drift between attempts stops the transaction instead of producing a false savings comparison.
-- CI drives sanitized checkout, creator-attribution preservation, and keyboard contracts in a real Chrome process and builds the store archive twice before publication.
+- CI drives sanitized checkout, creator-attribution preservation, and keyboard contracts in a real Chrome process and builds both the runtime ZIP and reviewer kit twice before publication.
 - Private feed-signing keys must never be committed to this repository; CI scans JSON artifacts for private EC material.

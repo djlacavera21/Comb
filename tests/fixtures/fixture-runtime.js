@@ -14,6 +14,7 @@
   const shipping = Number(document.body.dataset.shipping || 7.95);
   const locale = document.body.dataset.locale || "en-US";
   const currency = document.body.dataset.currency || "USD";
+  const currencyDisplay = document.body.dataset.currencyDisplay || "symbol";
   const removeFails = document.body.dataset.removeFails === "true";
   const removeLeavesTotal = document.body.dataset.removeLeavesTotal === "true";
   const currencyDrift = document.body.dataset.currencyDrift || null;
@@ -31,7 +32,11 @@
   };
 
   function money(value) {
-    return new Intl.NumberFormat(locale, { style: "currency", currency }).format(value);
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      currencyDisplay
+    }).format(value);
   }
 
   function setStatus(message) {
@@ -74,7 +79,8 @@
       if (total) {
         total.textContent = new Intl.NumberFormat(locale, {
           style: "currency",
-          currency: currencyDrift
+          currency: currencyDrift,
+          currencyDisplay
         }).format(baseline);
       }
       setStatus("Coupon could not be verified because the checkout currency changed.");

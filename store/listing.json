@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "extensionVersion": "0.5.0",
+  "lastReviewed": "2026-08-14",
+  "shared": {
+    "name": "Comb — Private Coupon Tester",
+    "shortDescription": "Test coupons with verified checkout restoration, trusted feed updates, and protected creator attribution.",
+    "category": "Shopping",
+    "language": "en",
+    "homepageUrl": "https://github.com/djlacavera21/Comb",
+    "supportUrl": "https://github.com/djlacavera21/Comb/issues",
+    "privacyPolicyUrl": "https://github.com/djlacavera21/Comb/blob/main/docs/PRIVACY.md",
+    "singlePurpose": "Comb tests user-provided or signature-verified coupon codes on the current checkout and preserves the best measurable discount without changing creator affiliate attribution."
+  },
+  "permissions": {
+    "activeTab": "Temporarily inspect the checkout only after the user invokes Comb on that tab.",
+    "alarms": "Run best-effort update checks only for signed-feed sources the user explicitly connected.",
+    "scripting": "Inject Comb's packaged coupon engine into the temporarily authorized active tab.",
+    "storage": "Keep merchant coupon lists, trusted public keys, verified feeds, and approved-source settings on the device.",
+    "optional_host_permissions": "Request one exact public HTTPS feed origin at runtime only after the user enters its URL and approves the browser prompt."
+  },
+  "privacy": {
+    "remoteCode": {
+      "usesRemoteCode": false,
+      "explanation": "All executable JavaScript and CSS is packaged in the extension. Optional feeds are bounded signed JSON and cannot contain scripts, selectors, URLs, or executable configuration."
+    },
+    "dashboardDataTypeSelections": [
+      "financial_and_payment_information",
+      "web_history",
+      "website_content"
+    ],
+    "dataHandling": [
+      {
+        "dashboardType": "financial_and_payment_information",
+        "scope": "The displayed payable total and currency only; no card, bank, billing-address, payment-token, or account fields.",
+        "purpose": "Measure whether a coupon changed the amount shown by the checkout.",
+        "retention": "Memory for the active run only.",
+        "developerReceives": false,
+        "recipients": [],
+        "unrelatedThirdPartyReceives": false
+      },
+      {
+        "dashboardType": "web_history",
+        "scope": "The current merchant hostname only when the user opens Comb; Comb does not request or read the browser history API.",
+        "purpose": "Keep the user's coupon list scoped to the correct merchant.",
+        "retention": "Extension-local storage until the user deletes the merchant or all local data.",
+        "developerReceives": false,
+        "recipients": [],
+        "unrelatedThirdPartyReceives": false
+      },
+      {
+        "dashboardType": "website_content",
+        "scope": "User-entered coupon tokens plus visible coupon-control labels, coupon-specific result messages, and the displayed payable total.",
+        "purpose": "Find coupon controls, test the user's codes, verify removal, and report the result.",
+        "retention": "Coupon tokens may remain in extension-local storage; checkout labels, messages, and totals remain in memory for the active run only.",
+        "developerReceives": false,
+        "recipients": [
+          "The current merchant checkout receives only the coupon token that Comb enters into its existing visible coupon field."
+        ],
+        "unrelatedThirdPartyReceives": false
+      }
+    ],
+    "optionalFeedNetwork": {
+      "enabledByDefault": false,
+      "destination": "Only the public HTTPS feed URL entered by the user and approved through the browser's origin prompt.",
+      "requestData": "A credential-free GET with no referrer, checkout URL, merchant history, coupon outcomes, creator tags, identity, or payment data.",
+      "operatorVisibility": "The user-selected feed operator can ordinarily observe the requested path, request time, IP address, and common transport/browser headers.",
+      "combDeveloperReceivesCheckoutData": false
+    },
+    "limitedUseCertifications": {
+      "noSaleOrUnapprovedTransfer": true,
+      "singlePurposeOnly": true,
+      "noCreditworthinessOrLendingUse": true,
+      "noPersonalizedAdvertising": true,
+      "noHumanReadingOutsideSecurityOrUserRequest": true
+    }
+  },
+  "creatorAttribution": {
+    "zeroAffiliate": true,
+    "publicMessage": "The creator-tagging issue is fixed: Comb leaves existing creator affiliate tags, referral parameters, and cookies untouched so the original creator can keep proper attribution.",
+    "verifiedBy": [
+      "scripts/validate-extension.js",
+      "scripts/run-browser-fixtures.js",
+      "docs/ATTRIBUTION.md",
+      "docs/SECURITY_REVIEW.md"
+    ]
+  },
+  "chrome": {
+    "detailedDescriptionFile": "store/chrome-description.txt",
+    "releaseNotesFile": "store/release-notes.txt",
+    "reviewNotesFile": "store/review-notes.md",
+    "assets": {
+      "icon": {
+        "path": "icons/comb-128.png",
+        "width": 128,
+        "height": 128
+      },
+      "smallPromo": {
+        "path": "store/assets/comb-small-promo-440x280.png",
+        "width": 440,
+        "height": 280
+      },
+      "screenshots": [
+        {
+          "path": "store/assets/comb-screenshot-01-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb testing coupon codes on a synthetic checkout while keeping creator attribution protected."
+        }
+      ]
+    }
+  },
+  "edge": {
+    "descriptionFile": "store/edge-description.txt",
+    "certificationNotesFile": "store/review-notes.md",
+    "searchTerms": [
+      "coupon tester",
+      "discount codes",
+      "private shopping",
+      "creator attribution",
+      "checkout savings"
+    ],
+    "assets": {
+      "logo": {
+        "path": "store/assets/comb-store-logo-300.png",
+        "width": 300,
+        "height": 300
+      },
+      "smallTile": {
+        "path": "store/assets/comb-small-promo-440x280.png",
+        "width": 440,
+        "height": 280
+      },
+      "screenshots": [
+        {
+          "path": "store/assets/comb-screenshot-01-1280x800.png",
+          "width": 1280,
+          "height": 800
+        }
+      ]
+    }
+  }
+}

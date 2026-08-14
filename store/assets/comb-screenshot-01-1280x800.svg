@@ -1,0 +1,107 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" role="img" aria-labelledby="title desc">
+  <title id="title">Comb on a synthetic checkout</title>
+  <desc id="desc">The Comb popup shows creator attribution protection, a detected checkout total, coupon codes, and the Try codes action</desc>
+  <defs>
+    <linearGradient id="background" x1="45" y1="25" x2="1230" y2="775" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#123629"/>
+      <stop offset="0.55" stop-color="#0b241b"/>
+      <stop offset="1" stop-color="#071a14"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(1070 72) rotate(125) scale(580 520)">
+      <stop stop-color="#d4a84f" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#d4a84f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f7dda0"/>
+      <stop offset="1" stop-color="#d4a84f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="800" fill="url(#background)"/>
+  <rect width="1280" height="800" fill="url(#glow)"/>
+  <g opacity="0.11" fill="none" stroke="#edc66f" stroke-width="2">
+    <path d="M91 74 126 94v40l-35 20-35-20V94z"/>
+    <path d="M121 145 156 165v40l-35 20-35-20v-40z"/>
+    <path d="M61 145 96 165v40l-35 20-35-20v-40z"/>
+    <path d="M1187 612 1222 632v40l-35 20-35-20v-40z"/>
+    <path d="M1157 683 1192 703v40l-35 20-35-20v-40z"/>
+    <path d="M1217 683 1252 703v40l-35 20-35-20v-40z"/>
+  </g>
+
+  <g transform="translate(94 118)">
+    <path d="M55 0 103 28v55l-48 28L7 83V28z" fill="#0b241b" stroke="url(#brass)" stroke-width="5"/>
+    <path d="M73 34a29 29 0 1 0 0 43" fill="none" stroke="url(#brass)" stroke-linecap="round" stroke-width="12"/>
+    <path d="m82 28 8 5v9l-8 5-8-5v-9zm0 36 8 5v9l-8 5-8-5v-9z" fill="#f7dda0"/>
+    <text x="130" y="42" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="700" letter-spacing="2.5">PRIVATE COUPON TESTER</text>
+    <text x="130" y="93" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="56" font-weight="800">Comb</text>
+  </g>
+  <text x="94" y="300" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="44" font-weight="800">Try codes. Keep the best.</text>
+  <text x="94" y="352" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="31" font-weight="750">Keep the creator’s credit.</text>
+  <text x="94" y="413" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="18">The creator-tagging issue is fixed by design.</text>
+  <text x="94" y="445" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="18">Existing affiliate tags, referral parameters, and</text>
+  <text x="94" y="477" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="18">attribution cookies remain untouched.</text>
+  <g transform="translate(94 535)">
+    <circle cx="13" cy="13" r="13" fill="#71d39b"/>
+    <path d="m7 13 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="40" y="18" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700">Local checkout processing</text>
+    <circle cx="13" cy="63" r="13" fill="#71d39b"/>
+    <path d="m7 63 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="40" y="68" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700">Verified restoration between attempts</text>
+    <circle cx="13" cy="113" r="13" fill="#71d39b"/>
+    <path d="m7 113 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="40" y="118" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700">No purchase clicks or affiliate swap</text>
+  </g>
+
+  <rect x="735" y="42" width="474" height="724" rx="36" fill="#000000" fill-opacity="0.3"/>
+  <g transform="translate(757 54)">
+    <rect width="430" height="692" rx="22" fill="#081d16" stroke="#edc66f" stroke-opacity="0.24"/>
+    <g transform="translate(24 22)">
+      <path d="M24 0 46 13v25L24 51 2 38V13z" fill="#0b241b" stroke="url(#brass)" stroke-width="2.5"/>
+      <text x="15" y="36" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="26" font-weight="800">C</text>
+      <text x="62" y="17" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="8" font-weight="700" letter-spacing="1.3">PRIVATE COUPON TESTER</text>
+      <text x="62" y="43" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="25" font-weight="800">Comb</text>
+      <circle cx="359" cy="25" r="18" fill="#ffffff" fill-opacity="0.05"/>
+      <path d="M353 25h12M359 19v12" stroke="#b8c7be" stroke-width="2" stroke-linecap="round"/>
+
+      <g transform="translate(0 70)">
+        <rect width="382" height="71" rx="12" fill="#71d39b" fill-opacity="0.09" stroke="#71d39b" stroke-opacity="0.32"/>
+        <circle cx="25" cy="25" r="11" fill="#71d39b"/>
+        <path d="m20 25 3 3 7-8" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"/>
+        <text x="44" y="23" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="800">Creator attribution protected</text>
+        <text x="44" y="43" fill="#bcd9c8" font-family="DejaVu Sans, sans-serif" font-size="9.5">Comb never replaces affiliate tags, referral links, or cookies.</text>
+      </g>
+
+      <g transform="translate(0 155)">
+        <rect width="382" height="113" rx="14" fill="#ffffff" fill-opacity="0.045" stroke="#edc66f" stroke-opacity="0.22"/>
+        <text x="16" y="25" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="8" font-weight="700" letter-spacing="1.2">CURRENT STORE</text>
+        <text x="16" y="51" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="800">demo.checkout.local</text>
+        <rect x="286" y="17" width="79" height="23" rx="12" fill="#d4a84f" fill-opacity="0.1" stroke="#edc66f" stroke-opacity="0.22"/>
+        <text x="298" y="32" fill="#f7dda0" font-family="DejaVu Sans, sans-serif" font-size="8.5" font-weight="700">Generic</text>
+        <line x1="16" x2="366" y1="68" y2="68" stroke="#edc66f" stroke-opacity="0.2"/>
+        <text x="16" y="92" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="10">Detected total</text>
+        <text x="310" y="92" fill="#f7dda0" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="800">$132.95</text>
+      </g>
+
+      <g transform="translate(0 289)">
+        <text x="0" y="10" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="8" font-weight="700" letter-spacing="1.2">LOCAL CODE LIST</text>
+        <text x="0" y="35" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="800">Codes to try</text>
+        <rect x="318" y="13" width="64" height="23" rx="12" fill="#d4a84f" fill-opacity="0.1" stroke="#edc66f" stroke-opacity="0.22"/>
+        <text x="333" y="28" fill="#f7dda0" font-family="DejaVu Sans, sans-serif" font-size="8.5" font-weight="700">20 max</text>
+        <rect y="50" width="382" height="132" rx="11" fill="#000000" fill-opacity="0.24" stroke="#edc66f" stroke-opacity="0.22"/>
+        <text x="14" y="77" fill="#fff7e2" font-family="DejaVu Sans Mono, monospace" font-size="12">SAVE10</text>
+        <text x="14" y="101" fill="#fff7e2" font-family="DejaVu Sans Mono, monospace" font-size="12">WELCOME20</text>
+        <text x="14" y="125" fill="#fff7e2" font-family="DejaVu Sans Mono, monospace" font-size="12">FREESHIP</text>
+        <text x="14" y="149" fill="#71837a" font-family="DejaVu Sans Mono, monospace" font-size="12">NOTREAL</text>
+        <text x="0" y="202" fill="#8fa097" font-family="DejaVu Sans, sans-serif" font-size="8.5">Saved only in this browser for this merchant. URLs are rejected.</text>
+      </g>
+
+      <g transform="translate(0 516)">
+        <rect width="382" height="48" rx="10" fill="url(#brass)"/>
+        <path d="m137 15 10 6v12l-10 6-10-6V21z" fill="none" stroke="#071a14" stroke-width="2"/>
+        <text x="158" y="30" fill="#071a14" font-family="DejaVu Sans, sans-serif" font-size="13" font-weight="800">Try codes</text>
+        <text x="0" y="84" fill="#7f9188" font-family="DejaVu Sans, sans-serif" font-size="8">No tracking. No affiliate swap. No purchase clicks.</text>
+        <text x="339" y="84" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="8">Privacy</text>
+      </g>
+    </g>
+  </g>
+  <text x="1110" y="778" text-anchor="end" fill="#82958b" font-family="DejaVu Sans, sans-serif" font-size="10">Synthetic checkout shown · Comb v0.5</text>
+</svg>

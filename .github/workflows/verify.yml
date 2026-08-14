@@ -19,17 +19,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Validate package and attribution boundary
-        run: node scripts/validate-extension.js
+      - name: Validate runtime, store disclosures, assets, and attribution boundary
+        run: npm run lint
       - name: Run unit tests
         run: node --test tests/*.test.cjs
       - name: Run real-browser adapter and keyboard fixtures
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/run-browser-fixtures.js --require-browser
-      - name: Build reproducible store package
-        run: node scripts/build-release.js --verify
-      - name: Upload verified store package
+      - name: Build reproducible runtime and store review kit
+        run: npm run release:build
+      - name: Upload verified runtime and store review kit
         uses: actions/upload-artifact@v4
         with:
           name: comb-${{ github.sha }}-store-package

@@ -4,13 +4,13 @@
 
 Creator lawsuits and public reporting alleged that Honey replaced pre-existing affiliate identifiers with its own near checkout, potentially moving commission away from the creator who made the referral. Those are litigated allegations, not a premise Comb needs a court to resolve. Comb fixes the underlying trust problem structurally: it has no affiliate identity and no code path capable of creating a competing referral event. See the [consolidated complaint](https://www.cohenmilstein.com/wp-content/uploads/2025/01/Second-Amended-Consolidated-Complaint-In-re-PayPal-Honey-Browser-Extension-01052026.pdf) for the allegations and the [Chrome Web Store affiliate policy](https://developer.chrome.com/docs/webstore/program-policies/affiliate-ads) for the platform rule.
 
-The result is simple: using Comb does not make Comb the last affiliate click.
+The result is simple: **the creator-tagging issue is fixed in Comb**. Using Comb does not make Comb the last affiliate click; existing creator affiliate tags, referral parameters, and attribution cookies stay untouched so the original creator can keep proper attribution.
 
 ## The invariant
 
 Comb must not take referral credit away from the creator, publisher, organization, or person who sent the shopper to a merchant.
 
-For v0.4, this is a strict zero-affiliate design:
+For v0.5, this is a strict zero-affiliate design:
 
 - Comb has no affiliate ID and earns no checkout commission.
 - Comb never changes the page URL or its query parameters.
@@ -23,7 +23,7 @@ This preserves the shopper's existing referral path because Comb does not create
 
 ## Product disclosure
 
-The popup displays **Creator attribution protected** on every checkout. The README and eventual store listing use the same plain-language guarantee. Comb will not hide monetization in terms of service or a privacy-policy footnote.
+The popup displays **Creator attribution protected** on every checkout. The README, validated Chrome/Edge descriptions, privacy policy, reviewer notes, and public security review use the same plain-language guarantee. Comb will not hide monetization in terms of service or a privacy-policy footnote.
 
 ## Mechanical enforcement
 

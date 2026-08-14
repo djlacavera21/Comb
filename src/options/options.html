@@ -12,7 +12,7 @@
       <header class="page-header">
         <div class="brand-mark" aria-hidden="true">C</div>
         <div>
-          <p class="eyebrow">Comb v0.4</p>
+          <p class="eyebrow">Comb v0.5</p>
           <h1>Codes and trusted feeds</h1>
           <p>Manage local coupon lists and cryptographically verified community feeds. Comb never uploads checkout data.</p>
         </div>
@@ -25,6 +25,20 @@
           <h2 id="guaranteeHeading">Creator Attribution Guarantee</h2>
           <p>If a creator sent you to a store, Comb leaves their attribution intact. This build has no affiliate ID, never rewrites a referral URL, never changes attribution cookies, and never opens a hidden commission link.</p>
         </div>
+      </section>
+
+      <section class="privacy-summary card" aria-labelledby="privacyHeading">
+        <div>
+          <p class="eyebrow">On-device data use</p>
+          <h2 id="privacyHeading">Privacy at a glance</h2>
+          <p>Comb handles the current merchant hostname, coupon tokens, coupon controls/messages, and displayed payable amount/currency to run the test. The Comb developer receives none of that checkout data.</p>
+        </div>
+        <ul>
+          <li>Coupon lists, trusted keys, feeds, and source settings stay in extension-local storage until you remove them.</li>
+          <li>The current merchant receives only the coupon token entered into its existing visible field.</li>
+          <li>An optional feed operator sees ordinary network metadata only after you enter its public HTTPS URL and approve the origin.</li>
+        </ul>
+        <p class="policy-location">Full public policy: github.com/djlacavera21/Comb/blob/main/docs/PRIVACY.md</p>
       </section>
 
       <section class="feed-manager card" aria-labelledby="feedsHeading">

@@ -35,14 +35,22 @@
 - Keyboard-visible native controls, announced progress, result focus management, and reduced-motion support.
 - Reproducible Chrome Web Store upload ZIP with a SHA-256 checksum and CI artifact.
 
-## v0.5 — Store release hardening
+## v0.5 — Store release hardening (shipped)
 
-- Chrome Web Store and Edge Add-ons privacy disclosures.
-- Expand the checkout fixture matrix across more platform versions and themes.
-- Expand the localization, currency, tax, and shipping test corpus.
-- Finalize Chrome Web Store and Edge Add-ons submission packages.
-- Public security and creator-attribution review.
+- Validated Chrome Web Store and Edge Add-ons privacy disclosures, including data handled only on-device.
+- Localized WooCommerce classic, Shopify-style, and generic RTL contracts across MXN, CHF, and AED.
+- Separate subtotal, tax, shipping, and payable-total fixtures to prevent false total selection.
+- Copy-ready listing metadata, reviewer notes, exact-dimension store graphics, and deterministic review kit.
+- Public security and creator-attribution self-review with executed URL/cookie preservation evidence.
 - Any anonymous outcome reporting only after separate consent, minimization, and abuse-control design.
+
+## v0.6 — Release-candidate feedback
+
+- Publish through Chrome Web Store and Microsoft Edge Add-ons after dashboard review.
+- Add sanitized fixtures from verified compatibility reports without collecting live checkout captures.
+- Track adapter regressions by platform/theme version and stop safely on unknown markup.
+- Formalize release tags, changelog, support triage, and store-review response playbooks.
+- Invite independent review of the permission, signed-feed, and creator-attribution boundaries.
 
 ## v1.0 — Trustworthy shopping assistant
 

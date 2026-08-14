@@ -1,54 +1,74 @@
-# Comb v0.4 Privacy Specification
+# Comb v0.5 Privacy Policy and Data-Use Specification
 
-## Data Comb stores
+Effective: August 14, 2026
 
-Comb stores coupon-code lists keyed by merchant hostname, explicitly trusted public feed keys, signed coupon-feed envelopes, and any feed-source URL the user approves. Source records include the pinned feed ID and signer, origin grant, last-check and last-update times, and a short status or error. This data stays in the browser's extension-local storage. The options page can export or delete local lists and remove keys, feeds, or sources.
+Comb is an open-source browser extension with no Comb account, developer backend, analytics, advertising SDK, default feed, or checkout-outcome upload. The developer does not receive checkout data. Comb does, however, handle limited data on-device to test coupons. Browser-store disclosures must include that local handling; “local” does not mean “undisclosed.”
 
-Signed-feed records contain only publisher name, public-key fingerprint, feed identity and sequence, issue/expiry times, exact merchant hostnames, coupon tokens, verification timestamps, and aggregate success/failure counts. Private signing keys never enter the extension.
+## Data handled on-device
 
-## Data Comb reads temporarily
+The Chrome Web Store and Edge Add-ons submissions conservatively disclose these categories:
 
-After the user clicks Comb, the checkout engine examines visible DOM metadata needed to identify:
+| Store category | Exact scope | Purpose | Retention |
+| --- | --- | --- | --- |
+| **Financial and payment information** | The displayed payable amount and currency only. Comb does not access card, bank, payment-token, billing-address, or account fields. | Measure whether a coupon changed the amount displayed by the checkout. | Memory for the active run only. |
+| **Web history** | The current merchant hostname when the user opens Comb. Comb does not request or read the browser history API or build a general history. | Scope a saved coupon list to the correct merchant. | Extension-local storage until the user deletes that merchant or all local data. |
+| **Website content** | User-entered coupon tokens, visible coupon-control labels, coupon-specific status messages, and the displayed payable total. | Find coupon controls, test requested codes, verify removal, and report results. | Coupon tokens may remain in extension-local storage; checkout labels, messages, and totals remain in memory for the active run only. |
 
-- a coupon or promotion input;
-- a coupon-specific apply or remove control;
-- a displayed checkout total;
-- a coupon-related success or error message.
+Comb also stores explicitly trusted public feed keys, verified signed coupon-feed envelopes, and any feed-source URL the user approves. Source records include the pinned feed ID and signer, granted origin, last-check and last-update times, and a short status or error. Signed-feed records contain publisher name, public-key fingerprint, feed identity and sequence, issue/expiry times, exact merchant hostnames, coupon tokens, verification timestamps, and publisher-provided aggregate success/failure counts. Private signing keys never enter the extension.
 
-It does not query payment fields, addresses, identity fields, cart item descriptions, cookies, local storage belonging to the merchant, or network traffic.
+Messages between the checkout page, service worker, and popup stay inside the browser extension. They contain coupon tokens under test, current merchant hostname, adapter name, a short coupon-related message, and numeric before/after totals.
 
-## Creator attribution
+## Data Comb deliberately does not access
 
-Comb neither reads nor writes affiliate cookies. It does not change referral parameters, URLs, navigation, or merchant requests and has no Comb affiliate identity. A creator's existing referral path is left untouched. See [ATTRIBUTION.md](ATTRIBUTION.md).
+Comb does not query payment instruments, address fields, identity fields, cart-item descriptions, merchant cookies, merchant local storage, browser history, or merchant network traffic. It requests no cookie, history, web-request interception, or required shopping-site permission. It never clicks purchase, payment, checkout, or place-order controls.
+
+## Who receives data
+
+| Recipient | What it receives |
+| --- | --- |
+| Comb developer | No checkout data, merchant history, coupon outcomes, identity, payment data, creator tags, or extension analytics. Comb has no service that accepts them. |
+| Merchant checkout already open by the user | Coupon tokens entered through the merchant's existing visible coupon field, exactly as necessary to perform the requested test. |
+| User-selected feed operator, only if the user connects a source | The requested public HTTPS path plus network-level information ordinarily visible to a server, such as request time, IP address, and common transport/browser headers. It receives no checkout URL, merchant history, coupon outcome, creator tag, identity, or payment data from Comb. |
+| Any other third party | Nothing from Comb. Comb does not sell data, provide advertising audiences, or transfer data for unrelated purposes. |
 
 ## Optional feed-source requests
 
-By default, nothing is transmitted. Comb has no server, analytics SDK, advertising SDK, affiliate rewrite, error collector, default feed, or outcome upload.
+Network feed updates are disabled by default. If the user enters a public HTTPS feed URL and approves its exact origin in the browser permission prompt, Comb sends a `GET` request when the source is connected, when the user selects **Check now**, and approximately every 12 hours while the browser can run the scheduled task.
 
-If the user enters a public HTTPS feed URL and approves its origin in Chrome's permission prompt, Comb sends a `GET` request to that exact URL when the source is connected, when the user selects **Check now**, and approximately every 12 hours while the browser can run the scheduled task. The request:
+The request omits cookies and other credentials, supplies no referrer, rejects redirects, and accepts at most 2 MiB of UTF-8 JSON. The response remains inert data and must pass local public-key signature, schema, expiry, signer-pin, feed-ID, and rollback checks. A feed cannot contain JavaScript, DOM selectors, affiliate metadata, referral URLs, source URLs, or executable configuration. The user-selected feed operator is independent of Comb; users should connect only operators they trust.
 
-- omits cookies and other credentials;
-- supplies no referrer;
-- rejects redirects;
-- sends no checkout URL, merchant history, coupon outcomes, creator tags, identity, or payment data; and
-- accepts at most 2 MiB of UTF-8 JSON before local signature and schema verification.
+## Creator attribution
 
-As with any network connection, the feed operator can ordinarily observe network-level information such as the request time, IP address, and common transport or browser headers. Comb does not add a user identifier.
-
-Messages between the checkout page, service worker, and popup remain inside the browser extension. They contain coupon codes under test, detected merchant hostname, adapter name, status text reduced to a short coupon-related message, and numeric before/after totals.
-
-The browser fixtures used in continuous integration are entirely synthetic. They run against invented local pages and contain no merchant session, account, purchase, creator, or checkout data.
+The creator-tagging issue is fixed by design. Comb neither reads nor writes affiliate cookies, never changes a URL or referral query parameter, never opens a merchant referral tab, and has no Comb affiliate identity. Existing creator affiliate tags, referral parameters, and attribution cookies remain untouched so the original creator can keep proper attribution. See [ATTRIBUTION.md](ATTRIBUTION.md) and the executed regression record in [SECURITY_REVIEW.md](SECURITY_REVIEW.md).
 
 ## Permissions
 
-- `activeTab`: temporary access to the current page after the user invokes Comb.
-- `alarms`: run best-effort checks for sources the user has already connected.
-- `scripting`: inject the packaged checkout engine into that temporarily authorized page.
-- `storage`: keep the user's local merchant coupon lists, trusted public keys, signed feeds, and approved-source settings.
-- optional `https://*/*`: allows Chrome to offer an origin-specific runtime prompt for a feed URL discovered from user input. No origin is granted at installation, and Comb requests only the exact HTTPS origin selected by the user.
+- `activeTab`: temporary access to the current page only after the user invokes Comb.
+- `alarms`: best-effort checks only for sources the user has already connected.
+- `scripting`: inject the packaged checkout engine into the temporarily authorized page.
+- `storage`: keep merchant coupon lists, trusted public keys, verified feeds, and approved-source settings on the device.
+- optional `https://*/*`: allows an origin-specific runtime prompt for the public feed URL entered by the user. No origin is granted at installation, and Comb requests only the exact approved HTTPS origin.
 
-Comb requests no required host patterns, shopping-site host access, cookie permission, traffic-interception permission, or browsing-history permission.
+## User controls, retention, and deletion
 
-## Deletion and export
+Open Comb settings to export the local coupon library, delete one merchant, erase the entire library, remove a source, remove a signed feed, or remove a trusted key and the feeds/sources signed by it. Removing the final source on an origin asks the browser to remove that optional origin grant. Uninstalling Comb asks the browser to delete its extension-local storage under the browser's normal uninstall behavior.
 
-Open Comb's extension options to export the local coupon library, delete one merchant, erase the entire local library, remove a source, remove a signed feed, or remove a trusted key and every feed and source signed by it. Removing the final source on an origin asks Chrome to remove that optional origin grant; the last verified feed remains installed until separately removed or replaced.
+Checkout labels, status messages, and totals are not intentionally persisted after a run. Local coupon lists, keys, feeds, sources, sequence history, and related settings remain until the user removes them or uninstalls the extension.
+
+## Limited Use commitments
+
+Comb's handling of user data is limited to its disclosed single purpose. The project commits that it will:
+
+- not sell user data or transfer it outside approved uses necessary to provide the requested feature;
+- not use or transfer user data for a purpose unrelated to local coupon testing and user-configured signed-feed updates;
+- not use or transfer user data to determine creditworthiness or for lending;
+- not use or transfer user data for personalized advertising; and
+- not allow humans to read user data except at the user's affirmative request, for a specific security/abuse investigation, or where legally required.
+
+Any future analytics, outcome reporting, affiliate model, account, or backend would require a separate public design, new consent where applicable, updated store disclosures and privacy policy, and review of the Creator Attribution Guarantee before implementation. It is not part of v0.5.
+
+## Security and policy changes
+
+Comb's packaged-code validator blocks cookie, navigation, traffic-interception, remote-code, and purchase-click capabilities. Required continuous integration also exercises sanitized real-browser checkout and creator-attribution contracts. These controls reduce risk but are not a substitute for independent review.
+
+Material policy changes will be versioned in the public repository before a corresponding extension release. Questions can be opened as sanitized issues at [github.com/djlacavera21/Comb/issues](https://github.com/djlacavera21/Comb/issues). Do not include checkout URLs, cookies, payment details, addresses, affiliate IDs, or order data in a public issue; use GitHub private vulnerability reporting for sensitive security reports when available.

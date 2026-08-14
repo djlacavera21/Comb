@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8">
+    <title>WooCommerce classic Spanish fixture</title>
+    <link rel="stylesheet" href="fixture.css">
+  </head>
+  <body data-baseline="1999.90" data-shipping="149.90" data-currency="MXN" data-locale="es-MX" data-currency-display="code">
+    <main>
+      <h1>Pago clásico de WooCommerce</h1>
+      <form class="checkout_coupon woocommerce-form-coupon">
+        <label for="coupon_code">Código de cupón</label>
+        <input id="coupon_code" name="coupon_code" type="text" autocomplete="off" data-fixture-input>
+        <button name="apply_coupon" type="submit" value="Aplicar cupón" data-fixture-apply>Aplicar cupón</button>
+      </form>
+      <div class="woocommerce-message" role="alert" data-fixture-status hidden></div>
+      <div class="applied-coupon" data-fixture-applied hidden>
+        <span data-fixture-applied-code></span>
+        <a class="woocommerce-remove-coupon" href="#remove-coupon" aria-label="Quitar cupón" data-fixture-remove>Quitar</a>
+      </div>
+      <table class="shop_table woocommerce-checkout-review-order-table">
+        <tbody>
+          <tr class="cart-subtotal">
+            <th>Subtotal</th>
+            <td><span class="woocommerce-Price-amount amount">MX$1,700.00</span></td>
+          </tr>
+          <tr class="shipping-total">
+            <th>Envío</th>
+            <td><span class="woocommerce-Price-amount amount">MX$149.90</span></td>
+          </tr>
+          <tr class="tax-total">
+            <th>Impuestos</th>
+            <td><span class="woocommerce-Price-amount amount">MX$150.00</span></td>
+          </tr>
+          <tr class="order-total">
+            <th>Total del pedido</th>
+            <td><strong><span class="woocommerce-Price-amount amount" data-fixture-total>MX$1,999.90</span></strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="danger-zone">
+        <button type="button" data-fixture-danger>Realizar el pedido</button>
+      </div>
+    </main>
+    <script src="../../src/content/checkout-engine.js"></script>
+    <script src="fixture-runtime.js"></script>
+  </body>
+</html>

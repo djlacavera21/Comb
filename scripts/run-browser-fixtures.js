@@ -240,7 +240,7 @@ async function verifyHappyFixture(client, baseUrl, specification) {
   const scan = await evaluate(client, "globalThis.CombCheckout.scanCheckout(document)");
   assert.equal(scan.detected, true, `${specification.file} should be detected`);
   assert.equal(scan.adapter, specification.adapter);
-  assert.equal(scan.engineVersion, "0.4.0");
+  assert.equal(scan.engineVersion, "0.5.0");
   assert.equal(scan.total.currency, specification.currency);
   assert.ok(Math.abs(scan.total.amount - specification.baseline) < 0.01);
   assert.equal(scan.existingCouponCount, 0);
@@ -265,8 +265,11 @@ async function verifyHappyFixture(client, baseUrl, specification) {
 async function runFixtureSuite(client, baseUrl) {
   const happyFixtures = [
     { file: "woocommerce-blocks.html", adapter: "woocommerce", currency: "USD", baseline: 132.95 },
+    { file: "woocommerce-classic-es.html", adapter: "woocommerce", currency: "MXN", baseline: 1999.9 },
     { file: "shopify-style.html", adapter: "shopify", currency: "USD", baseline: 132.95 },
+    { file: "shopify-swiss.html", adapter: "shopify", currency: "CHF", baseline: 132.95 },
     { file: "bigcommerce.html", adapter: "bigcommerce", currency: "EUR", baseline: 1234.5 },
+    { file: "generic-rtl-aed.html", adapter: "generic", currency: "AED", baseline: 1234.5 },
     { file: "generic.html", adapter: "generic", currency: "USD", baseline: 132.95, attribution: true }
   ];
 

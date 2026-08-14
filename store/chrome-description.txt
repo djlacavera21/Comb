@@ -1,0 +1,17 @@
+Comb is an open-source, privacy-first coupon tester. Open it on a checkout page, enter your coupon codes, and Comb tests them one at a time against the displayed payable total. When the checkout exposes a safe coupon-removal control, Comb restores the best verified code at the end.
+
+THE CREATOR-TAGGING ISSUE IS FIXED
+
+Comb was built as a transparent replacement for Honey-style coupon tools with creator attribution protected by design. Comb never appends or replaces affiliate tags, changes attribution cookies, redirects you through a Comb link, opens hidden merchant tabs, or claims last-click commission. Existing creator affiliate tags and referral parameters stay untouched so the creator who sent you can keep proper attribution. The extension's required real-Chrome regression suite verifies that a synthetic creator-tagged URL and attribution cookie are unchanged after a complete coupon run.
+
+PRIVATE BY ARCHITECTURE
+
+Comb has no account, analytics SDK, advertising SDK, developer backend, default feed, outcome upload, or remote executable code. Merchant hostnames and coupon lists stay in extension-local storage and can be exported or erased. During a user-started run, Comb temporarily handles the visible coupon controls, coupon-specific status messages, and displayed payable total needed to measure a discount. The Comb developer does not receive that checkout data.
+
+Optional community feeds are off until you import a trusted publisher key or connect a public HTTPS feed URL. A connected source requires a browser origin prompt. Requests omit credentials and referrers, reject redirects, and contain no checkout URL, merchant history, coupon outcomes, creator tags, identity, or payment data. Every feed must pass local signature, expiry, rollback, and strict code-only schema checks.
+
+SAFE CHECKOUT BOUNDARY
+
+Comb selects only coupon-specific fields and Apply or Remove controls. It never clicks payment, purchase, checkout, or place-order controls. Before trying another code, it requires coupon markers to disappear and the original payable amount and currency to return. If the page is ambiguous, the currency changes, or removal cannot be verified, Comb stops and asks you to review the checkout.
+
+Supported fixture contracts include WooCommerce classic and Blocks, BigCommerce Cornerstone, Shopify-style checkouts, and a conservative generic adapter. Checkout markup changes, so always review the final coupon, payable total, shipping, tax, and order details before placing an order.

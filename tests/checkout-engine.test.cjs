@@ -53,6 +53,7 @@ test("inferCurrency distinguishes regional dollar and international codes", () =
   assert.equal(engine.inferCurrency("R$ 1.234,50"), "BRL");
   assert.equal(engine.inferCurrency("CHF 1’234.50"), "CHF");
   assert.equal(engine.inferCurrency("AED ١٬٢٣٤٫٥٠"), "AED");
+  assert.equal(engine.inferCurrency("MX$1,999.90"), "MXN");
 });
 
 test("parseMoney favors a currency amount over an item count", () => {
@@ -162,7 +163,17 @@ test("total scoring favors order total over subtotal and savings", () => {
     { class: "total-savings" },
     { textContent: "Total savings $20.00" }
   );
+  const shipping = fakeElement(
+    { class: "shipping-total" },
+    { textContent: "Shipping AED 50.00" }
+  );
+  const tax = fakeElement(
+    { class: "tax-total" },
+    { textContent: "Tax CHF 4.95" }
+  );
 
   assert.ok(engine.scoreTotalElement(total) > engine.scoreTotalElement(subtotal));
   assert.ok(engine.scoreTotalElement(total) > engine.scoreTotalElement(savings));
+  assert.ok(engine.scoreTotalElement(total) > engine.scoreTotalElement(shipping));
+  assert.ok(engine.scoreTotalElement(total) > engine.scoreTotalElement(tax));
 });

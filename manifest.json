@@ -2,8 +2,9 @@
   "manifest_version": 3,
   "name": "Comb — Private Coupon Tester",
   "short_name": "Comb",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "description": "Test coupons with verified checkout restoration, trusted feed updates, and protected creator attribution.",
+  "homepage_url": "https://github.com/djlacavera21/Comb",
   "permissions": [
     "activeTab",
     "alarms",

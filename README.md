@@ -8,18 +8,20 @@ Comb is being built as a transparent alternative to Honey-style coupon extension
 
 ## Creator Attribution Guarantee
 
-If a creator sent you to a store, the creator should keep the credit. Comb v0.4 has no affiliate program and never appends or replaces an affiliate tag, writes an attribution cookie, opens a hidden referral tab, redirects the shopper through a Comb link, or claims last-click commission. The extension operates only on the checkout controls already visible in the active tab.
+If a creator sent you to a store, the creator should keep the credit. **The creator-tagging issue is fixed in Comb:** this Honey-style replacement never appends or replaces an affiliate tag, writes an attribution cookie, opens a hidden referral tab, redirects the shopper through a Comb link, or claims last-click commission. Existing creator affiliate tags, referral parameters, and attribution cookies stay untouched so the original creator can keep proper attribution. The extension operates only on checkout controls already visible in the active tab.
 
 This is enforced in the product, not merely promised in policy:
 
 - the manifest has no cookie, web-request, traffic-redirection, or required shopping-site permission; optional feed-origin access is separately user-approved;
 - Comb accepts coupon-code tokens, never affiliate URLs;
 - the packaged-code validator rejects attribution-changing browser APIs and URL/cookie mutation patterns;
-- the popup displays **Creator attribution protected** during every run.
+- the popup displays **Creator attribution protected** during every run;
+- required real-Chrome CI runs a full coupon transaction on a synthetic creator-tagged checkout and verifies that both its URL tags and attribution cookie are byte-for-byte unchanged; and
+- the public store copy, privacy policy, reviewer notes, and security review all carry the same exact guarantee.
 
 See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) for the invariant and its limits.
 
-## What works in v0.4
+## What works in v0.5
 
 - Detects coupon fields, apply buttons, totals, and existing coupons.
 - Includes targeted adapters for WooCommerce classic/Blocks, BigCommerce Cornerstone, and Shopify-style checkouts plus a conservative generic adapter.
@@ -36,14 +38,18 @@ See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) for the invariant and its limits.
 - Keeps expired signed sequence history for rollback protection while excluding expired codes from checkout.
 - Parses regional grouping, decimal separators, Arabic/Persian/full-width digits, and a broader currency set; currency changes during a run trigger a safe stop.
 - Runs sanitized adapter, no-stacking, purchase-control refusal, creator URL/cookie preservation, and keyboard contracts in real headless Chrome during CI.
+- Exercises localized MXN, EUR, CHF, AED, and USD checkouts, including right-to-left digits and separate subtotal, shipping, tax, and payable-total rows.
 - Provides keyboard-visible native import controls, an announced progress bar, result focus management, and reduced-motion support.
-- Produces a deterministic Chrome Web Store ZIP and SHA-256 sidecar, then uploads both from successful CI.
+- Validates copy-ready Chrome Web Store and Edge Add-ons listing fields, conservative local data-use disclosures, Limited Use commitments, reviewer notes, and exact image dimensions.
+- Produces a deterministic runtime ZIP plus a deterministic store review kit with SHA-256 sidecars, then uploads all four files from successful CI.
 - Uses Chrome's temporary `activeTab` access instead of permanent access to every website.
 - Includes a local demo checkout and dependency-free automated tests.
 
 ## Privacy model
 
-Comb v0.4 has no backend, analytics, affiliate links, accounts, tracking, or remote code. Signed feeds are inert JSON and are never executed. Network feed updates are off until the user connects a public HTTPS URL and grants that exact origin; requests carry no cookies, credentials, referrer, checkout data, merchant history, or outcomes. Comb does not request browsing-history access or install-time access to shopping sites. Checkout-page access begins only after you click the extension while viewing a checkout and ends when that temporary `activeTab` grant expires.
+Comb v0.5 has no backend, analytics, affiliate links, accounts, tracking, or remote code. It does handle limited data on-device: the current merchant hostname, coupon tokens, visible coupon controls/messages, and displayed payable amount/currency. The developer receives none of that checkout data. Store disclosures conservatively select the corresponding Web history, Website content, and Financial/payment categories even though the processing stays local.
+
+Signed feeds are inert JSON and are never executed. Network feed updates are off until the user connects a public HTTPS URL and grants that exact origin; requests carry no cookies, credentials, referrer, checkout data, merchant history, or outcomes. Comb does not request browsing-history access or install-time access to shopping sites. Checkout-page access begins only after you click the extension while viewing a checkout and ends when that temporary `activeTab` grant expires.
 
 See [docs/PRIVACY.md](docs/PRIVACY.md) for the precise data boundaries.
 
@@ -84,7 +90,7 @@ npm run release:build
 
 The project has no runtime or development dependencies and uses Node 22 or newer for its browser-test transport. The validation script checks the manifest, packaged files, permission and creator-attribution boundaries, checkout restoration guardrails, signing-key leakage, accessibility hooks, and JavaScript syntax. `npm run check` runs browser contracts when Chrome is installed; CI requires Chrome and cannot skip them.
 
-`npm run release:build` writes `dist/comb-0.4.0.zip` and its `.sha256` sidecar, building twice to prove identical output. See [docs/RELEASE.md](docs/RELEASE.md).
+`npm run release:build` writes `dist/comb-0.5.0.zip`, `dist/comb-0.5.0-store-review-kit.zip`, and their `.sha256` sidecars. Both archives are built twice to prove identical output. Upload only the minimal runtime ZIP as the extension. See [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Publish or verify a signed feed
 
@@ -127,7 +133,7 @@ Detailed design notes are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Roadmap
 
-The next major target is store-submission hardening, a larger checkout/currency matrix, localization, and public security review. Any outcome reporting remains a separate, strictly opt-in future decision. See [docs/ROADMAP.md](docs/ROADMAP.md).
+The store-submission hardening milestone is shipped in v0.5. The next target is live compatibility intake, additional sanitized adapter contracts, and release-candidate feedback without weakening the privacy or attribution boundary. Any outcome reporting remains a separate, strictly opt-in future decision. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 

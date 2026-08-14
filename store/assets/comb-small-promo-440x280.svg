@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="280" viewBox="0 0 440 280" role="img" aria-labelledby="title desc">
+  <title id="title">Comb — Private Coupon Tester</title>
+  <desc id="desc">Comb logo with the messages Creator attribution protected and Private coupon testing</desc>
+  <defs>
+    <linearGradient id="background" x1="20" y1="10" x2="420" y2="270" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#123629"/>
+      <stop offset="1" stop-color="#071a14"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f7dda0"/>
+      <stop offset="1" stop-color="#d4a84f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(354 24) rotate(126) scale(210)">
+      <stop stop-color="#d4a84f" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#d4a84f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="440" height="280" rx="20" fill="url(#background)"/>
+  <rect width="440" height="280" rx="20" fill="url(#glow)"/>
+  <path d="M72 37 112 60v46l-40 23-40-23V60z" fill="#0b241b" stroke="url(#brass)" stroke-width="4"/>
+  <path d="M87 66a24 24 0 1 0 0 34" fill="none" stroke="url(#brass)" stroke-linecap="round" stroke-width="10"/>
+  <path d="m94 61 7 4v8l-7 4-7-4v-8zm0 29 7 4v8l-7 4-7-4v-8z" fill="#f7dda0"/>
+  <text x="137" y="78" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="13" font-weight="700" letter-spacing="2">PRIVATE COUPON TESTER</text>
+  <text x="137" y="115" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="42" font-weight="800">Comb</text>
+  <rect x="32" y="157" width="376" height="66" rx="14" fill="#71d39b" fill-opacity="0.09" stroke="#71d39b" stroke-opacity="0.34"/>
+  <circle cx="62" cy="190" r="13" fill="#71d39b"/>
+  <path d="m56 190 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+  <text x="84" y="186" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="800">Creator attribution protected</text>
+  <text x="84" y="207" fill="#bcd9c8" font-family="DejaVu Sans, sans-serif" font-size="11">Existing affiliate tags and cookies stay untouched.</text>
+  <text x="32" y="253" fill="#8fa097" font-family="DejaVu Sans, sans-serif" font-size="10">No tracking · No affiliate swap · No purchase clicks</text>
+</svg>

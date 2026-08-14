@@ -29,7 +29,10 @@ function walk(directory) {
 if (manifest.manifest_version !== 3) fail("manifest_version must be 3");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 if (manifest.version !== packageJson.version) fail("manifest and package versions must match");
-if (!/^0\.4\./.test(manifest.version)) fail("manifest version must match the v0.4 milestone");
+if (!/^0\.5\./.test(manifest.version)) fail("manifest version must match the v0.5 milestone");
+if (manifest.homepage_url !== "https://github.com/djlacavera21/Comb") {
+  fail("manifest homepage must identify the public source repository");
+}
 
 const expectedPermissions = ["activeTab", "alarms", "scripting", "storage"];
 const permissions = Array.isArray(manifest.permissions) ? manifest.permissions : [];
@@ -43,18 +46,18 @@ for (const permission of permissions) {
 }
 
 if (Array.isArray(manifest.host_permissions) && manifest.host_permissions.length) {
-  fail("v0.4 must not declare permanent host permissions");
+  fail("v0.5 must not declare permanent host permissions");
 }
 
 const optionalHosts = Array.isArray(manifest.optional_host_permissions)
   ? manifest.optional_host_permissions
   : [];
 if (optionalHosts.length !== 1 || optionalHosts[0] !== "https://*/*") {
-  fail("v0.4 must declare only runtime-approved HTTPS feed origins");
+  fail("v0.5 must declare only runtime-approved HTTPS feed origins");
 }
 
 if (manifest.content_scripts) {
-  fail("v0.4 must inject only after a user gesture, not through static content scripts");
+  fail("v0.5 must inject only after a user gesture, not through static content scripts");
 }
 
 const requiredFiles = [
@@ -133,11 +136,11 @@ for (const file of packageFiles) {
 }
 
 if (packageJson.dependencies && Object.keys(packageJson.dependencies).length) {
-  fail("v0.4 must remain dependency-free");
+  fail("v0.5 must remain dependency-free");
 }
 
 if (packageJson.devDependencies && Object.keys(packageJson.devDependencies).length) {
-  fail("v0.4 must remain dependency-free");
+  fail("v0.5 must remain dependency-free");
 }
 
 if (!fs.existsSync(path.join(root, "src/shared/feed-verifier.js"))) {
@@ -161,7 +164,7 @@ for (const requiredAdapterBoundary of [
   "totalsMatch(restoredTotal, expectedTotal)"
 ]) {
   if (!checkoutEngineSource.includes(requiredAdapterBoundary)) {
-    fail(`v0.4 checkout reliability boundary is missing: ${requiredAdapterBoundary}`);
+    fail(`v0.5 checkout reliability boundary is missing: ${requiredAdapterBoundary}`);
   }
 }
 
@@ -175,30 +178,53 @@ for (const requiredImportButton of ["trustKeyButton", "signedFeedButton", "impor
     fail(`settings keyboard import control is missing: ${requiredImportButton}`);
   }
 }
+for (const privacyDisclosure of [
+  'id="privacyHeading"',
+  "The Comb developer receives none of that checkout data",
+  "current merchant receives only the coupon token",
+  "docs/PRIVACY.md"
+]) {
+  if (!optionsHtml.includes(privacyDisclosure)) {
+    fail(`settings privacy summary is missing: ${privacyDisclosure}`);
+  }
+}
 
 for (const requiredTool of [
   "scripts/run-browser-fixtures.js",
   "scripts/build-release.js",
+  "scripts/build-store-package.js",
+  "scripts/deterministic-zip.js",
+  "scripts/validate-store.js",
+  "tests/deterministic-zip.test.cjs",
   "tests/fixtures/woocommerce-blocks.html",
+  "tests/fixtures/woocommerce-classic-es.html",
+  "tests/fixtures/shopify-swiss.html",
+  "tests/fixtures/generic-rtl-aed.html",
   "tests/fixtures/bigcommerce.html",
   "tests/fixtures/removal-failure.html",
   "tests/fixtures/restoration-mismatch.html",
   "tests/fixtures/currency-drift.html"
 ]) {
-  if (!fs.existsSync(path.join(root, requiredTool))) fail(`v0.4 verification tool is missing: ${requiredTool}`);
+  if (!fs.existsSync(path.join(root, requiredTool))) fail(`v0.5 verification tool is missing: ${requiredTool}`);
 }
 const browserFixtureSource = fs.readFileSync(path.join(root, "scripts/run-browser-fixtures.js"), "utf8");
 for (const requiredBrowserBoundary of [
   "creator_attribution=creator-42",
   "creator URL tags and attribution cookie must remain unchanged",
+  "woocommerce-classic-es.html",
+  "shopify-swiss.html",
+  "generic-rtl-aed.html",
   "dangerClicks"
 ]) {
   if (!browserFixtureSource.includes(requiredBrowserBoundary)) {
-    fail(`v0.4 browser safety boundary is missing: ${requiredBrowserBoundary}`);
+    fail(`v0.5 browser safety boundary is missing: ${requiredBrowserBoundary}`);
   }
 }
 if (!packageJson.engines || packageJson.engines.node !== ">=22") {
-  fail("v0.4 tooling requires the stable WebSocket API in Node 22 or newer");
+  fail("v0.5 tooling requires the stable WebSocket API in Node 22 or newer");
+}
+if (packageJson.scripts?.["release:build"] !== "node scripts/build-store-package.js --verify") {
+  fail("v0.5 release build must produce the validated store review kit");
 }
 
 for (const file of walk(root).filter((entry) => entry.endsWith(".json") && !entry.includes(`${path.sep}.git${path.sep}`))) {

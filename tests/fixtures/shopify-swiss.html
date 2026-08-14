@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="de-CH">
+  <head>
+    <meta charset="utf-8">
+    <title>Shopify-style Swiss fixture</title>
+    <link rel="stylesheet" href="fixture.css">
+  </head>
+  <body data-baseline="132.95" data-shipping="8" data-currency="CHF" data-locale="de-CH">
+    <main>
+      <h1>Shopify-Checkout Schweiz</h1>
+      <div data-discount-field>
+        <form>
+          <label for="shopify-discount-ch">Rabattcode</label>
+          <input id="shopify-discount-ch" name="reductions" type="text" autocomplete="off" data-fixture-input>
+          <button type="submit" data-testid="discount-redeem-button" data-fixture-apply>Rabatt anwenden</button>
+        </form>
+      </div>
+      <p role="alert" data-testid="discount-message" data-fixture-status hidden></p>
+      <div data-testid="applied-discount" data-fixture-applied hidden>
+        <span data-fixture-applied-code></span>
+        <button type="button" data-testid="remove-discount" aria-label="Rabatt entfernen" data-fixture-remove>Entfernen</button>
+      </div>
+      <div class="summary">
+        <div data-testid="subtotal-total"><span>Zwischensumme</span><span>CHF 120.00</span></div>
+        <div data-testid="shipping-total"><span>Versand</span><span>CHF 8.00</span></div>
+        <div data-testid="tax-total"><span>Steuern</span><span>CHF 4.95</span></div>
+        <div>
+          <span>Zahlungsbetrag</span>
+          <strong data-checkout-payment-due-target aria-label="Order total" data-fixture-total>CHF 132.95</strong>
+        </div>
+      </div>
+      <div class="danger-zone">
+        <button type="button" data-fixture-danger>Weiter zur Zahlung</button>
+      </div>
+    </main>
+    <script src="../../src/content/checkout-engine.js"></script>
+    <script src="fixture-runtime.js"></script>
+  </body>
+</html>

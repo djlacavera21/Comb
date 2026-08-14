@@ -1,38 +1,25 @@
-# Chrome Web Store Listing Draft
+# Comb v0.5 Browser Store Submission Record
 
-## Name
+The copy-ready Chrome Web Store and Microsoft Edge Add-ons fields live in [`../store/listing.json`](../store/listing.json). `npm run lint` validates their version, text boundaries, permissions, privacy categories, Limited Use commitments, URLs, search-term limits, and exact PNG dimensions.
 
-Comb — Private Coupon Tester
+## Public message
 
-## Short description
+> **The creator-tagging issue is fixed.** Comb leaves existing creator affiliate tags, referral parameters, and attribution cookies untouched so the original creator can keep proper attribution.
 
-Try coupon codes locally, keep the best verified discount, and preserve creator attribution.
+This is backed by a required real-Chrome checkout transaction, not just listing copy. The test preserves a synthetic creator-tagged URL and attribution cookie byte-for-byte while testing multiple coupons and restoring the winner. Static validation independently blocks cookie, traffic interception, navigation, URL/history mutation, and affiliate-rewrite capabilities.
 
-## Detailed description
+## Copy-ready submission files
 
-Comb is an open-source, privacy-first coupon tester. Open it on a checkout page, enter coupon codes, and Comb will test them one at a time against the payable total. When the checkout exposes a safe coupon-removal control, Comb restores the best verified code at the end.
-
-### Creator Attribution Guarantee
-
-If a creator sent you to a store, the creator should keep the credit. Comb v0.4 has no affiliate program. It does not append or replace affiliate tags, change attribution cookies, redirect you through a Comb link, open hidden merchant tabs, or claim last-click commission. Signed community feeds contain coupon tokens only; their schema rejects affiliate and referral metadata.
-
-### Privacy by architecture
-
-- No account.
-- No analytics or advertising SDK.
-- No browsing-history permission.
-- No install-time access to shopping sites.
-- No remote code, Comb server, default feed, analytics, or outcome upload in v0.4.
-- Merchant coupon lists stay in local extension storage and can be exported or erased.
-- Community feeds can be imported manually and become eligible only after their signature verifies against a public key the user explicitly trusts.
-- Optional updates remain off until the user supplies a public HTTPS feed URL and grants that exact origin through Chrome's runtime prompt.
-- Connected-source requests omit credentials and referrers, reject redirects, carry no checkout data, and must pass the same signature and code-only schema checks.
-
-### Safe checkout boundary
-
-Comb selects only coupon-specific fields and Apply/Remove controls. It does not click payment, purchase, checkout, or place-order controls. Before another attempt, Comb requires every tested-coupon marker to disappear and the original payable amount and currency to return. If a page is ambiguous, the currency changes, or removal cannot be verified, Comb stops and asks the shopper to review the checkout.
-
-Comb is early software. Always review the coupon, payable total, and checkout before placing an order.
+| Field | Source |
+| --- | --- |
+| Shared name, short description, category, URLs, purpose, permissions, privacy, assets | [`../store/listing.json`](../store/listing.json) |
+| Chrome detailed description | [`../store/chrome-description.txt`](../store/chrome-description.txt) |
+| Edge localized description | [`../store/edge-description.txt`](../store/edge-description.txt) |
+| Release notes | [`../store/release-notes.txt`](../store/release-notes.txt) |
+| Certification/reviewer notes | [`../store/review-notes.md`](../store/review-notes.md) |
+| Submission sequence | [`../store/SUBMISSION.md`](../store/SUBMISSION.md) |
+| Public privacy policy | [`PRIVACY.md`](PRIVACY.md) |
+| Public security review | [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) |
 
 ## Single purpose
 
@@ -42,35 +29,46 @@ Comb tests user-provided or signature-verified coupon codes on the current check
 
 | Permission | Justification |
 | --- | --- |
-| `activeTab` | Temporarily inspect the checkout only after the user clicks Comb. |
-| `alarms` | Check only the signed-feed sources a user has explicitly connected, approximately twice daily while the browser can run the task. |
-| `scripting` | Inject the packaged, local coupon engine into that temporarily authorized tab. |
-| `storage` | Save local coupon lists, trusted public keys, signed feeds, and approved-source settings on the device. |
-| Optional HTTPS origin | Retrieve inert signed-feed JSON from one public origin only after the user approves Chrome's runtime prompt. No origin is granted at installation. |
+| `activeTab` | Temporarily inspect the checkout only after the user invokes Comb on that tab. |
+| `alarms` | Run best-effort checks only for signed-feed sources the user explicitly connected. |
+| `scripting` | Inject Comb's packaged coupon engine into that temporarily authorized tab. |
+| `storage` | Keep merchant coupon lists, trusted public keys, verified feeds, and source settings on the device. |
+| Optional HTTPS origin | Request one exact public feed origin at runtime only after the user enters its URL and approves the browser prompt. No site is granted at installation. |
+
+Select **No remote code**. Signed community feeds are strict, bounded, signature-verified JSON. They cannot contain scripts, selectors, source URLs, referral metadata, or executable configuration.
 
 ## Data-use disclosure
 
-Comb v0.4 does not collect or upload checkout data. It stores merchant hostnames, user-entered coupon tokens, explicitly trusted public keys, signed coupon-feed data, and approved source settings locally. During a run it temporarily reads coupon-control labels, coupon-specific result messages, and displayed totals inside the active tab. It does not read payment details, addresses, identities, cookies, browsing history, or merchant network traffic.
+Store policy treats on-device processing as data handling. The submission therefore selects these categories conservatively instead of claiming “no data”:
 
-If the user connects a source, Comb makes a credential-free HTTPS `GET` to that exact URL on connection, on **Check now**, and approximately twice daily. It sends no merchant history, checkout URL, coupon outcomes, creator tags, or identity. The feed operator can ordinarily observe network-level details such as request time and IP address.
+| Dashboard category | Local scope | Sent to Comb developer? |
+| --- | --- | --- |
+| Financial and payment information | Displayed payable amount and currency only, for the active run. | No |
+| Web history | Current merchant hostname used to scope a saved local list; no browser-history API. | No |
+| Website content | Coupon tokens, coupon-control labels, coupon-specific messages, and displayed total. | No |
 
-## v0.4 release notes
+If the user connects an optional public feed URL, that user-selected operator can ordinarily see the requested path, request time, IP address, and common network headers. Comb omits credentials and referrers and sends no checkout URL, merchant history, outcome, creator tag, identity, or payment data. The policy names that operator rather than hiding the network boundary.
 
-- Local sequential coupon testing.
-- WooCommerce classic/Blocks, BigCommerce Cornerstone, Shopify-style, and conservative generic adapters.
-- Best-code restoration, existing-coupon safety gate, verified coupon removal, and baseline amount/currency restoration.
-- Regional separators, a broader currency set, and Arabic, Persian, and full-width digit parsing.
-- Local coupon library with JSON export/import.
-- Explicit public-key trust and local ECDSA P-256 signature verification.
-- Strict, expiring code-only feeds with rollback, substitution, cross-publisher, and tamper protection.
-- Freshness and outcome-based community-code ranking with manual offline import.
-- Runtime-approved HTTPS feed sources with no default server or install-time origin grant.
-- Credential-free, referrer-free, redirect-free, 2 MiB-bounded source checks.
-- Signer/feed-ID pinning, scheduled higher-sequence updates, and origin permission cleanup.
-- Expired-feed sequence retention closes a rollback window without exposing expired codes.
-- Creator Attribution Guarantee with automated build enforcement.
-- Executed creator-tag and attribution-cookie preservation contract in required real-Chrome CI.
-- Required real-Chrome adapter, no-stacking, purchase-control, keyboard, and accessible-name contracts in CI.
-- Keyboard-visible native import controls, announced progress, result focus management, and reduced-motion support.
-- Reproducible Chrome Web Store upload ZIP and SHA-256 checksum artifact.
-- Synthetic checkout demo, offline feed-signing tools, and dependency-free verification suite.
+All Limited Use commitments in `store/listing.json` remain release-blocking: no sale/unapproved transfer, unrelated use, credit/lending use, personalized advertising, or human reading outside narrow user-request/security/legal cases.
+
+## Validated upload assets
+
+| Asset | Dimensions | Store use |
+| --- | ---: | --- |
+| `icons/comb-128.png` | 128×128 | Chrome icon; meets Edge minimum |
+| `store/assets/comb-store-logo-300.png` | 300×300 | Edge recommended logo |
+| `store/assets/comb-small-promo-440x280.png` | 440×280 | Chrome small promo / Edge small tile |
+| `store/assets/comb-screenshot-01-1280x800.png` | 1280×800 | Chrome and Edge screenshot |
+
+Editable SVG sources sit beside the generated promotional PNGs. Only the validated PNGs are placed in the review kit.
+
+## Policy references used for v0.5
+
+- [Chrome Web Store listing fields and assets](https://developer.chrome.com/docs/webstore/cws-dashboard-listing)
+- [Chrome Web Store privacy fields](https://developer.chrome.com/docs/webstore/cws-dashboard-privacy)
+- [Chrome Web Store user-data FAQ](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq)
+- [Chrome Web Store privacy policy requirements](https://developer.chrome.com/docs/webstore/program-policies/privacy)
+- [Microsoft Edge Add-ons publication fields](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/publish-extension)
+- [Microsoft Edge extension developer policies](https://learn.microsoft.com/en-us/legal/microsoft-edge/extensions/developer-policies)
+
+Store dashboards can change after this review date. Recheck the official forms before submission and update both metadata and validator together if a requirement changes.

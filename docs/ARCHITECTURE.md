@@ -4,7 +4,7 @@
 
 Comb proves the difficult local loop: find the relevant checkout controls, test codes without clicking unrelated controls, measure the real price change, and leave the cart in the best recoverable state.
 
-The v0.4 build optimizes for inspectability and safe failure. It is dependency-free, uses ordinary JavaScript, and can be loaded directly from the repository.
+The v0.5 build optimizes for inspectability, safe failure, and a reviewable browser-store handoff. It is dependency-free, uses ordinary JavaScript, and can be loaded directly from the repository.
 
 ## Components
 
@@ -42,7 +42,7 @@ All feed-state mutations share one serialized queue, so a scheduled refresh cann
 
 ### Checkout engine
 
-The checkout engine runs in Chrome's isolated content-script world. It has no network client and never receives payment or identity data. Its adapter pipeline is:
+The checkout engine runs in Chrome's isolated content-script world. It has no network client and never reads payment credentials, address fields, or identity data; it handles only the displayed payable amount/currency and coupon-specific UI needed for the run. Its adapter pipeline is:
 
 1. WooCommerce classic and Blocks selectors;
 2. BigCommerce Cornerstone selectors derived from its public templates;
@@ -74,11 +74,13 @@ Accepted but unmeasured shipping discounts are reported but not ranked as the wi
 
 ### Browser contracts
 
-`scripts/run-browser-fixtures.js` starts a local-only fixture server and drives headless Chrome directly through the Chrome DevTools Protocol, without an automation dependency. Sanitized contracts cover WooCommerce Blocks, Shopify-style, BigCommerce Cornerstone, generic detection, ambiguous-control refusal, the existing-coupon gate, failed-removal no-stacking behavior, creator URL/cookie preservation, popup tab order, accessible control names, progress semantics, and settings file-import controls. CI passes `--require-browser`; a missing browser is therefore a failure rather than a skip.
+`scripts/run-browser-fixtures.js` starts a local-only fixture server and drives headless Chrome directly through the Chrome DevTools Protocol, without an automation dependency. Sanitized contracts cover WooCommerce classic/Blocks, two Shopify-style variants, BigCommerce Cornerstone, generic and RTL detection, MXN/EUR/CHF/AED/USD totals, separate subtotal/tax/shipping rows, ambiguous-control refusal, the existing-coupon gate, failed-removal no-stacking behavior, creator URL/cookie preservation, popup tab order, accessible control names, progress semantics, and settings file-import controls. CI passes `--require-browser`; a missing browser is therefore a failure rather than a skip.
 
 ### Release package
 
-`scripts/build-release.js` uses a deterministic, stored-entry ZIP writer implemented with Node built-ins. It sorts the exact runtime file list, normalizes every entry timestamp to `SOURCE_DATE_EPOCH` or the Git commit time, fixes file modes, writes no platform-specific extras, builds twice, and emits a SHA-256 sidecar. The manifest stays at the archive root. GitHub Actions uploads the verified pair; Chrome Web Store publication supplies the installable extension signature.
+`scripts/build-release.js` uses a deterministic, stored-entry ZIP writer implemented with Node built-ins. It sorts the exact runtime file list, normalizes every entry timestamp to `SOURCE_DATE_EPOCH` or the Git commit time, fixes file modes, writes no platform-specific extras, builds twice, and emits a SHA-256 sidecar. The manifest stays at the archive root.
+
+`scripts/validate-store.js` separately binds copy-ready Chrome/Edge metadata to the manifest, exact permission explanations, conservative on-device data categories, Limited Use commitments, creator-attribution evidence, description/search limits, and PNG dimensions. `scripts/build-store-package.js` runs both validation boundaries and places the runtime ZIP plus listing copy, assets, privacy policy, and public review in a second deterministic reviewer kit. GitHub Actions uploads both archives and sidecars; browser-store publication supplies the installable extension signature.
 
 ## Message protocol
 
@@ -88,7 +90,7 @@ Accepted but unmeasured shipping discounts are reported but not ranked as the wi
 | `COMB_RUN` | Popup → worker | Start one bounded coupon run |
 | `COMB_CANCEL` | Popup → worker → page | Request cancellation between code attempts |
 | `COMB_SCAN` | Worker → page | Return serializable checkout metadata |
-| `COMB_PROGRESS` | Page → worker/UI | Report lifecycle progress without page contents |
+| `COMB_PROGRESS` | Page → worker/UI | Report bounded coupon lifecycle/results without arbitrary page content |
 | `COMB_GET_LIBRARY` | Options → worker | Read local merchant-code records |
 | `COMB_REPLACE_LIBRARY` | Options → worker | Import a validated local library |
 | `COMB_GET_FEED_STATE` | Options → worker | List trusted keys and installed feed metadata |

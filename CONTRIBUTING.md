@@ -34,7 +34,7 @@ Comb handles checkout pages, so conservative behavior, creator attribution, and 
 - Do not add URLs, scripts, conditions that behave as executable logic, affiliate IDs, referral IDs, publisher sub-IDs, or opaque metadata.
 - Never commit a feed private key. Public trust keys and signed feed fixtures are allowed only when their purpose and trust status are explicit.
 - A sequence number must increase whenever signed payload content changes.
-- Key rotation requires a new explicitly imported public key; v0.4 does not silently delegate trust.
+- Key rotation requires a new explicitly imported public key; v0.5 does not silently delegate trust.
 
 ## Approved-source rules
 
