@@ -1,6 +1,6 @@
 # Changelog
 
-All notable Comb changes are recorded here. Release versions match `manifest.json`, `package.json`, the checkout engine, store metadata, and the immutable `vX.Y.Z` source tag.
+All notable Comb changes are recorded here. At browser-store publication, the release version must match `manifest.json`, `package.json`, the checkout engine, store metadata, and an immutable `vX.Y.Z` source tag created only after required CI succeeds.
 
 ## [0.6.0] - 2026-08-14
 
