@@ -227,6 +227,8 @@ async function browserRun(client, codes) {
 }
 
 async function verifyHappyFixture(client, baseUrl, specification) {
+  const expectedBestCode = specification.expectedBestCode || "BEST20";
+  const expectedSavings = specification.expectedSavings || 20;
   const attributionQuery = specification.attribution
     ? "?affiliate_id=creator-42&utm_source=creator"
     : "";
@@ -247,14 +249,14 @@ async function verifyHappyFixture(client, baseUrl, specification) {
 
   const result = await browserRun(client, ["SHIPFREE", "BEST20", "NOTREAL"]);
   assert.equal(result.status, "complete");
-  assert.equal(result.best.code, "BEST20");
+  assert.equal(result.best.code, expectedBestCode);
   assert.equal(result.tested, 3);
-  assert.ok(Math.abs(result.finalTotal - (specification.baseline - 20)) < 0.01);
+  assert.ok(Math.abs(result.finalTotal - (specification.baseline - expectedSavings)) < 0.01);
   const state = await evaluate(client, "globalThis.fixtureState");
   assert.equal(state.applyClicks, 4, "three attempts plus best-code restoration");
   assert.equal(state.removeClicks, 2);
   assert.equal(state.dangerClicks, 0, "purchase controls must never be clicked");
-  assert.equal(state.appliedCode, "BEST20");
+  assert.equal(state.appliedCode, expectedBestCode);
   if (specification.attribution) {
     const attributionAfter = await evaluate(client, "({ href: location.href, cookie: document.cookie })");
     assert.deepEqual(attributionAfter, attributionBefore, "creator URL tags and attribution cookie must remain unchanged");
@@ -265,11 +267,25 @@ async function verifyHappyFixture(client, baseUrl, specification) {
 async function runFixtureSuite(client, baseUrl) {
   const happyFixtures = [
     { file: "woocommerce-blocks.html", adapter: "woocommerce", currency: "USD", baseline: 132.95 },
-    { file: "woocommerce-classic-es.html", adapter: "woocommerce", currency: "MXN", baseline: 1999.9 },
+    {
+      file: "woocommerce-classic-es.html",
+      adapter: "woocommerce",
+      currency: "MXN",
+      baseline: 1999.9,
+      expectedBestCode: "SHIPFREE",
+      expectedSavings: 149.9
+    },
     { file: "shopify-style.html", adapter: "shopify", currency: "USD", baseline: 132.95 },
     { file: "shopify-swiss.html", adapter: "shopify", currency: "CHF", baseline: 132.95 },
     { file: "bigcommerce.html", adapter: "bigcommerce", currency: "EUR", baseline: 1234.5 },
-    { file: "generic-rtl-aed.html", adapter: "generic", currency: "AED", baseline: 1234.5 },
+    {
+      file: "generic-rtl-aed.html",
+      adapter: "generic",
+      currency: "AED",
+      baseline: 1234.5,
+      expectedBestCode: "SHIPFREE",
+      expectedSavings: 50
+    },
     { file: "generic.html", adapter: "generic", currency: "USD", baseline: 132.95, attribution: true }
   ];
 
