@@ -31,6 +31,8 @@ Never attach a screenshot, HAR file, checkout URL, live HTML, cookie export, con
 
 The public platform and theme values are version labels for the public-contract snapshot and synthetic fixture—not claims that every deployment of that product version is supported. A passing row means the adapter must satisfy the listed local contract, preserve the purchase control, and keep creator attribution unchanged where noted.
 
+The matrix `baseline` is the payable total visible when Comb scans the fixture. It matches the fixture's invented cart baseline except for the existing-coupon contract, which intentionally starts with an invented $10 discount and therefore exposes $122.95. Validation also derives `BEST20`, `SAVE10`, and `SHIPFREE` savings from the fixture baseline/shipping values so expected results cannot silently drift from the synthetic markup.
+
 | Fixture contract | Adapter | Public snapshot / synthetic theme | Locale / currency | Required behavior |
 | --- | --- | --- | --- | --- |
 | WooCommerce Blocks | `woocommerce` | `public-contract-2026-08` / `blocks-synthetic-v1` | en-US / USD | Apply, verified removal, best-code restoration |

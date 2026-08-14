@@ -34,3 +34,12 @@ test("only the creator-tagged fixture can own attribution preservation", () => {
   assert.ok(errors.some((error) => error.includes("may not own")));
   assert.ok(errors.some((error) => error.includes("exactly generic.html")));
 });
+
+test("fixture totals and synthetic savings cannot drift from their markup contract", () => {
+  const drifted = structuredClone(matrix);
+  drifted.fixtures.find((fixture) => fixture.file === "existing-coupon.html").baseline = 120;
+  drifted.fixtures.find((fixture) => fixture.file === "removal-failure.html").expected.savings = 10;
+  const errors = validateFixtureMatrix(drifted, { rootDirectory: root });
+  assert.ok(errors.some((error) => error.includes("discounted initial payable total")));
+  assert.ok(errors.some((error) => error.includes("synthetic code contract")));
+});

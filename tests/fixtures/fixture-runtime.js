@@ -19,6 +19,7 @@
   const removeLeavesTotal = document.body.dataset.removeLeavesTotal === "true";
   const currencyDrift = document.body.dataset.currencyDrift || null;
   const initialExistingCoupon = document.body.dataset.existingCoupon === "true";
+  const initialExistingDiscount = Number(document.body.dataset.existingDiscount || 10);
   const discounts = {
     SAVE10: Math.round(baseline * 10) / 100,
     BEST20: 20,
@@ -117,7 +118,7 @@
   }
 
   if (total) total.textContent = money(baseline);
-  if (initialExistingCoupon) renderCoupon("ALREADY10", 10);
+  if (initialExistingCoupon) renderCoupon("ALREADY10", initialExistingDiscount);
   else {
     if (applied) applied.hidden = true;
     setStatus("");

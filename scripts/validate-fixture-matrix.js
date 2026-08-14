@@ -174,6 +174,33 @@ function validateFixtureMatrix(matrix, options = {}) {
       fail(`${label} does not exist`);
     } else {
       const source = fs.readFileSync(fixturePath, "utf8");
+      const declaredBaseline = Number(source.match(/data-baseline="([0-9]+(?:\.[0-9]+)?)"/)?.[1]);
+      const declaredShipping = Number(source.match(/data-shipping="([0-9]+(?:\.[0-9]+)?)"/)?.[1] || 7.95);
+      const declaredExistingDiscount = Number(source.match(/data-existing-discount="([0-9]+(?:\.[0-9]+)?)"/)?.[1]);
+      if (!Number.isFinite(declaredBaseline)) {
+        fail(`${label} must declare a synthetic data-baseline`);
+      } else if (source.includes('data-existing-coupon="true"')) {
+        const initialPayable = Math.round((declaredBaseline - declaredExistingDiscount) * 100) / 100;
+        if (!Number.isFinite(declaredExistingDiscount) || declaredExistingDiscount <= 0) {
+          fail(`${label} must declare a positive synthetic data-existing-discount`);
+        } else if (Math.abs(fixture.baseline - initialPayable) >= 0.001) {
+          fail(`${label} matrix baseline must match the discounted initial payable total`);
+        }
+      } else if (Math.abs(fixture.baseline - declaredBaseline) >= 0.001) {
+        fail(`${label} matrix baseline must match its synthetic data-baseline`);
+      }
+      const measuredCode = expected.bestCode || expected.bestCandidateCode;
+      const derivedSavings = measuredCode === "BEST20"
+        ? 20
+        : measuredCode === "SAVE10"
+          ? Math.round(declaredBaseline * 10) / 100
+          : measuredCode === "SHIPFREE"
+            ? declaredShipping
+            : null;
+      if (derivedSavings !== null &&
+          Math.abs(expected.savings - derivedSavings) >= 0.001) {
+        fail(`${label} expected savings must match its synthetic code contract`);
+      }
       if (/<(?:script|link)\b[^>]+(?:src|href)=["']https?:\/\//i.test(source)) {
         fail(`${label} loads a remote fixture resource`);
       }
