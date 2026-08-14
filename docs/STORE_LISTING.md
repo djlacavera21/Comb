@@ -1,4 +1,4 @@
-# Comb v0.6 Browser Store Submission Record
+# Comb v0.7 Browser Store Submission Record
 
 The copy-ready Chrome Web Store and Microsoft Edge Add-ons fields live in [`../store/listing.json`](../store/listing.json). `npm run lint` validates their version, text boundaries, permissions, privacy categories, Limited Use commitments, URLs, search-term limits, and exact PNG dimensions.
 
@@ -22,6 +22,7 @@ This is backed by a required real-Chrome checkout transaction, not just listing 
 | Public privacy policy | [`PRIVACY.md`](PRIVACY.md) |
 | Public security review | [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) |
 | Compatibility-report boundary | [`COMPATIBILITY.md`](COMPATIBILITY.md) |
+| Independent-review guide | [`INDEPENDENT_REVIEW.md`](INDEPENDENT_REVIEW.md) |
 
 ## Single purpose
 
@@ -66,7 +67,7 @@ The popup's **Save safe report** action creates a local allowlisted JSON file on
 
 Editable SVG sources sit beside the generated promotional PNGs. Only the validated PNGs are placed in the review kit.
 
-## Policy references used for v0.6
+## Policy references used for v0.7
 
 - [Chrome Web Store listing fields and assets](https://developer.chrome.com/docs/webstore/cws-dashboard-listing)
 - [Chrome Web Store privacy fields](https://developer.chrome.com/docs/webstore/cws-dashboard-privacy)

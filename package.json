@@ -1,6 +1,6 @@
 {
   "name": "comb-extension",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "private": true,
   "description": "Privacy-first, creator-respecting local coupon tester",
   "scripts": {
@@ -9,7 +9,7 @@
     "feed:keygen": "node scripts/generate-feed-keypair.js",
     "feed:sign": "node scripts/sign-feed.js",
     "feed:verify": "node scripts/verify-feed.js",
-    "lint": "node scripts/validate-extension.js && node scripts/validate-store.js",
+    "lint": "node scripts/validate-fixture-matrix.js && node scripts/validate-extension.js && node scripts/validate-store.js",
     "test": "node --test tests/*.test.cjs",
     "test:browser": "node scripts/run-browser-fixtures.js",
     "release:runtime": "node scripts/build-release.js --verify",

@@ -52,13 +52,21 @@
 - Executed adapter/platform matrix, release changelog, support triage, and store-review response playbook.
 - Unchanged zero-affiliate creator-attribution guarantee and no analytics/outcome upload.
 
-## v0.7 — Public browser-store launch
+## v0.7 — Browser-store launch controls (shipped)
 
-- Publish through Chrome Web Store and Microsoft Edge Add-ons after developer-dashboard review.
-- Add synthetic fixtures derived from verified sanitized compatibility reports without collecting live checkout captures.
-- Track adapter regressions by public platform/theme version and continue stopping safely on unknown markup.
-- Invite independent review of the permission, signed-feed, compatibility-report, and creator-attribution boundaries.
-- Respond to browser-store review using the public evidence kit without weakening disclosures.
+- Added a machine-validated fixture matrix that tracks public-contract snapshots and synthetic theme versions without collecting live checkout captures.
+- Bound every synthetic fixture to expected adapter, status, reason, totals, click counts, and the sole creator-attribution preservation owner.
+- Added a commit-pinned, public-evidence-only independent-review guide and intake for permission, signed-feed, compatibility-report, release, and creator-attribution boundaries.
+- Added a manually authorized GitHub publication workflow that reruns every safety/attribution gate and creates the version tag/release only at the supplied current `main` SHA.
+- Added the matrix and independent-review guide to the deterministic store evidence kit and retained exact disclosure language for reviewer responses.
+
+## v0.8 — Browser-store publication and field feedback
+
+- Run the verified release workflow for the approved v0.7 source commit and record its immutable tag, release URL, and four artifact checksums.
+- Submit only the runtime ZIP through Chrome Web Store and Microsoft Edge Add-ons developer dashboards; record review outcomes and public listing URLs without claiming availability early.
+- Convert privacy-safe compatibility reports into independently written synthetic fixtures while retaining safe stops on unknown markup.
+- Link scoped independent reviews and respond to findings with tests or documented rationale before release.
+- Keep outcome reporting absent unless a separate consent, minimization, and abuse-control design is approved.
 
 ## v1.0 — Trustworthy shopping assistant
 

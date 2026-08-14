@@ -1,0 +1,108 @@
+name: Publish verified Comb release
+run-name: Publish Comb v${{ inputs.version }} at ${{ inputs.commit_sha }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Exact version without the v prefix, for example 0.7.0
+        required: true
+        type: string
+      commit_sha:
+        description: Full 40-character green main commit SHA
+        required: true
+        type: string
+      confirm_creator_attribution:
+        description: Confirm creator attribution is release-blocking and authorize publication
+        required: true
+        default: false
+        type: boolean
+
+permissions:
+  contents: write
+
+concurrency:
+  group: comb-release-${{ inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      EXPECTED_VERSION: ${{ inputs.version }}
+      EXPECTED_SHA: ${{ inputs.commit_sha }}
+      CONFIRM_CREATOR_ATTRIBUTION: ${{ inputs.confirm_creator_attribution }}
+      CHROME_PATH: /usr/bin/google-chrome
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Require explicit creator-attribution publication authorization
+        run: |
+          if [ "$CONFIRM_CREATOR_ATTRIBUTION" != "true" ]; then
+            echo "Release rejected: creator-attribution publication was not explicitly authorized."
+            exit 1
+          fi
+      - name: Check out the exact authorized commit
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.commit_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Refresh the public main reference without fetching tags
+        run: git fetch --no-tags origin main:refs/remotes/origin/main
+      - name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          package-manager-cache: false
+      - name: Reject version, commit, branch, worktree, or local-tag drift
+        run: node scripts/validate-release-candidate.js --version "$EXPECTED_VERSION" --commit "$EXPECTED_SHA"
+      - name: Reject an existing remote release tag
+        run: |
+          set +e
+          git ls-remote --exit-code --tags origin "refs/tags/v${EXPECTED_VERSION}" >/dev/null 2>&1
+          tag_status=$?
+          set -e
+          if [ "$tag_status" -eq 0 ]; then
+            echo "Release rejected: remote tag v${EXPECTED_VERSION} already exists."
+            exit 1
+          fi
+          if [ "$tag_status" -ne 2 ]; then
+            echo "Release rejected: remote tag state could not be verified."
+            exit "$tag_status"
+          fi
+      - name: Validate runtime, support matrix, store disclosures, and attribution boundary
+        run: npm run lint
+      - name: Run unit tests
+        run: node --test tests/*.test.cjs
+      - name: Run required real-browser contracts
+        run: node scripts/run-browser-fixtures.js --require-browser
+      - name: Build deterministic runtime and reviewer kit
+        run: npm run release:build
+      - name: Verify exact release assets and checksums
+        run: node scripts/verify-release-artifacts.js --version "$EXPECTED_VERSION"
+      - name: Create the version tag and published GitHub release at the authorized SHA
+        run: |
+          gh release create "v${EXPECTED_VERSION}" \
+            "dist/comb-${EXPECTED_VERSION}.zip" \
+            "dist/comb-${EXPECTED_VERSION}.zip.sha256" \
+            "dist/comb-${EXPECTED_VERSION}-store-review-kit.zip" \
+            "dist/comb-${EXPECTED_VERSION}-store-review-kit.zip.sha256" \
+            --target "$EXPECTED_SHA" \
+            --title "Comb v${EXPECTED_VERSION}" \
+            --notes-file store/release-notes.txt
+      - name: Verify published tag and asset names
+        run: |
+          git fetch --no-tags origin "refs/tags/v${EXPECTED_VERSION}:refs/tags/v${EXPECTED_VERSION}"
+          test "$(git rev-list -n 1 "v${EXPECTED_VERSION}")" = "$EXPECTED_SHA"
+          test "$(gh release view "v${EXPECTED_VERSION}" --json tagName --jq .tagName)" = "v${EXPECTED_VERSION}"
+          test "$(gh release view "v${EXPECTED_VERSION}" --json targetCommitish --jq .targetCommitish)" = "$EXPECTED_SHA"
+          test "$(gh release view "v${EXPECTED_VERSION}" --json isDraft --jq .isDraft)" = "false"
+          gh release view "v${EXPECTED_VERSION}" --json assets --jq '.assets[].name' | sort > "$RUNNER_TEMP/comb-actual-assets.txt"
+          printf '%s\n' \
+            "comb-${EXPECTED_VERSION}-store-review-kit.zip" \
+            "comb-${EXPECTED_VERSION}-store-review-kit.zip.sha256" \
+            "comb-${EXPECTED_VERSION}.zip" \
+            "comb-${EXPECTED_VERSION}.zip.sha256" \
+            > "$RUNNER_TEMP/comb-expected-assets.txt"
+          diff -u "$RUNNER_TEMP/comb-expected-assets.txt" "$RUNNER_TEMP/comb-actual-assets.txt"

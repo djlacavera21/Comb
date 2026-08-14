@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "extensionVersion": "0.6.0",
+  "extensionVersion": "0.7.0",
   "lastReviewed": "2026-08-14",
   "shared": {
     "name": "Comb — Private Coupon Tester",
@@ -90,9 +90,12 @@
     "verifiedBy": [
       "scripts/validate-extension.js",
       "scripts/run-browser-fixtures.js",
+      "tests/fixtures/support-matrix.json",
       "tests/compatibility-report.test.cjs",
+      ".github/workflows/release.yml",
       "docs/ATTRIBUTION.md",
       "docs/COMPATIBILITY.md",
+      "docs/INDEPENDENT_REVIEW.md",
       "docs/SECURITY_REVIEW.md"
     ]
   },

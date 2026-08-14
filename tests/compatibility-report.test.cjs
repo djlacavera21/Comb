@@ -11,7 +11,7 @@ const {
 
 test("compatibility report keeps only coarse allowlisted checkout signals", () => {
   const scan = {
-    engineVersion: "0.6.0",
+    engineVersion: "0.7.0",
     detected: false,
     adapter: "generic",
     reason: "coupon_apply_button_not_found",
@@ -29,11 +29,11 @@ test("compatibility report keeps only coarse allowlisted checkout signals", () =
   };
 
   assert.deepEqual(createCompatibilityReport(scan, {
-    extensionVersion: "0.6.0",
+    extensionVersion: "0.7.0",
     generatedAt: "2026-08-14T12:00:00.000Z"
   }), {
     schema: SCHEMA,
-    extensionVersion: "0.6.0",
+    extensionVersion: "0.7.0",
     generatedAt: "2026-08-14T12:00:00.000Z",
     compatibility: {
       detected: false,
@@ -61,7 +61,7 @@ test("compatibility report keeps only coarse allowlisted checkout signals", () =
   });
 
   const serialized = stringifyCompatibilityReport(scan, {
-    extensionVersion: "0.6.0",
+    extensionVersion: "0.7.0",
     generatedAt: "2026-08-14T12:00:00.000Z"
   });
   for (const secret of [

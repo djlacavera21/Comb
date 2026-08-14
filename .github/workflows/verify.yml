@@ -14,11 +14,12 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: 22
+          package-manager-cache: false
       - name: Validate runtime, store disclosures, assets, and attribution boundary
         run: npm run lint
       - name: Run unit tests
@@ -30,7 +31,7 @@ jobs:
       - name: Build reproducible runtime and store review kit
         run: npm run release:build
       - name: Upload verified runtime and store review kit
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: comb-${{ github.sha }}-store-package
           path: |

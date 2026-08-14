@@ -1,4 +1,4 @@
-# Comb v0.6 Store-Review Response Playbook
+# Comb v0.7 Store-Review Response Playbook
 
 Use this playbook to answer Chrome Web Store or Microsoft Edge Add-ons questions without weakening the reviewed product boundary. Tailor the greeting and reviewer-specific reference, but keep technical claims exact.
 
@@ -16,7 +16,7 @@ The broad-looking optional HTTPS declaration enables an origin-specific browser 
 
 ## Local data and safe report
 
-Checkout detection and coupon testing happen on-device. The Comb developer receives no merchant history, checkout content, totals, coupon outcomes, creator tags, identity, or payment/order data. The v0.6 compatibility report is user-triggered and saved locally; it is not uploaded. Its fixed schema omits hostname/URL, page content/selectors, coupon codes, total/currency values, cookies, and creator tags.
+Checkout detection and coupon testing happen on-device. The Comb developer receives no merchant history, checkout content, totals, coupon outcomes, creator tags, identity, or payment/order data. The v0.7 compatibility report is user-triggered and saved locally; it is not uploaded. Its fixed schema omits hostname/URL, page content/selectors, coupon codes, total/currency values, cookies, and creator tags.
 
 ## Unknown checkout markup
 
@@ -28,4 +28,4 @@ Select **No, I am not using remote code**. All JavaScript and CSS is packaged in
 
 ## Evidence to attach
 
-Provide the deterministic runtime checksum, public security review, Creator Attribution Guarantee, compatibility matrix, privacy policy, manifest snapshot, and required CI URL. Never send a live checkout capture or user report to a store reviewer.
+Provide the deterministic runtime checksum, public security review, Creator Attribution Guarantee, machine support matrix, independent-review guide, privacy policy, manifest snapshot, required CI URL, and exact GitHub release SHA. Never send a live checkout capture or user report to a store reviewer.

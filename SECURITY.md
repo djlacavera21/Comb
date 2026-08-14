@@ -13,7 +13,7 @@ GitHub private vulnerability reporting is not currently enabled for this reposit
 ## Design constraints
 
 - No remotely hosted executable code.
-- No required host permissions in the v0.6 manifest and no install-time access to shopping sites.
+- No required host permissions in the v0.7 manifest and no install-time access to shopping sites.
 - Optional feed-origin access is granted at runtime for one user-selected HTTPS origin and removed when its last source is removed.
 - No cookie or traffic-interception permissions.
 - No affiliate-link or attribution mutation.

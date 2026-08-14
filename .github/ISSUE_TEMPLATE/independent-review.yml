@@ -1,0 +1,78 @@
+name: Independent boundary review
+description: Record a reproducible review of Comb's public repository evidence without sharing live checkout data.
+title: "Independent review: "
+labels:
+  - independent-review
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reviewing Comb. Use **public repository evidence only**: a commit, source path, test output, or synthetic fixture. Do not include a live checkout URL, hostname, screenshot, page source, cookie, coupon token, total, identity, payment/order detail, affiliate tag, or creator identifier.
+
+        **Do not publish a security-sensitive finding here.** Follow the security policy and request a private channel without posting any vulnerability details.
+  - type: input
+    id: reviewed-commit
+    attributes:
+      label: Reviewed commit
+      description: Enter the full 40-character commit SHA so the evidence can be reproduced exactly.
+      placeholder: "0123456789abcdef0123456789abcdef01234567"
+    validations:
+      required: true
+  - type: dropdown
+    id: review-scope
+    attributes:
+      label: Primary review boundary
+      options:
+        - Permissions and user-initiated page access
+        - Signed-feed verification and source policy
+        - Privacy-safe compatibility report
+        - Creator attribution and zero-affiliate behavior
+        - Release reproducibility and publication gate
+        - Cross-boundary review
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction commands and environment
+      description: List the public commands you ran, browser/Node versions where relevant, and whether each command passed. Do not attach live merchant artifacts.
+      placeholder: |
+        Node 22.x, Chrome 128.x
+        npm run lint — pass
+        npm test — pass
+        node scripts/run-browser-fixtures.js --require-browser — pass
+    validations:
+      required: true
+  - type: dropdown
+    id: result
+    attributes:
+      label: Review result
+      options:
+        - No finding in reviewed scope
+        - Documentation or evidence gap
+        - Defense-in-depth recommendation
+        - Correctness or safety finding using synthetic evidence
+        - Security-sensitive finding; private channel requested with no details here
+    validations:
+      required: true
+  - type: textarea
+    id: public-evidence
+    attributes:
+      label: Public evidence and finding
+      description: Cite repository paths, line-independent symbols, test names, or public commit links. Use invented values in any example.
+      placeholder: "Evidence: manifest.json; scripts/validate-extension.js; creator URL/cookie browser contract. Finding or conclusion: ..."
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Review acknowledgements
+      options:
+        - label: I reviewed the exact commit above and distinguished executed evidence from documentation claims.
+          required: true
+        - label: I understand the machine support matrix covers synthetic contracts and does not claim every live merchant or theme is supported.
+          required: true
+        - label: I checked that this issue contains no live checkout data, affiliate tag, or creator identifier.
+          required: true
+        - label: I will not describe this review as an audit or certification unless the engagement actually meets that standard.
+          required: true

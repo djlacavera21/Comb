@@ -29,7 +29,7 @@ function walk(directory) {
 if (manifest.manifest_version !== 3) fail("manifest_version must be 3");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 if (manifest.version !== packageJson.version) fail("manifest and package versions must match");
-if (!/^0\.6\./.test(manifest.version)) fail("manifest version must match the v0.6 milestone");
+if (!/^0\.7\./.test(manifest.version)) fail("manifest version must match the v0.7 milestone");
 if (manifest.homepage_url !== "https://github.com/djlacavera21/Comb") {
   fail("manifest homepage must identify the public source repository");
 }
@@ -46,18 +46,18 @@ for (const permission of permissions) {
 }
 
 if (Array.isArray(manifest.host_permissions) && manifest.host_permissions.length) {
-  fail("v0.6 must not declare permanent host permissions");
+  fail("v0.7 must not declare permanent host permissions");
 }
 
 const optionalHosts = Array.isArray(manifest.optional_host_permissions)
   ? manifest.optional_host_permissions
   : [];
 if (optionalHosts.length !== 1 || optionalHosts[0] !== "https://*/*") {
-  fail("v0.6 must declare only runtime-approved HTTPS feed origins");
+  fail("v0.7 must declare only runtime-approved HTTPS feed origins");
 }
 
 if (manifest.content_scripts) {
-  fail("v0.6 must inject only after a user gesture, not through static content scripts");
+  fail("v0.7 must inject only after a user gesture, not through static content scripts");
 }
 
 const requiredFiles = [
@@ -136,11 +136,11 @@ for (const file of packageFiles) {
 }
 
 if (packageJson.dependencies && Object.keys(packageJson.dependencies).length) {
-  fail("v0.6 must remain dependency-free");
+  fail("v0.7 must remain dependency-free");
 }
 
 if (packageJson.devDependencies && Object.keys(packageJson.devDependencies).length) {
-  fail("v0.6 must remain dependency-free");
+  fail("v0.7 must remain dependency-free");
 }
 
 if (!fs.existsSync(path.join(root, "src/shared/feed-verifier.js"))) {
@@ -164,7 +164,7 @@ for (const requiredAdapterBoundary of [
   "totalsMatch(restoredTotal, expectedTotal)"
 ]) {
   if (!checkoutEngineSource.includes(requiredAdapterBoundary)) {
-    fail(`v0.6 checkout reliability boundary is missing: ${requiredAdapterBoundary}`);
+    fail(`v0.7 checkout reliability boundary is missing: ${requiredAdapterBoundary}`);
   }
 }
 
@@ -217,13 +217,23 @@ for (const requiredTool of [
   "scripts/build-release.js",
   "scripts/build-store-package.js",
   "scripts/deterministic-zip.js",
+  "scripts/validate-release-candidate.js",
   "scripts/validate-store.js",
+  "scripts/validate-fixture-matrix.js",
+  "scripts/verify-release-artifacts.js",
   "tests/deterministic-zip.test.cjs",
   "tests/compatibility-report.test.cjs",
+  "tests/fixture-matrix.test.cjs",
+  "tests/release-artifacts.test.cjs",
+  "tests/release-candidate.test.cjs",
   "CHANGELOG.md",
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/compatibility.yml",
+  ".github/ISSUE_TEMPLATE/independent-review.yml",
+  ".github/workflows/release.yml",
+  ".github/workflows/verify.yml",
   "docs/COMPATIBILITY.md",
+  "docs/INDEPENDENT_REVIEW.md",
   "docs/SUPPORT_TRIAGE.md",
   "store/REVIEW_RESPONSE_PLAYBOOK.md",
   "tests/fixtures/woocommerce-blocks.html",
@@ -233,9 +243,10 @@ for (const requiredTool of [
   "tests/fixtures/bigcommerce.html",
   "tests/fixtures/removal-failure.html",
   "tests/fixtures/restoration-mismatch.html",
-  "tests/fixtures/currency-drift.html"
+  "tests/fixtures/currency-drift.html",
+  "tests/fixtures/support-matrix.json"
 ]) {
-  if (!fs.existsSync(path.join(root, requiredTool))) fail(`v0.6 verification tool is missing: ${requiredTool}`);
+  if (!fs.existsSync(path.join(root, requiredTool))) fail(`v0.7 verification tool is missing: ${requiredTool}`);
 }
 const issueConfigSource = fs.readFileSync(path.join(root, ".github/ISSUE_TEMPLATE/config.yml"), "utf8");
 if (!issueConfigSource.includes("https://github.com/djlacavera21/Comb/security/policy") ||
@@ -260,25 +271,93 @@ for (const intakeBoundary of [
 if (/type:\s*upload\b/.test(compatibilityFormSource)) {
   fail("compatibility issue form must not invite live checkout file uploads");
 }
+const independentReviewFormSource = fs.readFileSync(
+  path.join(root, ".github/ISSUE_TEMPLATE/independent-review.yml"),
+  "utf8"
+);
+for (const reviewBoundary of [
+  "public repository evidence only",
+  "full 40-character commit SHA",
+  "Creator attribution and zero-affiliate behavior",
+  "Do not publish a security-sensitive finding here",
+  "does not claim every live merchant or theme is supported"
+]) {
+  if (!independentReviewFormSource.includes(reviewBoundary)) {
+    fail(`independent-review issue form is missing: ${reviewBoundary}`);
+  }
+}
+if (/type:\s*upload\b/.test(independentReviewFormSource)) {
+  fail("independent-review issue form must not invite evidence uploads");
+}
+const releaseWorkflowSource = fs.readFileSync(path.join(root, ".github/workflows/release.yml"), "utf8");
+if (/^  (?:push|pull_request|pull_request_target|schedule|workflow_run):/m.test(releaseWorkflowSource)) {
+  fail("release workflow must be manually dispatched only");
+}
+if ((releaseWorkflowSource.match(/contents:\s*write/g) || []).length !== 1) {
+  fail("release workflow must declare exactly one contents: write permission");
+}
+for (const releaseBoundary of [
+  "workflow_dispatch:",
+  "confirm_creator_attribution:",
+  "CONFIRM_CREATOR_ATTRIBUTION",
+  "ref: ${{ inputs.commit_sha }}",
+  "persist-credentials: false",
+  "git fetch --no-tags origin main:refs/remotes/origin/main",
+  "validate-release-candidate.js",
+  "git ls-remote --exit-code --tags",
+  "npm run lint",
+  "node --test tests/*.test.cjs",
+  "run-browser-fixtures.js --require-browser",
+  "npm run release:build",
+  "verify-release-artifacts.js",
+  "gh release create",
+  '--target "$EXPECTED_SHA"',
+  "comb-${EXPECTED_VERSION}-store-review-kit.zip.sha256",
+  "git rev-list -n 1",
+  "gh release view"
+]) {
+  if (!releaseWorkflowSource.includes(releaseBoundary)) {
+    fail(`release workflow boundary is missing: ${releaseBoundary}`);
+  }
+}
+const verifyWorkflowSource = fs.readFileSync(path.join(root, ".github/workflows/verify.yml"), "utf8");
+for (const currentAction of [
+  "actions/checkout@v7",
+  "actions/setup-node@v7",
+  "actions/upload-artifact@v7",
+  "package-manager-cache: false"
+]) {
+  if (!verifyWorkflowSource.includes(currentAction)) {
+    fail(`required CI action boundary is missing: ${currentAction}`);
+  }
+}
+if (verifyWorkflowSource.includes("contents: write")) {
+  fail("push and pull-request verification must remain read-only");
+}
 const browserFixtureSource = fs.readFileSync(path.join(root, "scripts/run-browser-fixtures.js"), "utf8");
 for (const requiredBrowserBoundary of [
   "creator_attribution=creator-42",
   "creator URL tags and attribution cookie must remain unchanged",
-  "woocommerce-classic-es.html",
-  "shopify-swiss.html",
-  "generic-rtl-aed.html",
+  "support-matrix.json",
+  "fixtureMatrix.fixtures.filter",
+  "assertFixtureState",
+  "assertSafeStopResult",
   "privacy-safe compatibility report contract",
   "dangerClicks"
 ]) {
   if (!browserFixtureSource.includes(requiredBrowserBoundary)) {
-    fail(`v0.6 browser safety boundary is missing: ${requiredBrowserBoundary}`);
+    fail(`v0.7 browser safety boundary is missing: ${requiredBrowserBoundary}`);
   }
 }
 if (!packageJson.engines || packageJson.engines.node !== ">=22") {
-  fail("v0.6 tooling requires the stable WebSocket API in Node 22 or newer");
+  fail("v0.7 tooling requires the stable WebSocket API in Node 22 or newer");
 }
 if (packageJson.scripts?.["release:build"] !== "node scripts/build-store-package.js --verify") {
-  fail("v0.6 release build must produce the validated store review kit");
+  fail("v0.7 release build must produce the validated store review kit");
+}
+if (packageJson.scripts?.lint !==
+    "node scripts/validate-fixture-matrix.js && node scripts/validate-extension.js && node scripts/validate-store.js") {
+  fail("v0.7 lint must validate the matrix, runtime/workflow, and store boundaries");
 }
 
 for (const file of walk(root).filter((entry) => entry.endsWith(".json") && !entry.includes(`${path.sep}.git${path.sep}`))) {

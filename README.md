@@ -21,7 +21,7 @@ This is enforced in the product, not merely promised in policy:
 
 See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) for the invariant and its limits.
 
-## What works in v0.6
+## What works in v0.7
 
 - Detects coupon fields, apply buttons, totals, and existing coupons.
 - Includes targeted adapters for WooCommerce classic/Blocks, BigCommerce Cornerstone, and Shopify-style checkouts plus a conservative generic adapter.
@@ -38,17 +38,19 @@ See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) for the invariant and its limits.
 - Keeps expired signed sequence history for rollback protection while excluding expired codes from checkout.
 - Parses regional grouping, decimal separators, Arabic/Persian/full-width digits, and a broader currency set; currency changes during a run trigger a safe stop.
 - Runs sanitized adapter, no-stacking, purchase-control refusal, creator URL/cookie preservation, and keyboard contracts in real headless Chrome during CI.
+- Binds every synthetic HTML fixture to a strict machine-readable support record with a public-contract snapshot, expected state/click counts, and exact version.
 - Saves a user-triggered compatibility report whose allowlisted schema omits merchant URLs/hostnames, page content/selectors, codes, totals/currencies, cookies, and creator tags; Comb never uploads it.
 - Exercises localized MXN, EUR, CHF, AED, and USD checkouts, including right-to-left digits and separate subtotal, shipping, tax, and payable-total rows.
 - Provides keyboard-visible native import controls, an announced progress bar, result focus management, and reduced-motion support.
 - Validates copy-ready Chrome Web Store and Edge Add-ons listing fields, conservative local data-use disclosures, Limited Use commitments, reviewer notes, and exact image dimensions.
 - Produces a deterministic runtime ZIP plus a deterministic store review kit with SHA-256 sidecars, then uploads all four files from successful CI.
+- Provides a public-evidence-only independent-review path and a manual release workflow that rejects version, commit, tag, checksum, test, or creator-attribution authorization drift before publication.
 - Uses Chrome's temporary `activeTab` access instead of permanent access to every website.
 - Includes a local demo checkout and dependency-free automated tests.
 
 ## Privacy model
 
-Comb v0.6 has no backend, analytics, affiliate links, accounts, tracking, or remote code. It does handle limited data on-device: the current merchant hostname, coupon tokens, visible coupon controls/messages, and displayed payable amount/currency. The developer receives none of that checkout data. Store disclosures conservatively select the corresponding Web history, Website content, and Financial/payment categories even though the processing stays local.
+Comb v0.7 has no backend, analytics, affiliate links, accounts, tracking, or remote code. It does handle limited data on-device: the current merchant hostname, coupon tokens, visible coupon controls/messages, and displayed payable amount/currency. The developer receives none of that checkout data. Store disclosures conservatively select the corresponding Web history, Website content, and Financial/payment categories even though the processing stays local.
 
 The optional **Save safe report** action creates a local JSON file only after a user chooses it. It extracts coarse allowlisted detection signals rather than redacting a checkout capture, and it makes no request. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md).
 
@@ -93,7 +95,7 @@ npm run release:build
 
 The project has no runtime or development dependencies and uses Node 22 or newer for its browser-test transport. The validation script checks the manifest, packaged files, permission and creator-attribution boundaries, checkout restoration guardrails, signing-key leakage, accessibility hooks, and JavaScript syntax. `npm run check` runs browser contracts when Chrome is installed; CI requires Chrome and cannot skip them.
 
-`npm run release:build` writes `dist/comb-0.6.0.zip`, `dist/comb-0.6.0-store-review-kit.zip`, and their `.sha256` sidecars. Both archives are built twice to prove identical output. Upload only the minimal runtime ZIP as the extension. See [docs/RELEASE.md](docs/RELEASE.md).
+`npm run release:build` writes `dist/comb-0.7.0.zip`, `dist/comb-0.7.0-store-review-kit.zip`, and their `.sha256` sidecars. Both archives are built twice to prove identical output. Upload only the minimal runtime ZIP as the extension. See [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Publish or verify a signed feed
 
@@ -136,11 +138,11 @@ Detailed design notes are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Roadmap
 
-The privacy-safe compatibility-intake milestone is shipped in v0.6. The next target is browser-store dashboard publication, verified sanitized adapter reports, and independent review without weakening the privacy or attribution boundary. Any outcome reporting remains a separate, strictly opt-in future decision. See [docs/ROADMAP.md](docs/ROADMAP.md).
+The machine support matrix, independent-review path, and controlled GitHub release workflow are shipped in v0.7. Browser-store dashboard submission and approval remain the next account-level milestone; Comb will not claim public availability before that occurs. Any outcome reporting remains a separate, strictly opt-in future decision. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 
-Adapter fixes and checkout fixtures are especially welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md) before submitting changes. Never include real payment, identity, address, order, session, or creator-attribution data in a fixture or bug report.
+Adapter fixes, synthetic checkout fixtures, and independent boundary reviews are especially welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md), [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md), and [docs/INDEPENDENT_REVIEW.md](docs/INDEPENDENT_REVIEW.md) before submitting changes. Never include real payment, identity, address, order, session, or creator-attribution data in a fixture or bug report.
 
 ## License
 

@@ -1,4 +1,4 @@
-# Comb v0.6 reviewer notes
+# Comb v0.7 reviewer notes
 
 Comb has one purpose: test coupon-code tokens on the user-authorized active checkout and preserve the best measurable discount without changing creator affiliate attribution.
 
@@ -42,4 +42,4 @@ The popup's **Save safe report** button creates a local `comb.compatibility-repo
 6. Open **Settings** to inspect/export/delete local lists or import an explicitly trusted public feed key.
 7. To use the repository's sanitized checkout, clone the linked public source, run `npm run demo`, open `http://127.0.0.1:4173/demo/checkout.html`, and try `SAVE10`, `WELCOME20`, `FREESHIP`, and `NOTREAL`.
 
-The runtime upload ZIP intentionally excludes demo/test files. Public evidence and exact commands are in `docs/SECURITY_REVIEW.md` and `docs/RELEASE.md`.
+The runtime upload ZIP intentionally excludes demo/test files. The outer reviewer kit includes the strict synthetic fixture matrix and independent-review guide. Public evidence and exact commands are in `docs/SECURITY_REVIEW.md` and `docs/RELEASE.md`; the GitHub release workflow pins all four assets to one verified full `main` SHA before any separate store submission.

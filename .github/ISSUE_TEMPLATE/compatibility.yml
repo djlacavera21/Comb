@@ -15,7 +15,7 @@ body:
     attributes:
       label: Comb version
       description: Find this in Comb settings or the generated safe report.
-      placeholder: "0.6.0"
+      placeholder: "0.7.0"
     validations:
       required: true
   - type: dropdown

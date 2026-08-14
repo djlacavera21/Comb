@@ -6,3 +6,6 @@ contact_links:
   - name: Compatibility-reporting guide
     url: https://github.com/djlacavera21/Comb/blob/main/docs/COMPATIBILITY.md
     about: Review the sanitization rules before filing a checkout compatibility report.
+  - name: Independent-review guide
+    url: https://github.com/djlacavera21/Comb/blob/main/docs/INDEPENDENT_REVIEW.md
+    about: Reproduce a public commit's safety and creator-attribution boundaries using synthetic evidence only.

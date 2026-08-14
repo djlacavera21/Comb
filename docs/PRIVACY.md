@@ -1,4 +1,4 @@
-# Comb v0.6 Privacy Policy and Data-Use Specification
+# Comb v0.7 Privacy Policy and Data-Use Specification
 
 Effective: August 14, 2026
 
@@ -71,10 +71,10 @@ Comb's handling of user data is limited to its disclosed single purpose. The pro
 - not use or transfer user data for personalized advertising; and
 - not allow humans to read user data except at the user's affirmative request, for a specific security/abuse investigation, or where legally required.
 
-Any future analytics, outcome reporting, affiliate model, account, or backend would require a separate public design, new consent where applicable, updated store disclosures and privacy policy, and review of the Creator Attribution Guarantee before implementation. It is not part of v0.6.
+Any future analytics, outcome reporting, affiliate model, account, or backend would require a separate public design, new consent where applicable, updated store disclosures and privacy policy, and review of the Creator Attribution Guarantee before implementation. It is not part of v0.7.
 
 ## Security and policy changes
 
 Comb's packaged-code validator blocks cookie, navigation, traffic-interception, remote-code, and purchase-click capabilities. Required continuous integration also exercises sanitized real-browser checkout and creator-attribution contracts. These controls reduce risk but are not a substitute for independent review.
 
-Material policy changes will be versioned in the public repository before a corresponding extension release. Questions can be opened through the sanitized [checkout compatibility form](https://github.com/djlacavera21/Comb/issues/new?template=compatibility.yml). Do not include checkout URLs, screenshots, page source, cookies, codes, totals, payment details, addresses, affiliate IDs, creator identifiers, or order data in a public issue; use GitHub private vulnerability reporting for sensitive security reports when available.
+Material policy changes will be versioned in the public repository before a corresponding extension release. Questions can be opened through the sanitized [checkout compatibility form](https://github.com/djlacavera21/Comb/issues/new?template=compatibility.yml). Do not include checkout URLs, screenshots, page source, cookies, codes, totals, payment details, addresses, affiliate IDs, creator identifiers, or order data in a public issue. Private vulnerability reporting is currently disabled; follow [../SECURITY.md](../SECURITY.md) to request a private channel without publishing details.

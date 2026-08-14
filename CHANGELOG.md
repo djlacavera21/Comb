@@ -2,6 +2,26 @@
 
 All notable Comb changes are recorded here. At browser-store publication, the release version must match `manifest.json`, `package.json`, the checkout engine, store metadata, and an immutable `vX.Y.Z` source tag created only after required CI succeeds.
 
+## [0.7.0] - 2026-08-14
+
+### Added
+
+- A strict `comb.fixture-support-matrix/v1` record covering every synthetic HTML fixture exactly once, with public-contract snapshot labels, expected state transitions, and a single creator-attribution owner.
+- Matrix validation that rejects live hosts, remote fixture resources, creator/affiliate identifiers, version drift, missing fixtures, and unsupported result values before browser tests run.
+- A public-evidence-only independent-review guide and GitHub issue form for permission, signed-feed, compatibility-report, checkout-state, release, and creator-attribution boundaries.
+- A manually dispatched, fail-closed GitHub release workflow that accepts only an exact clean `main` commit and synchronized version, requires explicit creator-attribution authorization, reruns every gate, verifies four checksummed artifacts, rejects tag reuse, and publishes at that full SHA.
+
+### Changed
+
+- The real-Chrome suite now reads happy-path versions and expectations from the machine matrix instead of a second hardcoded fixture list.
+- GitHub CI actions moved to their current Node 24-backed v7 release lines.
+- The deterministic reviewer kit now includes the machine support matrix and independent-review guide.
+
+### Preserved
+
+- The creator-tagging issue remains fixed: Comb has no affiliate identity and leaves existing creator affiliate tags, referral parameters, and attribution cookies untouched so the original creator can keep proper attribution.
+- Browser-store dashboard submission remains a separate maintainer account action; v0.7 does not claim publication before a store approves the package.
+
 ## [0.6.0] - 2026-08-14
 
 ### Added

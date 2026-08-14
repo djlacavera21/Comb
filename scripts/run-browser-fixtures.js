@@ -10,6 +10,10 @@ const { spawn } = require("node:child_process");
 
 const root = path.resolve(__dirname, "..");
 const requireBrowser = process.argv.includes("--require-browser");
+const fixtureMatrix = JSON.parse(
+  fs.readFileSync(path.join(root, "tests/fixtures/support-matrix.json"), "utf8")
+);
+const fixturesByFile = new Map(fixtureMatrix.fixtures.map((fixture) => [fixture.file, fixture]));
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
@@ -226,38 +230,66 @@ async function browserRun(client, codes) {
   })`, 30_000);
 }
 
+function assertFixtureState(state, expected) {
+  assert.equal(state.applyClicks, expected.applyClicks, "synthetic Apply click count changed");
+  assert.equal(state.removeClicks, expected.removeClicks, "synthetic removal click count changed");
+  if (expected.zeroPurchaseClicks) {
+    assert.equal(state.dangerClicks, 0, "purchase controls must never be clicked");
+  }
+}
+
+function assertSafeStopResult(result, specification) {
+  const expected = specification.expected;
+  assert.equal(result.status, expected.status, `${specification.file} status contract changed`);
+  assert.equal(result.reason, expected.reason, `${specification.file} reason contract changed`);
+  assert.equal(result.scan.adapter, specification.adapter, `${specification.file} adapter contract changed`);
+  assert.equal(result.scan.detected, expected.detected, `${specification.file} detection contract changed`);
+  assert.equal(result.scan.engineVersion, fixtureMatrix.engineVersion);
+  assert.equal(result.scan.total.currency, specification.currency);
+  assert.ok(Math.abs(result.scan.total.amount - specification.baseline) < 0.01);
+  if (expected.tested === null) {
+    assert.equal(result.results.length, 0, `${specification.file} must stop before a coupon attempt`);
+  } else {
+    assert.equal(result.tested, expected.tested, `${specification.file} attempt count changed`);
+  }
+  assert.equal(result.best?.code || null, expected.bestCode);
+  assert.equal(result.bestCandidate?.code || null, expected.bestCandidateCode);
+  if (expected.savings !== null) {
+    const measured = result.best?.savings ?? result.bestCandidate?.savings;
+    assert.ok(Math.abs(measured - expected.savings) < 0.01);
+  }
+}
+
 async function verifyHappyFixture(client, baseUrl, specification) {
-  const expectedBestCode = specification.expectedBestCode || "BEST20";
-  const expectedSavings = specification.expectedSavings || 20;
-  const attributionQuery = specification.attribution
+  const expected = specification.expected;
+  const attributionQuery = expected.creatorAttributionPreserved
     ? "?affiliate_id=creator-42&utm_source=creator"
     : "";
   await openPage(client, `${baseUrl}/tests/fixtures/${specification.file}${attributionQuery}`);
-  const attributionBefore = specification.attribution
+  const attributionBefore = expected.creatorAttributionPreserved
     ? await evaluate(client, `(() => {
         document.cookie = "creator_attribution=creator-42; Path=/; SameSite=Lax";
         return { href: location.href, cookie: document.cookie };
       })()`)
     : null;
   const scan = await evaluate(client, "globalThis.CombCheckout.scanCheckout(document)");
-  assert.equal(scan.detected, true, `${specification.file} should be detected`);
+  assert.equal(scan.detected, expected.detected, `${specification.file} detection contract changed`);
   assert.equal(scan.adapter, specification.adapter);
-  assert.equal(scan.engineVersion, "0.6.0");
+  assert.equal(scan.engineVersion, fixtureMatrix.engineVersion);
   assert.equal(scan.total.currency, specification.currency);
   assert.ok(Math.abs(scan.total.amount - specification.baseline) < 0.01);
   assert.equal(scan.existingCouponCount, 0);
 
   const result = await browserRun(client, ["SHIPFREE", "BEST20", "NOTREAL"]);
-  assert.equal(result.status, "complete");
-  assert.equal(result.best.code, expectedBestCode);
-  assert.equal(result.tested, 3);
-  assert.ok(Math.abs(result.finalTotal - (specification.baseline - expectedSavings)) < 0.01);
+  assert.equal(result.status, expected.status);
+  assert.equal(result.reason, expected.reason);
+  assert.equal(result.best.code, expected.bestCode);
+  assert.equal(result.tested, expected.tested);
+  assert.ok(Math.abs(result.finalTotal - (specification.baseline - expected.savings)) < 0.01);
   const state = await evaluate(client, "globalThis.fixtureState");
-  assert.equal(state.applyClicks, 4, "three attempts plus best-code restoration");
-  assert.equal(state.removeClicks, 2);
-  assert.equal(state.dangerClicks, 0, "purchase controls must never be clicked");
-  assert.equal(state.appliedCode, expectedBestCode);
-  if (specification.attribution) {
+  assertFixtureState(state, expected);
+  assert.equal(state.appliedCode, expected.bestCode);
+  if (expected.creatorAttributionPreserved) {
     const attributionAfter = await evaluate(client, "({ href: location.href, cookie: document.cookie })");
     assert.deepEqual(attributionAfter, attributionBefore, "creator URL tags and attribution cookie must remain unchanged");
     process.stdout.write("✓ creator URL and cookie attribution preservation\n");
@@ -265,87 +297,71 @@ async function verifyHappyFixture(client, baseUrl, specification) {
 }
 
 async function runFixtureSuite(client, baseUrl) {
-  const happyFixtures = [
-    { file: "woocommerce-blocks.html", adapter: "woocommerce", currency: "USD", baseline: 132.95 },
-    {
-      file: "woocommerce-classic-es.html",
-      adapter: "woocommerce",
-      currency: "MXN",
-      baseline: 1999.9,
-      expectedBestCode: "SHIPFREE",
-      expectedSavings: 149.9
-    },
-    { file: "shopify-style.html", adapter: "shopify", currency: "USD", baseline: 132.95 },
-    { file: "shopify-swiss.html", adapter: "shopify", currency: "CHF", baseline: 132.95 },
-    { file: "bigcommerce.html", adapter: "bigcommerce", currency: "EUR", baseline: 1234.5 },
-    {
-      file: "generic-rtl-aed.html",
-      adapter: "generic",
-      currency: "AED",
-      baseline: 1234.5,
-      expectedBestCode: "SHIPFREE",
-      expectedSavings: 50
-    },
-    { file: "generic.html", adapter: "generic", currency: "USD", baseline: 132.95, attribution: true }
+  const happyFixtures = fixtureMatrix.fixtures.filter((fixture) => fixture.contract === "happy-path");
+  const expectedSafeStopFiles = [
+    "ambiguous.html",
+    "currency-drift.html",
+    "existing-coupon.html",
+    "removal-failure.html",
+    "restoration-mismatch.html"
   ];
+  assert.deepEqual(
+    fixtureMatrix.fixtures
+      .filter((fixture) => fixture.contract === "safe-stop")
+      .map((fixture) => fixture.file)
+      .sort(),
+    expectedSafeStopFiles,
+    "every matrix safe-stop contract must have an executed specialized assertion"
+  );
 
   for (const specification of happyFixtures) {
     await verifyHappyFixture(client, baseUrl, specification);
     process.stdout.write(`✓ ${specification.adapter} browser contract\n`);
   }
 
-  await openPage(client, `${baseUrl}/tests/fixtures/ambiguous.html`);
+  const ambiguous = fixturesByFile.get("ambiguous.html");
+  await openPage(client, `${baseUrl}/tests/fixtures/${ambiguous.file}`);
   const ambiguousScan = await evaluate(client, "globalThis.CombCheckout.scanCheckout(document)");
-  assert.equal(ambiguousScan.detected, false);
-  assert.equal(ambiguousScan.reason, "coupon_apply_button_not_found");
+  assert.equal(ambiguousScan.detected, ambiguous.expected.detected);
+  assert.equal(ambiguousScan.reason, ambiguous.expected.reason);
   const ambiguousRun = await browserRun(client, ["SAVE10"]);
-  assert.equal(ambiguousRun.status, "blocked");
-  assert.equal((await evaluate(client, "globalThis.fixtureState.dangerClicks")), 0);
+  assertSafeStopResult(ambiguousRun, ambiguous);
+  assertFixtureState(await evaluate(client, "globalThis.fixtureState"), ambiguous.expected);
   process.stdout.write("✓ ambiguous purchase control refusal\n");
 
-  await openPage(client, `${baseUrl}/tests/fixtures/existing-coupon.html`);
+  const existing = fixturesByFile.get("existing-coupon.html");
+  await openPage(client, `${baseUrl}/tests/fixtures/${existing.file}`);
   const existingRun = await browserRun(client, ["SAVE10"]);
-  assert.equal(existingRun.status, "blocked");
-  assert.equal(existingRun.reason, "existing_coupon_detected");
-  assert.equal((await evaluate(client, "globalThis.fixtureState.applyClicks")), 0);
+  assertSafeStopResult(existingRun, existing);
+  assertFixtureState(await evaluate(client, "globalThis.fixtureState"), existing.expected);
   process.stdout.write("✓ existing-coupon safety gate\n");
 
-  await openPage(client, `${baseUrl}/tests/fixtures/removal-failure.html`);
+  const removalFailure = fixturesByFile.get("removal-failure.html");
+  await openPage(client, `${baseUrl}/tests/fixtures/${removalFailure.file}`);
   const failedRemoval = await browserRun(client, ["SAVE10", "BEST20"]);
-  assert.equal(failedRemoval.status, "partial");
-  assert.equal(failedRemoval.reason, "coupon_removal_unverified");
-  assert.equal(failedRemoval.tested, 1);
-  assert.equal(failedRemoval.best.code, "SAVE10");
+  assertSafeStopResult(failedRemoval, removalFailure);
   const failureState = await evaluate(client, "globalThis.fixtureState");
-  assert.equal(failureState.applyClicks, 1);
-  assert.equal(failureState.removeClicks, 1);
-  assert.equal(failureState.dangerClicks, 0);
-  assert.equal(failureState.appliedCode, "SAVE10");
+  assertFixtureState(failureState, removalFailure.expected);
+  assert.equal(failureState.appliedCode, removalFailure.expected.bestCode);
   process.stdout.write("✓ failed-removal stop and no stacking\n");
 
-  await openPage(client, `${baseUrl}/tests/fixtures/restoration-mismatch.html`);
+  const restorationMismatch = fixturesByFile.get("restoration-mismatch.html");
+  await openPage(client, `${baseUrl}/tests/fixtures/${restorationMismatch.file}`);
   const incompleteRestoration = await browserRun(client, ["SAVE10", "BEST20"]);
-  assert.equal(incompleteRestoration.status, "stopped");
-  assert.equal(incompleteRestoration.reason, "coupon_removal_unverified");
-  assert.equal(incompleteRestoration.tested, 1);
+  assertSafeStopResult(incompleteRestoration, restorationMismatch);
   assert.equal(incompleteRestoration.best, null, "an unverified partial removal must not be reported as applied");
-  assert.equal(incompleteRestoration.bestCandidate.code, "SAVE10");
+  assert.equal(incompleteRestoration.bestCandidate.code, restorationMismatch.expected.bestCandidateCode);
   const incompleteState = await evaluate(client, "globalThis.fixtureState");
-  assert.equal(incompleteState.applyClicks, 1);
-  assert.equal(incompleteState.removeClicks, 1);
-  assert.equal(incompleteState.dangerClicks, 0);
+  assertFixtureState(incompleteState, restorationMismatch.expected);
   assert.equal(incompleteState.appliedCode, null);
   process.stdout.write("✓ marker removal without baseline restoration stops safely\n");
 
-  await openPage(client, `${baseUrl}/tests/fixtures/currency-drift.html`);
+  const currencyDriftFixture = fixturesByFile.get("currency-drift.html");
+  await openPage(client, `${baseUrl}/tests/fixtures/${currencyDriftFixture.file}`);
   const currencyDrift = await browserRun(client, ["NOTREAL", "BEST20"]);
-  assert.equal(currencyDrift.status, "stopped");
-  assert.equal(currencyDrift.reason, "checkout_total_changed_during_run");
-  assert.equal(currencyDrift.tested, 1);
+  assertSafeStopResult(currencyDrift, currencyDriftFixture);
   const driftState = await evaluate(client, "globalThis.fixtureState");
-  assert.equal(driftState.applyClicks, 1);
-  assert.equal(driftState.removeClicks, 0);
-  assert.equal(driftState.dangerClicks, 0);
+  assertFixtureState(driftState, currencyDriftFixture.expected);
   process.stdout.write("✓ checkout currency drift stop\n");
 }
 
@@ -365,7 +381,7 @@ const chromeUiStub = `(() => {
     runtime: {
       onMessage: { addListener() {} },
       openOptionsPage() {},
-      getManifest() { return { version: "0.6.0" }; },
+      getManifest() { return { version: "${fixtureMatrix.engineVersion}" }; },
       async sendMessage(message) {
         if (message.type === "COMB_GET_LIBRARY") {
           return { ok: true, result: { version: 1, merchants: {} } };
@@ -466,7 +482,7 @@ async function verifyUiAccessibility(client, baseUrl) {
     codes: ["SAVE10"],
     attribution: { affiliateId: "creator-secret" }
   }, {
-    extensionVersion: "0.6.0",
+    extensionVersion: fixtureMatrix.engineVersion,
     generatedAt: "2026-08-14T12:00:00.000Z"
   })`);
   const parsedReport = JSON.parse(safeReport);

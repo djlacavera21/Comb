@@ -55,7 +55,7 @@ function validateAsset(asset, label) {
 
 if (listing.schemaVersion !== 1) fail("store listing schemaVersion must be 1");
 if (listing.extensionVersion !== manifest.version) fail("store listing and manifest versions must match");
-if (listing.lastReviewed !== "2026-08-14") fail("store listing review date must match the v0.6 review");
+if (listing.lastReviewed !== "2026-08-14") fail("store listing review date must match the v0.7 review");
 if (listing.shared?.name !== manifest.name) fail("store name must match the manifest");
 if (listing.shared?.shortDescription !== manifest.description) {
   fail("store short description must match the manifest description");
@@ -161,9 +161,11 @@ for (const [label, description] of [["Chrome", chromeDescription], ["Edge", edge
   }
   if (/v0\.4/.test(description)) fail(`${label} description contains stale v0.4 copy`);
 }
-if (!releaseNotes.includes("v0.6") || !releaseNotes.includes("attribution cookies") ||
-    !releaseNotes.includes("safe compatibility report")) {
-  fail("v0.6 release notes must mention safe reporting and the attribution regression");
+if (!releaseNotes.includes("v0.7") || !releaseNotes.includes("attribution cookies") ||
+    !releaseNotes.includes("safe compatibility report") ||
+    !releaseNotes.includes("machine-readable synthetic fixture matrix") ||
+    !releaseNotes.includes("publication workflow")) {
+  fail("v0.7 release notes must cover the matrix, safe reporting, publication gate, and attribution regression");
 }
 for (const phrase of [
   "affiliate_id=creator-42&utm_source=creator",

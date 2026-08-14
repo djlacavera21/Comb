@@ -1,6 +1,6 @@
 # Comb Compatibility Reporting
 
-Comb v0.6 adds a user-triggered compatibility report for checkouts that are not recognized or stop safely. The report is generated locally only when the user chooses **Save safe report**. Comb does not upload it, open an issue, contact the developer, or add a network permission.
+Comb v0.7 provides a user-triggered compatibility report for checkouts that are not recognized or stop safely. The report is generated locally only when the user chooses **Save safe report**. Comb does not upload it, open an issue, contact the developer, or add a network permission.
 
 ## Exact report boundary
 
@@ -27,21 +27,23 @@ Never attach a screenshot, HAR file, checkout URL, live HTML, cookie export, con
 
 ## Executed support matrix
 
-The required real-Chrome suite runs synthetic, local-only fixtures. A checked row means the adapter must find one unambiguous input, one safe Apply control, and one payable total; preserve the purchase control; restore the checkout between attempts; and keep creator attribution unchanged where noted.
+[`../tests/fixtures/support-matrix.json`](../tests/fixtures/support-matrix.json) is the canonical machine-readable matrix. Validation requires every synthetic HTML fixture to appear exactly once, rejects remote resources and live hosts, pins the engine version, and permits only `generic.html` to own the creator-attribution preservation assertion. The required real-Chrome suite reads the matrix rather than maintaining a separate happy-path list.
 
-| Contract | Adapter | Locale / currency | Required behavior |
-| --- | --- | --- | --- |
-| WooCommerce Blocks | `woocommerce` | en-US / USD | Apply, verified removal, best-code restoration |
-| WooCommerce classic | `woocommerce` | es-MX / MXN | Localized total with shipping and tax separated |
-| Shopify-style | `shopify` | en-US / USD | Apply, verified removal, best-code restoration |
-| Shopify-style Swiss | `shopify` | de-CH / CHF | Apostrophe grouping and localized total |
-| BigCommerce Cornerstone | `bigcommerce` | de-DE / EUR | Decimal grouping and localized total |
-| Generic RTL | `generic` | ar-AE / AED | Right-to-left digits and payable-total selection |
-| Generic creator-tagged | `generic` | en-US / USD | URL tags and attribution cookie unchanged byte-for-byte |
-| Ambiguous Apply controls | safe stop | synthetic | Refuse purchase/control ambiguity; zero purchase clicks |
-| Existing coupon | safe stop | synthetic | Refuse stacking or replacement |
-| Failed removal | safe stop | synthetic | Stop after one code; do not stack |
-| Restoration mismatch | safe stop | synthetic | Do not claim an unverified applied code |
-| Currency drift | safe stop | synthetic | Stop before another attempt |
+The public platform and theme values are version labels for the public-contract snapshot and synthetic fixture—not claims that every deployment of that product version is supported. A passing row means the adapter must satisfy the listed local contract, preserve the purchase control, and keep creator attribution unchanged where noted.
 
-This matrix is evidence of bounded contracts, not a claim that every live merchant or theme is supported. A new platform/theme version becomes supported only after a sanitized synthetic fixture and safe-failure assertions land in the required suite.
+| Fixture contract | Adapter | Public snapshot / synthetic theme | Locale / currency | Required behavior |
+| --- | --- | --- | --- | --- |
+| WooCommerce Blocks | `woocommerce` | `public-contract-2026-08` / `blocks-synthetic-v1` | en-US / USD | Apply, verified removal, best-code restoration |
+| WooCommerce classic | `woocommerce` | `public-contract-2026-08` / `classic-synthetic-v1` | es-MX / MXN | Localized total with shipping and tax separated |
+| Shopify-style | `shopify` | `public-contract-2026-08` / `one-page-synthetic-v1` | en-US / USD | Apply, verified removal, best-code restoration |
+| Shopify-style Swiss | `shopify` | `public-contract-2026-08` / `one-page-swiss-synthetic-v1` | de-CH / CHF | Localized payable total and restoration |
+| BigCommerce Cornerstone | `bigcommerce` | `public-contract-2026-08` / `cornerstone-synthetic-v1` | de-DE / EUR | Decimal grouping and localized total |
+| Generic RTL | `generic` | `comb-generic-contract-v1` / `rtl-arabic-synthetic-v1` | ar-AE / AED | Right-to-left digits and payable-total selection |
+| Generic creator-tagged | `generic` | `comb-generic-contract-v1` / `creator-attribution-synthetic-v1` | en-US / USD | URL tags and attribution cookie unchanged byte-for-byte |
+| Ambiguous Apply controls | `generic` safe stop | `comb-safety-contract-v1` / `ambiguous-controls-synthetic-v1` | en-US / USD | Refuse purchase/control ambiguity; zero purchase clicks |
+| Existing coupon | `generic` safe stop | `comb-safety-contract-v1` / `existing-coupon-synthetic-v1` | en-US / USD | Refuse stacking or replacement |
+| Failed removal | `generic` safe stop | `comb-safety-contract-v1` / `removal-failure-synthetic-v1` | en-US / USD | Stop after one code; do not stack |
+| Restoration mismatch | `generic` safe stop | `comb-safety-contract-v1` / `restoration-mismatch-synthetic-v1` | en-US / USD | Do not claim an unverified applied code |
+| Currency drift | `generic` safe stop | `comb-safety-contract-v1` / `currency-drift-synthetic-v1` | en-US / USD | Stop before another attempt |
+
+This matrix is evidence of bounded contracts, not a claim that every live merchant or theme is supported. A new public platform/theme snapshot becomes supported only after a privacy-safe report informs an independently written synthetic fixture and its safety assertions land in the required suite. Live checkout captures never become fixtures.

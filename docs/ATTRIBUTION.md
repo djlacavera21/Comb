@@ -10,7 +10,7 @@ The result is simple: **the creator-tagging issue is fixed in Comb**. Using Comb
 
 Comb must not take referral credit away from the creator, publisher, organization, or person who sent the shopper to a merchant.
 
-For v0.6, this is a strict zero-affiliate design:
+For v0.7, this is a strict zero-affiliate design:
 
 - Comb has no affiliate ID and earns no checkout commission.
 - Comb never changes the page URL or its query parameters.
