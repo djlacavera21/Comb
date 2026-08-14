@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Comb Synthetic Checkout</title>
+    <link rel="stylesheet" href="checkout.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <span class="demo-label">Synthetic fixture · no purchase is possible</span>
+        <h1>Northwood Supply</h1>
+        <p>This local page behaves like a checkout so Comb can be tested without using a real cart.</p>
+      </header>
+
+      <div class="checkout-grid">
+        <section class="panel" aria-labelledby="cartHeading">
+          <h2 id="cartHeading">Your cart</h2>
+          <article class="product">
+            <div class="product-art" aria-hidden="true">⬡</div>
+            <div>
+              <strong>Field Notebook Set</strong>
+              <p>Forest green · pack of five</p>
+            </div>
+            <span>$125.00</span>
+          </article>
+
+          <form class="promo-form" id="promo-form">
+            <label for="promo-code">Coupon or promo code</label>
+            <div>
+              <input id="promo-code" name="coupon_code" type="text" autocomplete="off" placeholder="Enter coupon code">
+              <button id="apply-coupon" name="apply_coupon" type="button">Apply coupon</button>
+            </div>
+          </form>
+
+          <p class="coupon-message" id="coupon-message" role="alert" hidden></p>
+          <div class="applied-coupon" id="applied-coupon" hidden>
+            <span id="applied-code"></span>
+            <button class="coupon-remove" id="remove-coupon" type="button" aria-label="Remove coupon">Remove coupon</button>
+          </div>
+        </section>
+
+        <aside class="panel summary" aria-labelledby="summaryHeading">
+          <h2 id="summaryHeading">Order summary</h2>
+          <dl>
+            <div><dt>Subtotal</dt><dd>$125.00</dd></div>
+            <div><dt>Shipping</dt><dd id="shipping-amount">$7.95</dd></div>
+            <div id="discount-row" hidden><dt>Coupon discount</dt><dd id="discount-amount">−$0.00</dd></div>
+            <div class="order-total" data-testid="order-total"><dt>Order total</dt><dd id="order-total">$132.95</dd></div>
+          </dl>
+          <button class="fake-order" type="button" disabled>Place order (disabled fixture)</button>
+          <p>No payment, address, identity, account, or order data exists on this page.</p>
+        </aside>
+      </div>
+
+      <section class="codes panel" aria-labelledby="demoCodesHeading">
+        <h2 id="demoCodesHeading">Demo codes</h2>
+        <ul>
+          <li><code>SAVE10</code><span>10% off subtotal</span></li>
+          <li><code>WELCOME20</code><span>$20 off</span></li>
+          <li><code>FREESHIP</code><span>$7.95 off</span></li>
+          <li><code>NOTREAL</code><span>invalid-code path</span></li>
+        </ul>
+      </section>
+    </main>
+    <script src="checkout.js"></script>
+  </body>
+</html>

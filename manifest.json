@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "Comb — Private Coupon Tester",
+  "short_name": "Comb",
+  "version": "0.1.0",
+  "description": "Try coupon codes locally, keep the best discount, and preserve creator attribution.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "action": {
+    "default_title": "Open Comb",
+    "default_popup": "src/popup/popup.html",
+    "default_icon": {
+      "16": "icons/comb-16.png",
+      "32": "icons/comb-32.png"
+    }
+  },
+  "icons": {
+    "16": "icons/comb-16.png",
+    "32": "icons/comb-32.png",
+    "48": "icons/comb-48.png",
+    "128": "icons/comb-128.png"
+  },
+  "options_page": "src/options/options.html",
+  "minimum_chrome_version": "102"
+}

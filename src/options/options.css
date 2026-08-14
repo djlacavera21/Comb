@@ -1,0 +1,184 @@
+body {
+  min-height: 100vh;
+}
+
+.page {
+  margin: 0 auto;
+  max-width: 860px;
+  padding: 42px 24px 64px;
+}
+
+.page-header {
+  align-items: center;
+  display: flex;
+  gap: 16px;
+  margin-bottom: 25px;
+}
+
+.page-header h1,
+.guarantee h2,
+.library h2,
+.data-actions h2 {
+  margin: 0;
+}
+
+.page-header h1 {
+  font-size: clamp(24px, 4vw, 36px);
+  letter-spacing: -0.045em;
+}
+
+.page-header > div:last-child > p:last-child,
+.guarantee p:last-child,
+.data-actions p:last-child {
+  color: var(--muted);
+  line-height: 1.55;
+  margin: 7px 0 0;
+}
+
+.guarantee,
+.library,
+.data-actions {
+  margin-bottom: 18px;
+  padding: 22px;
+}
+
+.guarantee {
+  align-items: flex-start;
+  background: rgba(113, 211, 155, 0.07);
+  border-color: rgba(113, 211, 155, 0.28);
+  display: flex;
+  gap: 15px;
+}
+
+.guarantee-icon {
+  align-items: center;
+  background: var(--success);
+  border-radius: 50%;
+  color: var(--forest-950);
+  display: flex;
+  flex: 0 0 auto;
+  font-size: 19px;
+  font-weight: 900;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.guarantee h2,
+.library h2,
+.data-actions h2 {
+  font-size: 19px;
+}
+
+.section-heading,
+.merchant-heading,
+.data-actions,
+.action-row {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: space-between;
+}
+
+.section-heading > span {
+  background: rgba(212, 168, 79, 0.1);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  color: var(--brass-300);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 5px 9px;
+}
+
+.empty-state {
+  color: var(--muted);
+  padding: 34px 10px 18px;
+  text-align: center;
+}
+
+.empty-state strong {
+  color: var(--cream);
+}
+
+.empty-state p {
+  font-size: 13px;
+  margin: 6px auto 0;
+  max-width: 420px;
+}
+
+.merchant-list {
+  margin-top: 16px;
+}
+
+.merchant {
+  border-top: 1px solid var(--line);
+  padding: 15px 0;
+}
+
+.merchant:last-child {
+  padding-bottom: 0;
+}
+
+.merchant-heading strong {
+  font-size: 14px;
+}
+
+.merchant-heading button {
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 12px;
+  padding: 5px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.chip {
+  background: rgba(255, 255, 255, 0.055);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 7px;
+  color: var(--brass-300);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 11px;
+  padding: 5px 7px;
+}
+
+.data-actions > div:first-child {
+  max-width: 350px;
+}
+
+.action-row {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.file-button {
+  display: inline-flex;
+}
+
+.page-status {
+  color: var(--success);
+  font-size: 13px;
+  min-height: 20px;
+  text-align: center;
+}
+
+.page-status.error {
+  color: var(--danger);
+}
+
+@media (max-width: 700px) {
+  .data-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .action-row {
+    justify-content: flex-start;
+  }
+}

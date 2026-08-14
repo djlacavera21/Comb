@@ -1,0 +1,25 @@
+name: Verify Comb
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate package and attribution boundary
+        run: node scripts/validate-extension.js
+      - name: Run unit tests
+        run: node --test tests/*.test.cjs

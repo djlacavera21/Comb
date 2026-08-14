@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Comb</title>
+    <link rel="stylesheet" href="../shared/theme.css">
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="header">
+        <div class="brand-mark" aria-hidden="true">C</div>
+        <div class="brand-copy">
+          <p class="eyebrow">Private coupon tester</p>
+          <h1>Comb</h1>
+        </div>
+        <button class="icon-button" id="optionsButton" type="button" aria-label="Open Comb settings" title="Settings">⚙</button>
+      </header>
+
+      <section class="attribution" aria-label="Creator attribution protection">
+        <span class="shield" aria-hidden="true">✓</span>
+        <div>
+          <strong>Creator attribution protected</strong>
+          <p>Comb never replaces affiliate tags, referral links, or cookies.</p>
+        </div>
+      </section>
+
+      <section class="store-card card" aria-labelledby="storeHeading">
+        <div class="store-heading-row">
+          <div>
+            <p class="eyebrow">Current store</p>
+            <h2 id="storeHeading">Inspecting checkout…</h2>
+          </div>
+          <span class="adapter" id="adapterBadge" hidden></span>
+        </div>
+        <div class="total-row" id="totalRow" hidden>
+          <span class="muted">Detected total</span>
+          <strong id="detectedTotal">—</strong>
+        </div>
+        <p class="status" id="statusText" role="status" aria-live="polite">Comb is checking this page.</p>
+      </section>
+
+      <section class="codes-section" aria-labelledby="codesHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Local code list</p>
+            <h2 id="codesHeading">Codes to try</h2>
+          </div>
+          <span class="limit">20 max</span>
+        </div>
+        <label class="sr-only" for="codesInput">Coupon codes, separated by spaces, commas, or new lines</label>
+        <textarea
+          id="codesInput"
+          rows="5"
+          maxlength="1300"
+          spellcheck="false"
+          placeholder="SAVE10&#10;WELCOME20&#10;FREESHIP"
+          disabled
+        ></textarea>
+        <p class="input-help">Saved only in this browser for this merchant. URLs are rejected.</p>
+      </section>
+
+      <section class="progress-card card" id="progressCard" hidden aria-live="polite">
+        <div class="progress-copy">
+          <strong id="progressTitle">Testing codes</strong>
+          <span id="progressCount">0 / 0</span>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <span id="progressBar"></span>
+        </div>
+        <p id="progressDetail">Starting a safe checkout test…</p>
+      </section>
+
+      <section class="results" id="resultsSection" hidden aria-labelledby="resultsHeading">
+        <div class="result-summary" id="resultSummary"></div>
+        <h2 id="resultsHeading">Test results</h2>
+        <ol id="resultsList"></ol>
+      </section>
+
+      <div class="actions">
+        <button class="button button-primary" id="runButton" type="button" disabled>
+          <span aria-hidden="true">⬡</span>
+          Try codes
+        </button>
+        <button class="button button-secondary" id="cancelButton" type="button" hidden>Cancel</button>
+      </div>
+
+      <footer>
+        <span>No tracking. No affiliate swap. No purchase clicks.</span>
+        <button id="privacyButton" type="button">Privacy</button>
+      </footer>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>

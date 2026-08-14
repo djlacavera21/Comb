@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Comb</title>
+  <desc id="desc">A brass C inside a dark forest green honeycomb</desc>
+  <defs>
+    <linearGradient id="forest" x1="18" y1="10" x2="112" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#174735"/>
+      <stop offset="1" stop-color="#071a14"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="34" y1="22" x2="94" y2="108" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7dda0"/>
+      <stop offset="0.55" stop-color="#e0b65d"/>
+      <stop offset="1" stop-color="#b67a2e"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#forest)" d="M64 4 116 34v60l-52 30L12 94V34z"/>
+  <path fill="none" stroke="url(#brass)" stroke-width="6" d="M64 9 111.7 36.5v55L64 119 16.3 91.5v-55z"/>
+  <path fill="none" stroke="url(#brass)" stroke-linecap="round" stroke-width="14" d="M86 41.5A31 31 0 1 0 86 86.5"/>
+  <path fill="#f7dda0" d="m94 35 9 5.2v10.4L94 56l-9-5.4V40.2zm0 37 9 5.2v10.4L94 93l-9-5.4V77.2z"/>
+</svg>

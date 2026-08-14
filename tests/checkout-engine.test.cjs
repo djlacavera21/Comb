@@ -1,0 +1,137 @@
+"use strict";
+
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const engine = require("../src/content/checkout-engine.js");
+
+function fakeElement(attributes = {}, options = {}) {
+  const element = {
+    hidden: false,
+    disabled: false,
+    nodeType: 1,
+    tagName: options.tagName || "DIV",
+    value: options.value || "",
+    textContent: options.textContent || "",
+    children: options.children || [],
+    parentElement: options.parentElement || null,
+    ownerDocument: { defaultView: null },
+    classList: {
+      contains(name) {
+        return String(attributes.class || "").split(/\s+/).includes(name);
+      }
+    },
+    getAttribute(name) {
+      return Object.prototype.hasOwnProperty.call(attributes, name) ? attributes[name] : null;
+    },
+    closest(selector) {
+      if (selector === "form") return options.form || null;
+      return null;
+    },
+    contains(candidate) {
+      return candidate === element;
+    }
+  };
+
+  return element;
+}
+
+test("parseMoney handles common US and international formats", () => {
+  assert.equal(engine.parseMoney("$1,234.56"), 1234.56);
+  assert.equal(engine.parseMoney("EUR 1.234,56"), 1234.56);
+  assert.equal(engine.parseMoney("1 234,50 €"), 1234.5);
+  assert.equal(engine.parseMoney("¥1,234"), 1234);
+  assert.equal(engine.parseMoney("£99"), 99);
+});
+
+test("parseMoney favors a currency amount over an item count", () => {
+  assert.equal(engine.parseMoney("Order total (3 items): $125.00"), 125);
+});
+
+test("parseMoney returns null when no amount exists", () => {
+  assert.equal(engine.parseMoney("Calculated at checkout"), null);
+  assert.equal(engine.parseMoney(null), null);
+});
+
+test("normalizeCodes preserves the first spelling and removes duplicates", () => {
+  assert.deepEqual(
+    engine.normalizeCodes(["save10", "SAVE10", " WELCOME20 ", "", "FREESHIP"]),
+    ["save10", "WELCOME20", "FREESHIP"]
+  );
+});
+
+test("normalizeCodes rejects links and non-token payloads", () => {
+  assert.equal(engine.normalizeCode("https://merchant.example/deal"), null);
+  assert.equal(engine.normalizeCode("SAVE 10"), null);
+  assert.equal(engine.normalizeCode("<script>"), null);
+  assert.equal(engine.normalizeCode("SAVE-10_percent"), "SAVE-10_percent");
+});
+
+test("normalizeCodes enforces the bounded run size", () => {
+  const codes = Array.from({ length: 40 }, (_, index) => `CODE${index}`);
+  assert.equal(engine.normalizeCodes(codes).length, engine.MAX_CODES);
+});
+
+test("calculateSavings rounds currency differences and never reports negative savings", () => {
+  assert.equal(engine.calculateSavings(132.95, 112.95), 20);
+  assert.equal(engine.calculateSavings(10, 8.333), 1.67);
+  assert.equal(engine.calculateSavings(10, 12), 0);
+  assert.equal(engine.calculateSavings(null, 5), null);
+});
+
+test("coupon input scoring prefers explicit coupon semantics", () => {
+  const coupon = fakeElement(
+    { name: "coupon_code", placeholder: "Enter coupon" },
+    { tagName: "INPUT" }
+  );
+  const giftCard = fakeElement(
+    { name: "gift_card", placeholder: "Gift card" },
+    { tagName: "INPUT" }
+  );
+  assert.ok(engine.scoreCouponInput(coupon) >= 20);
+  assert.ok(engine.scoreCouponInput(coupon) > engine.scoreCouponInput(giftCard));
+});
+
+test("apply-button scoring rejects order submission controls", () => {
+  const form = {
+    parentElement: null,
+    nodeType: 1,
+    contains(candidate) {
+      return candidate === applyButton || candidate === input;
+    }
+  };
+  const input = fakeElement({ name: "coupon" }, { tagName: "INPUT", form, parentElement: form });
+  const applyButton = fakeElement(
+    { name: "apply_coupon" },
+    { tagName: "BUTTON", textContent: "Apply coupon", form, parentElement: form }
+  );
+  const orderButton = fakeElement(
+    { name: "place_order" },
+    { tagName: "BUTTON", textContent: "Place order", form, parentElement: form }
+  );
+  const ambiguousContinueButton = fakeElement(
+    { name: "continue" },
+    { tagName: "BUTTON", textContent: "Continue", form, parentElement: form }
+  );
+
+  assert.ok(engine.scoreApplyButton(applyButton, input) >= 30);
+  assert.equal(engine.scoreApplyButton(orderButton, input), -1000);
+  assert.equal(engine.scoreApplyButton(ambiguousContinueButton, input), -1000);
+});
+
+test("total scoring favors order total over subtotal and savings", () => {
+  const total = fakeElement(
+    { class: "order-total" },
+    { textContent: "Order total $132.95" }
+  );
+  const subtotal = fakeElement(
+    { class: "subtotal" },
+    { textContent: "Subtotal $125.00" }
+  );
+  const savings = fakeElement(
+    { class: "total-savings" },
+    { textContent: "Total savings $20.00" }
+  );
+
+  assert.ok(engine.scoreTotalElement(total) > engine.scoreTotalElement(subtotal));
+  assert.ok(engine.scoreTotalElement(total) > engine.scoreTotalElement(savings));
+});

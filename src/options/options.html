@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Comb settings</title>
+    <link rel="stylesheet" href="../shared/theme.css">
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main class="page">
+      <header class="page-header">
+        <div class="brand-mark" aria-hidden="true">C</div>
+        <div>
+          <p class="eyebrow">Comb v0.1</p>
+          <h1>Local coupon library</h1>
+          <p>Manage the code lists stored in this browser. Nothing here is uploaded.</p>
+        </div>
+      </header>
+
+      <section class="guarantee card" aria-labelledby="guaranteeHeading">
+        <div class="guarantee-icon" aria-hidden="true">✓</div>
+        <div>
+          <p class="eyebrow">Permanent product rule</p>
+          <h2 id="guaranteeHeading">Creator Attribution Guarantee</h2>
+          <p>If a creator sent you to a store, Comb leaves their attribution intact. This build has no affiliate ID, never rewrites a referral URL, never changes attribution cookies, and never opens a hidden commission link.</p>
+        </div>
+      </section>
+
+      <section class="library card" aria-labelledby="libraryHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Stored on this device</p>
+            <h2 id="libraryHeading">Merchant codes</h2>
+          </div>
+          <span id="merchantCount">0 merchants</span>
+        </div>
+
+        <div class="empty-state" id="emptyState">
+          <strong>No saved codes yet</strong>
+          <p>Open Comb on a checkout and run a code list to save it for that merchant.</p>
+        </div>
+
+        <div class="merchant-list" id="merchantList"></div>
+      </section>
+
+      <section class="data-actions card" aria-labelledby="dataHeading">
+        <div>
+          <p class="eyebrow">Your data</p>
+          <h2 id="dataHeading">Export, import, or erase</h2>
+          <p>Exports contain merchant hostnames and coupon tokens only.</p>
+        </div>
+        <div class="action-row">
+          <button class="button button-secondary" id="exportButton" type="button">Export JSON</button>
+          <label class="button button-secondary file-button" for="importInput">Import JSON</label>
+          <input class="sr-only" id="importInput" type="file" accept="application/json,.json">
+          <button class="button button-danger" id="clearButton" type="button">Erase all</button>
+        </div>
+      </section>
+
+      <p class="page-status" id="pageStatus" role="status" aria-live="polite"></p>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>
