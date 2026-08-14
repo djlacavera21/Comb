@@ -1,6 +1,6 @@
 "use strict";
 
-importScripts("shared/feed-verifier.js");
+importScripts("shared/feed-verifier.js", "shared/source-policy.js");
 
 const CONTENT_FILES = [
   "src/content/checkout-engine.js",
@@ -13,12 +13,32 @@ const MAX_CODE_LENGTH = 64;
 const MAX_MERCHANTS = 500;
 const MAX_TRUST_KEYS = 20;
 const MAX_FEEDS = 20;
+const MAX_SOURCES = 20;
 const MAX_SIGNED_FEED_BYTES = 2 * 1024 * 1024;
+const FEED_REFRESH_ALARM = "comb-signed-feed-refresh";
+const FEED_REFRESH_MINUTES = 12 * 60;
+const FEED_FETCH_TIMEOUT_MS = 15_000;
+const SOURCE_STATUSES = new Set(["idle", "ok", "error", "permission-needed"]);
+let feedMutationTail = Promise.resolve();
+
+function queueFeedMutation(task) {
+  const run = feedMutationTail.then(task, task);
+  feedMutationTail = run.catch(() => undefined);
+  return run;
+}
+
+function afterFeedMutations(task) {
+  return feedMutationTail.then(task);
+}
 
 function cleanText(value) {
   return String(value == null ? "" : value)
     .replace(/\s+/g, " ")
     .trim();
+}
+
+function ownRecord(collection, key) {
+  return Object.prototype.hasOwnProperty.call(collection, key) ? collection[key] : null;
 }
 
 function normalizeCode(value) {
@@ -127,10 +147,16 @@ async function saveMerchantCodes(hostname, rawCodes) {
 
 function emptyFeedState() {
   return {
-    version: 1,
+    version: 2,
     trustedKeys: {},
-    feeds: {}
+    feeds: {},
+    sources: {}
   };
+}
+
+function normalizeStoredTimestamp(value) {
+  const milliseconds = typeof value === "string" ? Date.parse(value) : NaN;
+  return Number.isFinite(milliseconds) ? new Date(milliseconds).toISOString() : null;
 }
 
 async function getFeedState() {
@@ -157,7 +183,7 @@ async function getFeedState() {
       const keyId = cleanText(record.envelope.signature && record.envelope.signature.keyId);
       const trustKey = state.trustedKeys[keyId];
       if (!trustKey) continue;
-      const verified = await CombFeed.verifyEnvelope(record.envelope, trustKey);
+      const verified = await CombFeed.verifyEnvelope(record.envelope, trustKey, { allowExpired: true });
       if (verified.payload.feedId !== feedId || verified.payloadHash !== cleanText(record.payloadHash)) continue;
 
       state.feeds[feedId] = {
@@ -168,7 +194,33 @@ async function getFeedState() {
         verifiedAt: cleanText(record.verifiedAt).slice(0, 40)
       };
     } catch (_error) {
-      // Expired, malformed, or orphaned feeds are not eligible for checkout use.
+      // Malformed, signature-mismatched, or orphaned records are quarantined.
+    }
+  }
+
+  const rawSources = raw.sources && typeof raw.sources === "object" ? raw.sources : {};
+  for (const rawSource of Object.values(rawSources).slice(0, MAX_SOURCES)) {
+    try {
+      if (!rawSource || typeof rawSource !== "object") continue;
+      const descriptor = CombSourcePolicy.normalizeSourceUrl(rawSource.url);
+      const feedId = cleanText(rawSource.feedId).toLowerCase();
+      const keyId = cleanText(rawSource.keyId);
+      const addedAt = normalizeStoredTimestamp(rawSource.addedAt);
+      if (!/^[a-z0-9][a-z0-9._-]{2,63}$/.test(feedId) || !state.trustedKeys[keyId] || !addedAt) continue;
+
+      state.sources[feedId] = {
+        feedId,
+        keyId,
+        url: descriptor.url,
+        originPattern: descriptor.originPattern,
+        addedAt,
+        lastCheckedAt: normalizeStoredTimestamp(rawSource.lastCheckedAt),
+        lastUpdatedAt: normalizeStoredTimestamp(rawSource.lastUpdatedAt),
+        status: SOURCE_STATUSES.has(rawSource.status) ? rawSource.status : "idle",
+        lastError: cleanText(rawSource.lastError).slice(0, 160) || null
+      };
+    } catch (_error) {
+      // Invalid source configuration is quarantined without making a request.
     }
   }
 
@@ -181,8 +233,9 @@ async function setFeedState(state) {
 }
 
 function summarizeFeedState(state) {
+  const now = Date.now();
   return {
-    version: 1,
+    version: 2,
     trustedKeys: Object.values(state.trustedKeys)
       .map((key) => ({
         keyId: key.keyId,
@@ -200,9 +253,13 @@ function summarizeFeedState(state) {
         issuedAt: record.payload.issuedAt,
         expiresAt: record.payload.expiresAt,
         entryCount: record.payload.entries.length,
-        verifiedAt: record.verifiedAt
+        verifiedAt: record.verifiedAt,
+        expired: Date.parse(record.payload.expiresAt) <= now
       }))
-      .sort((left, right) => left.name.localeCompare(right.name))
+      .sort((left, right) => left.name.localeCompare(right.name)),
+    sources: Object.values(state.sources)
+      .map((source) => ({ ...source }))
+      .sort((left, right) => left.feedId.localeCompare(right.feedId))
   };
 }
 
@@ -223,7 +280,7 @@ async function importTrustKey(rawKey) {
   return summarizeFeedState(state);
 }
 
-async function importSignedFeed(envelope) {
+function assertEnvelopeSize(envelope) {
   let serialized;
   try {
     serialized = JSON.stringify(envelope);
@@ -234,13 +291,21 @@ async function importSignedFeed(envelope) {
   if (!serialized || new TextEncoder().encode(serialized).byteLength > MAX_SIGNED_FEED_BYTES) {
     throw new Error("Signed feed exceeds Comb's 2 MiB import limit.");
   }
+}
 
-  const state = await getFeedState();
+async function verifyAndInstallEnvelope(state, envelope, expected = {}) {
+  assertEnvelopeSize(envelope);
   const keyId = cleanText(envelope && envelope.signature && envelope.signature.keyId);
   const trustKey = state.trustedKeys[keyId];
   if (!trustKey) throw new Error("Import the feed's public trust key before importing this signed feed.");
 
   const verified = await CombFeed.verifyEnvelope(envelope, trustKey);
+  if (expected.keyId && verified.keyId !== expected.keyId) {
+    throw new Error("Feed source changed signing keys. Reapprove the publisher key and source explicitly.");
+  }
+  if (expected.feedId && verified.payload.feedId !== expected.feedId) {
+    throw new Error("Feed source changed its feed ID and was rejected.");
+  }
   const existing = Object.prototype.hasOwnProperty.call(state.feeds, verified.payload.feedId)
     ? state.feeds[verified.payload.feedId]
     : null;
@@ -249,18 +314,26 @@ async function importSignedFeed(envelope) {
   }
   const classification = CombFeed.classifyFeedUpdate(existing, verified);
 
-  if (classification === "identical") return summarizeFeedState(state);
   if (!existing && Object.keys(state.feeds).length >= MAX_FEEDS) {
     throw new Error(`Comb supports at most ${MAX_FEEDS} signed feeds.`);
   }
 
-  state.feeds[verified.payload.feedId] = {
-    envelope,
-    payload: verified.payload,
-    payloadHash: verified.payloadHash,
-    keyId: verified.keyId,
-    verifiedAt: verified.verifiedAt
-  };
+  if (classification !== "identical") {
+    state.feeds[verified.payload.feedId] = {
+      envelope,
+      payload: verified.payload,
+      payloadHash: verified.payloadHash,
+      keyId: verified.keyId,
+      verifiedAt: verified.verifiedAt
+    };
+  }
+
+  return { classification, verified };
+}
+
+async function importSignedFeed(envelope) {
+  const state = await getFeedState();
+  await verifyAndInstallEnvelope(state, envelope);
   await setFeedState(state);
   return summarizeFeedState(state);
 }
@@ -268,6 +341,9 @@ async function importSignedFeed(envelope) {
 async function deleteSignedFeed(rawFeedId) {
   const feedId = cleanText(rawFeedId).toLowerCase();
   const state = await getFeedState();
+  if (ownRecord(state.sources, feedId)) {
+    throw new Error("Remove this feed's approved update source before removing the installed feed.");
+  }
   delete state.feeds[feedId];
   await setFeedState(state);
   return summarizeFeedState(state);
@@ -276,19 +352,233 @@ async function deleteSignedFeed(rawFeedId) {
 async function deleteTrustKey(rawKeyId) {
   const keyId = cleanText(rawKeyId);
   const state = await getFeedState();
+  const removedOrigins = new Set();
   delete state.trustedKeys[keyId];
 
   for (const [feedId, record] of Object.entries(state.feeds)) {
     if (record.keyId === keyId) delete state.feeds[feedId];
   }
+  for (const [feedId, source] of Object.entries(state.sources)) {
+    if (source.keyId === keyId) {
+      removedOrigins.add(source.originPattern);
+      delete state.sources[feedId];
+    }
+  }
 
   await setFeedState(state);
+  await syncFeedAlarm(state);
+  const removableOrigins = Array.from(removedOrigins).filter((originPattern) =>
+    !Object.values(state.sources).some((source) => source.originPattern === originPattern)
+  );
+  await Promise.all(removableOrigins.map((originPattern) =>
+    chrome.permissions.remove({ origins: [originPattern] }).catch(() => false)
+  ));
+  return {
+    state: summarizeFeedState(state),
+    removedOriginPatterns: removableOrigins
+  };
+}
+
+function assertOptionsSender(sender) {
+  const expectedUrl = chrome.runtime.getURL("src/options/options.html");
+  if (!sender || sender.tab || sender.url !== expectedUrl) {
+    throw new Error("Feed trust and source changes are allowed only from Comb settings.");
+  }
+}
+
+async function syncFeedAlarm(state) {
+  if (Object.keys(state.sources).length) {
+    const existing = await chrome.alarms.get(FEED_REFRESH_ALARM);
+    if (!existing) {
+      await chrome.alarms.create(FEED_REFRESH_ALARM, {
+        delayInMinutes: FEED_REFRESH_MINUTES,
+        periodInMinutes: FEED_REFRESH_MINUTES
+      });
+    }
+  } else {
+    await chrome.alarms.clear(FEED_REFRESH_ALARM);
+  }
+}
+
+async function readBoundedFeedResponse(response) {
+  const rawLength = response.headers && response.headers.get
+    ? response.headers.get("content-length")
+    : null;
+  const declaredLength = rawLength == null ? null : Number(rawLength);
+  if (Number.isFinite(declaredLength) && declaredLength > MAX_SIGNED_FEED_BYTES) {
+    throw new Error("Feed source response exceeds Comb's 2 MiB limit.");
+  }
+
+  let bytes;
+  if (response.body && typeof response.body.getReader === "function") {
+    const reader = response.body.getReader();
+    const chunks = [];
+    let total = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      const chunk = value instanceof Uint8Array ? value : new Uint8Array(value);
+      total += chunk.byteLength;
+      if (total > MAX_SIGNED_FEED_BYTES) {
+        await reader.cancel().catch(() => undefined);
+        throw new Error("Feed source response exceeds Comb's 2 MiB limit.");
+      }
+      chunks.push(chunk);
+    }
+
+    bytes = new Uint8Array(total);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+  } else {
+    bytes = new Uint8Array(await response.arrayBuffer());
+    if (bytes.byteLength > MAX_SIGNED_FEED_BYTES) {
+      throw new Error("Feed source response exceeds Comb's 2 MiB limit.");
+    }
+  }
+
+  let text;
+  try {
+    text = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+    return JSON.parse(text);
+  } catch (_error) {
+    throw new Error("Feed source did not return valid UTF-8 JSON.");
+  }
+}
+
+async function fetchFeedEnvelope(source) {
+  const descriptor = CombSourcePolicy.normalizeSourceUrl(source.url);
+  const permitted = await chrome.permissions.contains({ origins: [descriptor.originPattern] });
+  if (!permitted) {
+    const error = new Error("Feed source access is no longer approved. Reconnect it from Comb settings.");
+    error.code = "permission_needed";
+    throw error;
+  }
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FEED_FETCH_TIMEOUT_MS);
+  try {
+    const response = await fetch(descriptor.url, {
+      method: "GET",
+      headers: { Accept: "application/json" },
+      credentials: "omit",
+      cache: "no-store",
+      redirect: "error",
+      referrerPolicy: "no-referrer",
+      signal: controller.signal
+    });
+    if (!response.ok || response.status !== 200) {
+      throw new Error(`Feed source returned HTTP ${Number(response.status) || "error"}.`);
+    }
+    return await readBoundedFeedResponse(response);
+  } catch (error) {
+    if (error && error.name === "AbortError") throw new Error("Feed source request timed out.");
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
+async function addFeedSource(rawUrl) {
+  const descriptor = CombSourcePolicy.normalizeSourceUrl(rawUrl);
+  const state = await getFeedState();
+  const existingUrlSource = Object.values(state.sources).find((source) => source.url === descriptor.url);
+  if (existingUrlSource) return refreshFeedSource(existingUrlSource.feedId);
+  if (Object.keys(state.sources).length >= MAX_SOURCES) {
+    throw new Error(`Comb supports at most ${MAX_SOURCES} approved feed sources.`);
+  }
+
+  const envelope = await fetchFeedEnvelope(descriptor);
+  const { verified } = await verifyAndInstallEnvelope(state, envelope);
+  const feedId = verified.payload.feedId;
+  const existingSource = ownRecord(state.sources, feedId);
+  if (existingSource && existingSource.url !== descriptor.url) {
+    throw new Error("This feed already has a different approved source. Remove it before changing origins.");
+  }
+
+  const now = new Date().toISOString();
+  state.sources[feedId] = {
+    feedId,
+    keyId: verified.keyId,
+    url: descriptor.url,
+    originPattern: descriptor.originPattern,
+    addedAt: existingSource ? existingSource.addedAt : now,
+    lastCheckedAt: now,
+    lastUpdatedAt: now,
+    status: "ok",
+    lastError: null
+  };
+  await setFeedState(state);
+  await syncFeedAlarm(state);
   return summarizeFeedState(state);
 }
 
-async function communityCodesForMerchant(hostname) {
+async function refreshFeedSource(rawFeedId, scheduled = false) {
+  const feedId = cleanText(rawFeedId).toLowerCase();
   const state = await getFeedState();
-  return CombFeed.selectCodesForMerchant(Object.values(state.feeds), hostname, { limit: MAX_CODES });
+  const source = ownRecord(state.sources, feedId);
+  if (!source) throw new Error("Approved feed source was not found.");
+
+  try {
+    const envelope = await fetchFeedEnvelope(source);
+    const { classification } = await verifyAndInstallEnvelope(state, envelope, {
+      feedId: source.feedId,
+      keyId: source.keyId
+    });
+    const now = new Date().toISOString();
+    source.lastCheckedAt = now;
+    if (classification !== "identical") source.lastUpdatedAt = now;
+    source.status = "ok";
+    source.lastError = null;
+    await setFeedState(state);
+    return summarizeFeedState(state);
+  } catch (error) {
+    source.lastCheckedAt = new Date().toISOString();
+    source.status = error && error.code === "permission_needed" ? "permission-needed" : "error";
+    source.lastError = cleanText(error && error.message ? error.message : error).slice(0, 160);
+    await setFeedState(state);
+    if (!scheduled) throw error;
+    return null;
+  }
+}
+
+async function refreshAllFeedSources() {
+  const state = await getFeedState();
+  for (const feedId of Object.keys(state.sources)) {
+    await refreshFeedSource(feedId, true);
+  }
+}
+
+async function deleteFeedSource(rawFeedId) {
+  const feedId = cleanText(rawFeedId).toLowerCase();
+  const state = await getFeedState();
+  const source = ownRecord(state.sources, feedId);
+  if (!source) throw new Error("Approved feed source was not found.");
+  delete state.sources[feedId];
+  const originStillUsed = Object.values(state.sources).some(
+    (candidate) => candidate.originPattern === source.originPattern
+  );
+  await setFeedState(state);
+  await syncFeedAlarm(state);
+  const permissionRemoved = originStillUsed
+    ? false
+    : await chrome.permissions.remove({ origins: [source.originPattern] }).catch(() => false);
+  return {
+    state: summarizeFeedState(state),
+    removedOriginPattern: source.originPattern,
+    originStillUsed,
+    permissionRemoved
+  };
+}
+
+async function communityCodesForMerchant(hostname) {
+  return afterFeedMutations(async () => {
+    const state = await getFeedState();
+    return CombFeed.selectCodesForMerchant(Object.values(state.feeds), hostname, { limit: MAX_CODES });
+  });
 }
 
 async function ensureCheckoutRunner(tabId) {
@@ -444,21 +734,35 @@ async function routeMessage(message, sender) {
     case "COMB_REPLACE_LIBRARY":
       return setLibrary(message.library);
     case "COMB_GET_FEED_STATE":
-      return getFeedStateSummary();
+      assertOptionsSender(sender);
+      return afterFeedMutations(getFeedStateSummary);
     case "COMB_IMPORT_TRUST_KEY":
-      return importTrustKey(message.trustKey);
+      assertOptionsSender(sender);
+      return queueFeedMutation(() => importTrustKey(message.trustKey));
     case "COMB_IMPORT_SIGNED_FEED":
-      return importSignedFeed(message.envelope);
+      assertOptionsSender(sender);
+      return queueFeedMutation(() => importSignedFeed(message.envelope));
     case "COMB_DELETE_TRUST_KEY":
-      return deleteTrustKey(message.keyId);
+      assertOptionsSender(sender);
+      return queueFeedMutation(() => deleteTrustKey(message.keyId));
     case "COMB_DELETE_SIGNED_FEED":
-      return deleteSignedFeed(message.feedId);
+      assertOptionsSender(sender);
+      return queueFeedMutation(() => deleteSignedFeed(message.feedId));
+    case "COMB_ADD_FEED_SOURCE":
+      assertOptionsSender(sender);
+      return queueFeedMutation(() => addFeedSource(message.url));
+    case "COMB_REFRESH_FEED_SOURCE":
+      assertOptionsSender(sender);
+      return queueFeedMutation(() => refreshFeedSource(message.feedId));
+    case "COMB_DELETE_FEED_SOURCE":
+      assertOptionsSender(sender);
+      return queueFeedMutation(() => deleteFeedSource(message.feedId));
     default:
       return undefined;
   }
 }
 
-chrome.runtime.onInstalled.addListener(async () => {
+chrome.runtime.onInstalled.addListener(() => queueFeedMutation(async () => {
   const stored = await chrome.storage.local.get([LIBRARY_KEY, FEED_STATE_KEY]);
   if (!stored[LIBRARY_KEY]) {
     await chrome.storage.local.set({ [LIBRARY_KEY]: emptyLibrary() });
@@ -466,6 +770,14 @@ chrome.runtime.onInstalled.addListener(async () => {
   if (!stored[FEED_STATE_KEY]) {
     await chrome.storage.local.set({ [FEED_STATE_KEY]: emptyFeedState() });
   }
+  await syncFeedAlarm(await getFeedState());
+}));
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm && alarm.name === FEED_REFRESH_ALARM) {
+    return queueFeedMutation(refreshAllFeedSources).catch(() => undefined);
+  }
+  return undefined;
 });
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -480,3 +792,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   return true;
 });
+
+afterFeedMutations(async () => syncFeedAlarm(await getFeedState()))
+  .catch(() => undefined);

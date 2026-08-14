@@ -12,9 +12,9 @@
       <header class="page-header">
         <div class="brand-mark" aria-hidden="true">C</div>
         <div>
-          <p class="eyebrow">Comb v0.2</p>
+          <p class="eyebrow">Comb v0.3</p>
           <h1>Codes and trusted feeds</h1>
-          <p>Manage local coupon lists and cryptographically verified community feeds. Nothing here is uploaded.</p>
+          <p>Manage local coupon lists and cryptographically verified community feeds. Comb never uploads checkout data.</p>
         </div>
       </header>
 
@@ -30,12 +30,12 @@
       <section class="feed-manager card" aria-labelledby="feedsHeading">
         <div class="section-heading feed-heading">
           <div>
-            <p class="eyebrow">Offline trust chain</p>
+            <p class="eyebrow">Explicit trust chain</p>
             <h2 id="feedsHeading">Signed community feeds</h2>
           </div>
           <span id="feedSummaryCount">0 feeds · 0 keys</span>
         </div>
-        <p class="feed-intro">Comb accepts code-only feed files after an ECDSA signature verifies against a public key you explicitly trust. Feed files cannot contain affiliate tags, referral URLs, scripts, or arbitrary metadata.</p>
+        <p class="feed-intro">Comb accepts code-only feeds after an ECDSA signature verifies against a public key you explicitly trust. Feed files cannot contain affiliate tags, referral URLs, scripts, or arbitrary metadata.</p>
 
         <div class="feed-grid">
           <section class="feed-column" aria-labelledby="keysHeading">
@@ -64,6 +64,24 @@
             <div class="signed-feed-list" id="signedFeedList"></div>
           </section>
         </div>
+
+        <section class="source-manager" aria-labelledby="sourcesHeading">
+          <div class="source-heading">
+            <div>
+              <p class="eyebrow">Optional network access</p>
+              <h3 id="sourcesHeading">Approved update sources</h3>
+              <p>Connect one public HTTPS JSON URL. Chrome asks before granting that origin; Comb checks it about twice daily while the browser can run the task, without credentials or redirects, and installs only a valid, newer feed from the pinned signer.</p>
+            </div>
+          </div>
+          <form class="source-form" id="sourceForm">
+            <label class="sr-only" for="sourceUrlInput">Public HTTPS signed-feed URL</label>
+            <input id="sourceUrlInput" type="url" inputmode="url" autocomplete="off" aria-describedby="sourceNote" placeholder="https://feeds.yourpublisher.org/comb/community.signed.json" required>
+            <button class="button button-primary" id="connectSourceButton" type="submit">Approve &amp; verify</button>
+          </form>
+          <p class="source-note" id="sourceNote">Import the publisher's public key first. Public HTTPS .json only—no IP addresses, local hosts, credentials, query tokens, or redirects. Removing the source also removes its optional origin access when no other source uses it.</p>
+          <div class="feed-empty" id="sourceEmpty">No network feed sources approved. Manual import remains fully supported.</div>
+          <div class="source-list" id="sourceList"></div>
+        </section>
       </section>
 
       <section class="library card" aria-labelledby="libraryHeading">
@@ -100,6 +118,7 @@
       <p class="page-status" id="pageStatus" role="status" aria-live="polite"></p>
     </main>
 
+    <script src="../shared/source-policy.js"></script>
     <script src="options.js"></script>
   </body>
 </html>

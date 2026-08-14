@@ -17,16 +17,24 @@
 - Rollback, same-sequence substitution, cross-publisher replacement, and tamper protection.
 - Freshness and aggregate-outcome ranking, with manual offline import.
 
-## v0.3 — Reliability and controlled distribution
+## v0.3 — Controlled signed-feed distribution (shipped)
+
+- Optional feed retrieval only from an HTTPS origin the user explicitly approves at runtime.
+- Credential-free, referrer-free, redirect-free, bounded JSON requests.
+- Feed-ID and signer pinning across scheduled updates.
+- Best-effort twice-daily checks plus manual **Check now**.
+- Origin permission cleanup and expired-feed rollback-history retention.
+- No remote executable code, default source, telemetry, affiliate tags, or outcome upload.
+
+## v0.4 — Adapter reliability
 
 - Fixture-driven adapter contract tests in a real browser.
 - Additional adapters based on sanitized community fixtures.
 - Better international money parsing and shipping-discount handling.
 - Accessibility audit and keyboard-only run flow.
-- Optional feed retrieval only from an origin the user explicitly approves, without remote executable code.
 - Reproducible signed ZIP build with checksums.
 
-## v0.4 — Store release hardening
+## v0.5 — Store release hardening
 
 - Chrome Web Store and Edge Add-ons privacy disclosures.
 - Automated end-to-end checkout fixture matrix.

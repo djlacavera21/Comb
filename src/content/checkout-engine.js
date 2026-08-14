@@ -13,7 +13,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function createCombCheckout() {
   "use strict";
 
-  const VERSION = "0.2.0";
+  const VERSION = "0.3.0";
   const MAX_CODES = 20;
   const MAX_CODE_LENGTH = 64;
 

@@ -32,7 +32,15 @@ Comb handles checkout pages, so conservative behavior, creator attribution, and 
 - Do not add URLs, scripts, conditions that behave as executable logic, affiliate IDs, referral IDs, publisher sub-IDs, or opaque metadata.
 - Never commit a feed private key. Public trust keys and signed feed fixtures are allowed only when their purpose and trust status are explicit.
 - A sequence number must increase whenever signed payload content changes.
-- Key rotation requires a new explicitly imported public key; v0.2 does not silently delegate trust.
+- Key rotation requires a new explicitly imported public key; v0.3 does not silently delegate trust.
+
+## Approved-source rules
+
+- Keep source URLs outside the signed feed schema; a source is extension configuration, never coupon metadata.
+- Sources remain HTTPS-only, public-host-only, credential-free, query-free, fragment-free, and redirect-free.
+- Never allow content scripts or checkout pages to select a URL for the service worker to retrieve.
+- Every downloaded envelope passes the same size, trust-key, signature, schema, expiry, signer-pin, feed-ID-pin, and sequence checks as a manual import.
+- Do not add a default source, silent permission grant, remote script, remotely evaluated configuration, telemetry, or outcome upload.
 
 ## Privacy rules
 

@@ -10,12 +10,12 @@ The result is simple: using Comb does not make Comb the last affiliate click.
 
 Comb must not take referral credit away from the creator, publisher, organization, or person who sent the shopper to a merchant.
 
-For v0.2, this is a strict zero-affiliate design:
+For v0.3, this is a strict zero-affiliate design:
 
 - Comb has no affiliate ID and earns no checkout commission.
 - Comb never changes the page URL or its query parameters.
 - Comb never creates, changes, or deletes cookies.
-- Comb never opens a merchant or affiliate URL in another tab, frame, popup, or background request.
+- Comb never navigates to a merchant or affiliate URL in another tab, frame, or window, and never makes a checkout request with merchant credentials.
 - Comb never intercepts or redirects merchant traffic.
 - Comb only enters a user-visible coupon token into the merchant's existing coupon field after an explicit click on **Try codes**.
 
@@ -29,7 +29,7 @@ The popup displays **Creator attribution protected** on every checkout. The READ
 
 `scripts/validate-extension.js` fails the build if:
 
-- the manifest requests `cookies`, `webRequest`, `webRequestBlocking`, `declarativeNetRequest`, or permanent host access;
+- the manifest requests `cookies`, `webRequest`, `webRequestBlocking`, `declarativeNetRequest`, required host access, or a non-HTTPS optional host pattern;
 - packaged source uses URL-navigation or history-rewrite APIs;
 - packaged source reads or writes `document.cookie`;
 - packaged source opens a new tab/window or calls a redirect API;
@@ -45,6 +45,7 @@ A merchant may internally associate a public coupon code with a campaign. Comb c
 - entries are code tokens, not URLs;
 - Comb attaches no publisher, sub-ID, click ID, network ID, or commission metadata;
 - the signed-feed schema rejects extra fields, including affiliate or referral metadata, before a feed can be installed.
+- an approved update source is handled only as pinned JSON data, never as merchant navigation or a commission link; Comb follows no redirects and sends no cookies, credentials, or checkout data to it.
 
 ## Future monetization rule
 

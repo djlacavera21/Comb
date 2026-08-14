@@ -1,6 +1,6 @@
 # Comb Signed Coupon Feed v1
 
-Comb v0.2 accepts manually imported, signature-verified coupon data without adding a backend, automatic downloads, permanent host permissions, or executable configuration. This document defines the `comb.coupon-feed/v1`, `comb.signed-feed/v1`, and `comb.trust-key/v1` formats implemented by `src/shared/feed-verifier.js`.
+Comb v0.3 accepts manually imported or permission-gated, signature-verified coupon data without adding a backend, required host permissions, or executable configuration. This document defines the `comb.coupon-feed/v1`, `comb.signed-feed/v1`, and `comb.trust-key/v1` formats implemented by `src/shared/feed-verifier.js`, plus the separate approved-source policy implemented by `src/shared/source-policy.js`.
 
 ## Security and attribution boundary
 
@@ -16,6 +16,7 @@ A valid signature proves that the payload came from the holder of a trusted sign
 | Signed-feed file | 2 MiB UTF-8 JSON |
 | Trusted keys | 20 |
 | Installed feeds | 20 |
+| Approved update sources | 20 |
 | Entries per feed | 5,000 |
 | Feed lifetime | 45 days maximum |
 | Observation age at issue time | 365 days maximum |
@@ -95,7 +96,7 @@ The signature is a 64-byte P-256 `r || s` value encoded as unpadded base64url. T
 }
 ```
 
-Comb verifies the signature first, then validates and normalizes the payload. On later reads it verifies the stored envelope again; malformed, expired, orphaned, hash-mismatched, or signature-mismatched records are quarantined and do not supply codes.
+Comb verifies the signature first, then validates and normalizes the payload. On later reads it verifies the stored envelope again; malformed, orphaned, hash-mismatched, or signature-mismatched records are quarantined. Expired records remain only as signed sequence history for rollback protection and do not supply codes.
 
 ## Updates, rollback, and key rotation
 
@@ -109,11 +110,31 @@ The tuple of installed `feedId` and signing `keyId` identifies an update stream.
 
 For key rotation, distribute the new public trust key separately. The user must explicitly import that key, remove the old installed feed, and import the replacement. Removing a feed intentionally clears its local rollback history, so publishers and users should verify the new key fingerprint out of band.
 
+An approved source must be removed before its installed feed can be removed. For a source-backed key rotation, remove the source, remove the old feed, import and verify the new public key, then reconnect and verify the endpoint explicitly.
+
+## Approved-source layer
+
+Source configuration is not part of any signed feed object. Feed URLs never reach the coupon candidate list or checkout engine and cannot carry affiliate metadata. v0.3 accepts a source only when all of these are true:
+
+- the user enters the URL in Comb settings and submits Chrome's origin permission prompt;
+- the URL uses public HTTPS on the default port with a DNS hostname;
+- it identifies a `.json` resource and has no embedded credentials, query string, fragment, IP address, or local/reserved hostname;
+- the extension currently holds the exact origin grant derived from that URL;
+- the request returns HTTP 200 directly, without a redirect, within 15 seconds;
+- no more than 2 MiB of response bytes decode as UTF-8 JSON; and
+- the envelope passes the complete trust, signature, schema, expiry, and sequence contract above.
+
+Requests use `credentials: "omit"`, `referrerPolicy: "no-referrer"`, and `cache: "no-store"`. Comb adds no user identifier and sends no checkout information or coupon outcomes. Ordinary network metadata, including the connection IP address and common request headers, may still be visible to the feed operator.
+
+The first verified response pins the source to its `feedId` and `keyId`. Later responses that change either identity are rejected even if the new key is otherwise trusted. Valid higher sequences update the installed feed; an identical signed payload is a no-op. Comb checks connected sources approximately every 12 hours while Chrome can run the alarm, and users can check manually at any time.
+
+Removing the last source for an origin clears its scheduled work and asks Chrome to remove that optional host grant. The last verified feed remains installed and usable until expiry unless the user removes it separately.
+
 ## Candidate ranking
 
 Comb deduplicates coupon tokens case-insensitively for the exact current merchant and keeps the strongest candidate. Its v1 score combines a smoothed success rate (65%), a 30-day freshness half-life (25%), and observation-count confidence (10%). At most 20 merged local and signed-feed codes reach a checkout run, with local codes taking precedence.
 
-Outcome counts are publisher-provided evidence, not telemetry from the extension. Comb v0.2 uploads no outcomes.
+Outcome counts are publisher-provided evidence, not telemetry from the extension. Comb v0.3 uploads no outcomes.
 
 ## Publisher workflow
 

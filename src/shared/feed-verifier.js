@@ -316,7 +316,7 @@
     const issuedAtMs = parseTimestamp(value.issuedAt, "Feed issue time");
     const expiresAtMs = parseTimestamp(value.expiresAt, "Feed expiration time");
     if (issuedAtMs > nowMs + CLOCK_SKEW_MS) fail("future_feed", "Feed issue time is in the future.");
-    if (expiresAtMs <= nowMs) fail("expired_feed", "Feed has expired.");
+    if (expiresAtMs <= nowMs && options.allowExpired !== true) fail("expired_feed", "Feed has expired.");
     if (expiresAtMs <= issuedAtMs) fail("invalid_lifetime", "Feed expiration must follow its issue time.");
     if (expiresAtMs - issuedAtMs > MAX_FEED_LIFETIME_MS) {
       fail("invalid_lifetime", "Feed lifetime cannot exceed 45 days.");
@@ -405,7 +405,7 @@
   }
 
   async function signPayload(payload, privateKeyJwk, keyId, options = {}) {
-    const normalizedPayload = validateFeedPayload(payload, options);
+    const normalizedPayload = validateFeedPayload(payload, { ...options, allowExpired: false });
     if (normalizedPayload.keyId !== keyId) fail("key_id_mismatch", "Payload key ID does not match the signing key.");
     const material = publicKeyMaterial(privateKeyJwk);
     const fingerprint = await fingerprintPublicJwk(material);

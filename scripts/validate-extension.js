@@ -29,9 +29,9 @@ function walk(directory) {
 if (manifest.manifest_version !== 3) fail("manifest_version must be 3");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 if (manifest.version !== packageJson.version) fail("manifest and package versions must match");
-if (!/^0\.2\./.test(manifest.version)) fail("manifest version must match the v0.2 milestone");
+if (!/^0\.3\./.test(manifest.version)) fail("manifest version must match the v0.3 milestone");
 
-const expectedPermissions = ["activeTab", "scripting", "storage"];
+const expectedPermissions = ["activeTab", "alarms", "scripting", "storage"];
 const permissions = Array.isArray(manifest.permissions) ? manifest.permissions : [];
 
 for (const permission of expectedPermissions) {
@@ -43,11 +43,18 @@ for (const permission of permissions) {
 }
 
 if (Array.isArray(manifest.host_permissions) && manifest.host_permissions.length) {
-  fail("v0.2 must not declare permanent host permissions");
+  fail("v0.3 must not declare permanent host permissions");
+}
+
+const optionalHosts = Array.isArray(manifest.optional_host_permissions)
+  ? manifest.optional_host_permissions
+  : [];
+if (optionalHosts.length !== 1 || optionalHosts[0] !== "https://*/*") {
+  fail("v0.3 must declare only runtime-approved HTTPS feed origins");
 }
 
 if (manifest.content_scripts) {
-  fail("v0.2 must inject only after a user gesture, not through static content scripts");
+  fail("v0.3 must inject only after a user gesture, not through static content scripts");
 }
 
 const requiredFiles = [
@@ -75,9 +82,10 @@ const forbiddenRuntimePatterns = [
   ["page navigation", /\blocation\s*\.\s*(?:assign|replace)\s*\(/],
   ["page URL assignment", /\blocation\s*\.\s*(?:href|search)\s*=/],
   ["history rewrite", /\bhistory\s*\.\s*(?:pushState|replaceState)\s*\(/],
-  ["remote fetch", /\bfetch\s*\(/],
   ["XML HTTP client", /\bXMLHttpRequest\b/],
-  ["web socket client", /\bWebSocket\b/]
+  ["web socket client", /\bWebSocket\b/],
+  ["dynamic code evaluation", /\beval\s*\(|\bnew\s+Function\s*\(|\bimport\s*\(/],
+  ["HTML injection", /\.innerHTML\s*=/]
 ];
 
 for (const file of executableFiles) {
@@ -95,6 +103,28 @@ for (const file of executableFiles) {
   }
 }
 
+const fetchUsers = executableFiles.filter((file) => /\bfetch\s*\(/.test(fs.readFileSync(file, "utf8")));
+if (fetchUsers.length !== 1 || path.relative(root, fetchUsers[0]) !== "src/background.js") {
+  fail("only the service worker may retrieve a user-approved signed feed");
+} else {
+  const backgroundSource = fs.readFileSync(fetchUsers[0], "utf8");
+  const fetchCount = (backgroundSource.match(/\bfetch\s*\(/g) || []).length;
+  if (fetchCount !== 1) fail("service worker must contain exactly one bounded feed retrieval call");
+  for (const requiredBoundary of [
+    "CombSourcePolicy.normalizeSourceUrl",
+    "chrome.permissions.contains",
+    'credentials: "omit"',
+    'redirect: "error"',
+    'referrerPolicy: "no-referrer"',
+    "verifyAndInstallEnvelope",
+    "assertOptionsSender"
+  ]) {
+    if (!backgroundSource.includes(requiredBoundary)) {
+      fail(`approved-source boundary is missing: ${requiredBoundary}`);
+    }
+  }
+}
+
 for (const file of packageFiles) {
   const source = fs.readFileSync(file, "utf8");
   if (/\b(?:src|href)=["']https?:\/\//i.test(source)) {
@@ -103,15 +133,18 @@ for (const file of packageFiles) {
 }
 
 if (packageJson.dependencies && Object.keys(packageJson.dependencies).length) {
-  fail("v0.2 must remain dependency-free");
+  fail("v0.3 must remain dependency-free");
 }
 
 if (packageJson.devDependencies && Object.keys(packageJson.devDependencies).length) {
-  fail("v0.2 must remain dependency-free");
+  fail("v0.3 must remain dependency-free");
 }
 
 if (!fs.existsSync(path.join(root, "src/shared/feed-verifier.js"))) {
   fail("signed-feed verifier is missing");
+}
+if (!fs.existsSync(path.join(root, "src/shared/source-policy.js"))) {
+  fail("approved-source policy is missing");
 }
 
 const checkoutEngineSource = fs.readFileSync(path.join(root, "src/content/checkout-engine.js"), "utf8");

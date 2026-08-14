@@ -28,7 +28,17 @@ It has no API for navigation, cookies, affiliate tags, page requests, or order s
 
 The service worker loads a packaged verifier that treats community feeds as inert data. A feed becomes eligible only after its ECDSA P-256 signature verifies against a public key the user explicitly imported. Strict schema validation then checks expiry, exact merchant scope, code-token syntax, outcome counts, duplicate entries, and lifetime limits. Sequence numbers provide rollback and substitution resistance.
 
-No feed field can select DOM elements, execute logic, supply a URL, or change the Creator Attribution Guarantee. v0.2 performs no automatic feed request.
+No feed field can select DOM elements, execute logic, supply a URL, or change the Creator Attribution Guarantee. In v0.3, source URLs live in a separate local configuration guarded by `source-policy.js`; they never enter the feed schema or checkout engine.
+
+### Approved-source updater
+
+The options page validates a user-entered public HTTPS URL and invokes Chrome's runtime origin prompt directly from the submit gesture. Only after approval does the service worker retrieve the endpoint. Network source messages are rejected unless their sender is Comb's options page.
+
+The updater sends a credential-free, referrer-free request with redirects disabled, a 15-second timeout, and a streaming 2 MiB ceiling. Returned bytes must decode as UTF-8 JSON and pass the existing trust-key, signature, strict-schema, expiry, signer-pin, feed-ID-pin, and monotonic-sequence checks. A packaged alarm performs the same check about every 12 hours. Browser sleep may delay it.
+
+Expired feeds retain a verified sequence head for rollback detection but `selectCodesForMerchant` excludes their entries. Removing a source leaves its last verified feed installed, clears the alarm when no sources remain, and removes the now-unused origin grant.
+
+All feed-state mutations share one serialized queue, so a scheduled refresh cannot race an import, trust-key removal, or source deletion into restoring stale state.
 
 ### Checkout engine
 
@@ -72,6 +82,9 @@ The engine never clicks buttons whose text indicates purchase, pay, order, check
 | `COMB_IMPORT_SIGNED_FEED` | Options → worker | Verify and install a bounded signed coupon feed |
 | `COMB_DELETE_TRUST_KEY` | Options → worker | Remove a key and cascade-delete feeds signed by it |
 | `COMB_DELETE_SIGNED_FEED` | Options → worker | Remove one installed feed |
+| `COMB_ADD_FEED_SOURCE` | Options → worker | Retrieve, verify, pin, and schedule one approved HTTPS source |
+| `COMB_REFRESH_FEED_SOURCE` | Options → worker | Check one pinned source through the same bounded verifier |
+| `COMB_DELETE_FEED_SOURCE` | Options → worker | Stop updates and remove an unused origin grant |
 
 ## Threat boundaries
 
@@ -81,6 +94,9 @@ The engine never clicks buttons whose text indicates purchase, pay, order, check
 | Creator commission diversion | Zero-affiliate design; no cookie/navigation/traffic APIs |
 | Poisoned community codes | Explicit trust keys, signatures, strict schema, expiry, evidence scoring |
 | Feed rollback/substitution | Monotonic sequence and payload-hash checks |
+| Source endpoint compromise | Signer/feed pinning, signature verification, expiry, exact schema, size/time limits |
+| Cross-origin request abuse | Options-page-only messages and runtime-granted HTTPS origin |
+| Redirect or credential leakage | Redirect errors, `credentials: omit`, no referrer, no query-token URLs |
 | Remote-code supply chain | No dependencies or remote executable code |
 | Accidental purchase | Purchase/payment verbs are excluded; no order API exists |
 | Replacing a pre-existing deal | Existing-coupon gate and explicit override |
@@ -90,4 +106,4 @@ The engine never clicks buttons whose text indicates purchase, pay, order, check
 
 ## Feed boundary
 
-Community feeds are signed data artifacts rather than executable configuration. Feed entries contain only exact merchant scope, code, observed outcome counts, and freshness. They cannot contain affiliate IDs, redirect URLs, DOM selectors, or constraints expressed as logic. The full contract is in [FEED_SPEC.md](FEED_SPEC.md). Telemetry remains absent; any future reporting would require a separate consent and minimization design.
+Community feeds are signed data artifacts rather than executable configuration. Feed entries contain only exact merchant scope, code, observed outcome counts, and freshness. They cannot contain affiliate IDs, redirect URLs, DOM selectors, source URLs, or constraints expressed as logic. The full contract is in [FEED_SPEC.md](FEED_SPEC.md). Telemetry remains absent; any future reporting would require a separate consent and minimization design.
