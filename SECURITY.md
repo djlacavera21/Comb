@@ -11,7 +11,7 @@ Do not include active checkout URLs, session cookies, payment details, addresses
 ## Design constraints
 
 - No remotely hosted executable code.
-- No required host permissions in the v0.3 manifest and no install-time access to shopping sites.
+- No required host permissions in the v0.4 manifest and no install-time access to shopping sites.
 - Optional feed-origin access is granted at runtime for one user-selected HTTPS origin and removed when its last source is removed.
 - No cookie or traffic-interception permissions.
 - No affiliate-link or attribution mutation.
@@ -22,4 +22,7 @@ Do not include active checkout URLs, session cookies, payment details, addresses
 - Feed sequence numbers cannot move backward or reuse a sequence for different content.
 - Approved sources are pinned to their first verified feed ID and signing key; downloads omit credentials and referrers, reject redirects, time out, and stop at 2 MiB.
 - Network-source message handlers accept calls only from Comb's settings page, never from checkout content.
+- A coupon removal is successful only when coupon markers disappear and the original total and currency return; otherwise the run stops before another code can stack.
+- Currency or unexplained payable-total drift between attempts stops the transaction instead of producing a false savings comparison.
+- CI drives sanitized checkout, creator-attribution preservation, and keyboard contracts in a real Chrome process and builds the store archive twice before publication.
 - Private feed-signing keys must never be committed to this repository; CI scans JSON artifacts for private EC material.

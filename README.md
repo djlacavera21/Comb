@@ -8,7 +8,7 @@ Comb is being built as a transparent alternative to Honey-style coupon extension
 
 ## Creator Attribution Guarantee
 
-If a creator sent you to a store, the creator should keep the credit. Comb v0.3 has no affiliate program and never appends or replaces an affiliate tag, writes an attribution cookie, opens a hidden referral tab, redirects the shopper through a Comb link, or claims last-click commission. The extension operates only on the checkout controls already visible in the active tab.
+If a creator sent you to a store, the creator should keep the credit. Comb v0.4 has no affiliate program and never appends or replaces an affiliate tag, writes an attribution cookie, opens a hidden referral tab, redirects the shopper through a Comb link, or claims last-click commission. The extension operates only on the checkout controls already visible in the active tab.
 
 This is enforced in the product, not merely promised in policy:
 
@@ -19,12 +19,12 @@ This is enforced in the product, not merely promised in policy:
 
 See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) for the invariant and its limits.
 
-## What works in v0.3
+## What works in v0.4
 
 - Detects coupon fields, apply buttons, totals, and existing coupons.
-- Includes targeted adapters for WooCommerce and Shopify-style checkouts plus a conservative generic adapter.
+- Includes targeted adapters for WooCommerce classic/Blocks, BigCommerce Cornerstone, and Shopify-style checkouts plus a conservative generic adapter.
 - Tests codes sequentially and compares the actual cart total after each attempt.
-- Removes test coupons between attempts when the checkout exposes a safe coupon-removal control.
+- Removes test coupons between attempts only when a coupon-specific control exists, then verifies that coupon markers disappeared and the original amount and currency returned.
 - Reapplies the best verified code at the end.
 - Stops early rather than risk stacking or replacing a discount when Comb cannot safely remove a tested code.
 - Stores coupon lists locally by merchant.
@@ -34,12 +34,16 @@ See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) for the invariant and its limits.
 - Optionally retrieves an updated signed feed from one public HTTPS origin the user approves through Chrome's runtime permission prompt.
 - Pins each approved source to its original feed ID and signing key, rejects redirects, omits credentials and referrers, enforces a 2 MiB limit, and checks for valid higher sequences about twice daily.
 - Keeps expired signed sequence history for rollback protection while excluding expired codes from checkout.
+- Parses regional grouping, decimal separators, Arabic/Persian/full-width digits, and a broader currency set; currency changes during a run trigger a safe stop.
+- Runs sanitized adapter, no-stacking, purchase-control refusal, creator URL/cookie preservation, and keyboard contracts in real headless Chrome during CI.
+- Provides keyboard-visible native import controls, an announced progress bar, result focus management, and reduced-motion support.
+- Produces a deterministic Chrome Web Store ZIP and SHA-256 sidecar, then uploads both from successful CI.
 - Uses Chrome's temporary `activeTab` access instead of permanent access to every website.
 - Includes a local demo checkout and dependency-free automated tests.
 
 ## Privacy model
 
-Comb v0.3 has no backend, analytics, affiliate links, accounts, tracking, or remote code. Signed feeds are inert JSON and are never executed. Network feed updates are off until the user connects a public HTTPS URL and grants that exact origin; requests carry no cookies, credentials, referrer, checkout data, merchant history, or outcomes. Comb does not request browsing-history access or install-time access to shopping sites. Checkout-page access begins only after you click the extension while viewing a checkout and ends when that temporary `activeTab` grant expires.
+Comb v0.4 has no backend, analytics, affiliate links, accounts, tracking, or remote code. Signed feeds are inert JSON and are never executed. Network feed updates are off until the user connects a public HTTPS URL and grants that exact origin; requests carry no cookies, credentials, referrer, checkout data, merchant history, or outcomes. Comb does not request browsing-history access or install-time access to shopping sites. Checkout-page access begins only after you click the extension while viewing a checkout and ends when that temporary `activeTab` grant expires.
 
 See [docs/PRIVACY.md](docs/PRIVACY.md) for the precise data boundaries.
 
@@ -75,9 +79,12 @@ NOTREAL
 ```bash
 npm test
 npm run check
+npm run release:build
 ```
 
-The project has no runtime or development dependencies. The validation script checks the manifest, packaged files, permission and creator-attribution boundaries, signing-key leakage, and JavaScript syntax.
+The project has no runtime or development dependencies and uses Node 22 or newer for its browser-test transport. The validation script checks the manifest, packaged files, permission and creator-attribution boundaries, checkout restoration guardrails, signing-key leakage, accessibility hooks, and JavaScript syntax. `npm run check` runs browser contracts when Chrome is installed; CI requires Chrome and cannot skip them.
+
+`npm run release:build` writes `dist/comb-0.4.0.zip` and its `.sha256` sidecar, building twice to prove identical output. See [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Publish or verify a signed feed
 
@@ -112,7 +119,7 @@ Detailed design notes are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 - Comb ships with no default feed or feed server. Manual import works offline; network updates require a trusted public key, a user-supplied HTTPS URL, and Chrome's origin approval prompt.
 - Feed checks are best-effort while the browser is running and may be delayed while a device sleeps.
-- Checkout markup varies and can change without notice. The generic adapter deliberately refuses ambiguous pages.
+- Checkout markup varies and can change without notice. The real-browser fixtures cover sanitized contracts, not every live merchant; the generic adapter deliberately refuses ambiguous pages.
 - Some merchants block extensions, use cross-origin checkout frames, or do not expose a safe way to remove a coupon.
 - Shipping-only discounts may not be measurable until an address and shipping method have been selected.
 - Comb does not read protected or HttpOnly attribution cookies. Its guarantee comes from having no mechanism or financial incentive to change them—not from inspecting their value.
@@ -120,7 +127,7 @@ Detailed design notes are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Roadmap
 
-The next major target is fixture-driven browser adapter coverage, better international money parsing, accessibility review, and reproducible release packages. Any outcome reporting remains a separate, strictly opt-in future decision. See [docs/ROADMAP.md](docs/ROADMAP.md).
+The next major target is store-submission hardening, a larger checkout/currency matrix, localization, and public security review. Any outcome reporting remains a separate, strictly opt-in future decision. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 

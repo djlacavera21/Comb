@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <title>BigCommerce fixture</title>
+    <link rel="stylesheet" href="fixture.css">
+  </head>
+  <body data-baseline="1234.50" data-shipping="12.50" data-currency="EUR" data-locale="de-DE">
+    <main>
+      <h1>BigCommerce Cornerstone fixture</h1>
+      <form class="form form--hiddenLabels coupon-form">
+        <label class="form-label" for="couponcode">Gutscheincode</label>
+        <input class="form-input" id="couponcode" type="text" name="couponcode" placeholder="Gutscheincode" data-fixture-input>
+        <input class="button button--primary button--small" type="submit" aria-label="Rabatt einlösen" value="Einlösen" data-fixture-apply>
+        <input type="hidden" name="action" value="applycoupon">
+      </form>
+      <div class="alertBox--error" role="alert" data-fixture-status hidden></div>
+      <ul class="cart-coupon-list">
+        <li class="cart-coupon-item" data-fixture-applied hidden>
+          <span class="cart-coupon-name" data-fixture-applied-code></span>
+          <a class="cart-coupon-remove" aria-label="Gutschein entfernen" href="#remove" data-fixture-remove>Entfernen</a>
+        </li>
+      </ul>
+      <ul class="cart-totals">
+        <li class="cart-total">
+          <div class="cart-total-label"><strong>Gesamtsumme</strong></div>
+          <div class="cart-total-value cart-total-grandTotal">
+            <span class="cart-total-amount" data-fixture-total>1.234,50 €</span>
+          </div>
+        </li>
+      </ul>
+      <div class="danger-zone">
+        <button type="button" data-fixture-danger>Jetzt bezahlen</button>
+      </div>
+    </main>
+    <script src="../../src/content/checkout-engine.js"></script>
+    <script src="fixture-runtime.js"></script>
+  </body>
+</html>

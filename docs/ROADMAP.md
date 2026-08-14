@@ -26,19 +26,21 @@
 - Origin permission cleanup and expired-feed rollback-history retention.
 - No remote executable code, default source, telemetry, affiliate tags, or outcome upload.
 
-## v0.4 — Adapter reliability
+## v0.4 — Adapter reliability (shipped)
 
-- Fixture-driven adapter contract tests in a real browser.
-- Additional adapters based on sanitized community fixtures.
-- Better international money parsing and shipping-discount handling.
-- Accessibility audit and keyboard-only run flow.
-- Reproducible signed ZIP build with checksums.
+- Required headless-Chrome contracts for WooCommerce Blocks, BigCommerce Cornerstone, Shopify-style, and generic fixtures.
+- Browser safety contracts for ambiguous controls, existing coupons, failed removal, no stacking, and untouched purchase controls.
+- Verified coupon removal: coupon markers must disappear and the original payable amount/currency must return before another attempt.
+- Regional money parsing for broader currencies, separator styles, and Arabic, Persian, and full-width digits.
+- Keyboard-visible native controls, announced progress, result focus management, and reduced-motion support.
+- Reproducible Chrome Web Store upload ZIP with a SHA-256 checksum and CI artifact.
 
 ## v0.5 — Store release hardening
 
 - Chrome Web Store and Edge Add-ons privacy disclosures.
-- Automated end-to-end checkout fixture matrix.
-- Localization and currency test corpus.
+- Expand the checkout fixture matrix across more platform versions and themes.
+- Expand the localization, currency, tax, and shipping test corpus.
+- Finalize Chrome Web Store and Edge Add-ons submission packages.
 - Public security and creator-attribution review.
 - Any anonymous outcome reporting only after separate consent, minimization, and abuse-control design.
 

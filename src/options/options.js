@@ -6,7 +6,9 @@ const elements = {
   merchantList: document.querySelector("#merchantList"),
   feedSummaryCount: document.querySelector("#feedSummaryCount"),
   trustKeyInput: document.querySelector("#trustKeyInput"),
+  trustKeyButton: document.querySelector("#trustKeyButton"),
   signedFeedInput: document.querySelector("#signedFeedInput"),
+  signedFeedButton: document.querySelector("#signedFeedButton"),
   trustKeyEmpty: document.querySelector("#trustKeyEmpty"),
   signedFeedEmpty: document.querySelector("#signedFeedEmpty"),
   trustKeyList: document.querySelector("#trustKeyList"),
@@ -18,6 +20,7 @@ const elements = {
   sourceList: document.querySelector("#sourceList"),
   exportButton: document.querySelector("#exportButton"),
   importInput: document.querySelector("#importInput"),
+  importButton: document.querySelector("#importButton"),
   clearButton: document.querySelector("#clearButton"),
   pageStatus: document.querySelector("#pageStatus")
 };
@@ -52,6 +55,7 @@ function createMerchant(hostname, record) {
   name.textContent = hostname;
   removeButton.type = "button";
   removeButton.textContent = "Delete merchant";
+  removeButton.setAttribute("aria-label", `Delete saved coupon codes for ${hostname}`);
   removeButton.addEventListener("click", () => deleteMerchant(hostname));
   heading.append(name, removeButton);
 
@@ -177,8 +181,7 @@ function renderFeedState(feedState) {
   elements.sourceEmpty.hidden = sources.length > 0;
   elements.sourceList.replaceChildren(...sources.map(createFeedSource));
   elements.signedFeedInput.disabled = keys.length === 0;
-  elements.signedFeedInput.previousElementSibling.classList.toggle("disabled", keys.length === 0);
-  elements.signedFeedInput.previousElementSibling.setAttribute("aria-disabled", String(keys.length === 0));
+  elements.signedFeedButton.disabled = keys.length === 0;
   elements.sourceUrlInput.disabled = keys.length === 0;
   elements.connectSourceButton.disabled = keys.length === 0;
 }
@@ -359,9 +362,12 @@ async function clearLibrary() {
 }
 
 elements.exportButton.addEventListener("click", exportLibrary);
+elements.importButton.addEventListener("click", () => elements.importInput.click());
 elements.importInput.addEventListener("change", () => importLibrary(elements.importInput.files[0]));
 elements.clearButton.addEventListener("click", clearLibrary);
+elements.trustKeyButton.addEventListener("click", () => elements.trustKeyInput.click());
 elements.trustKeyInput.addEventListener("change", () => importTrustKey(elements.trustKeyInput.files[0]));
+elements.signedFeedButton.addEventListener("click", () => elements.signedFeedInput.click());
 elements.signedFeedInput.addEventListener("change", () => importSignedFeed(elements.signedFeedInput.files[0]));
 elements.sourceForm.addEventListener("submit", connectFeedSource);
 

@@ -41,6 +41,18 @@ test("parseMoney handles common US and international formats", () => {
   assert.equal(engine.parseMoney("1 234,50 €"), 1234.5);
   assert.equal(engine.parseMoney("¥1,234"), 1234);
   assert.equal(engine.parseMoney("£99"), 99);
+  assert.equal(engine.parseMoney("₹1,23,456.78"), 123456.78);
+  assert.equal(engine.parseMoney("CHF 1’234.50"), 1234.5);
+  assert.equal(engine.parseMoney("AED ١٬٢٣٤٫٥٠"), 1234.5);
+  assert.equal(engine.parseMoney("Ｒ＄ １２３,４５"), 123.45);
+});
+
+test("inferCurrency distinguishes regional dollar and international codes", () => {
+  assert.equal(engine.inferCurrency("C$ 125.00"), "CAD");
+  assert.equal(engine.inferCurrency("A$ 125.00"), "AUD");
+  assert.equal(engine.inferCurrency("R$ 1.234,50"), "BRL");
+  assert.equal(engine.inferCurrency("CHF 1’234.50"), "CHF");
+  assert.equal(engine.inferCurrency("AED ١٬٢٣٤٫٥٠"), "AED");
 });
 
 test("parseMoney favors a currency amount over an item count", () => {
@@ -76,6 +88,25 @@ test("calculateSavings rounds currency differences and never reports negative sa
   assert.equal(engine.calculateSavings(10, 8.333), 1.67);
   assert.equal(engine.calculateSavings(10, 12), 0);
   assert.equal(engine.calculateSavings(null, 5), null);
+});
+
+test("total matching rejects currency drift and tolerates cent-level rendering noise", () => {
+  assert.equal(
+    engine.totalsMatch({ amount: 100, currency: "USD" }, { amount: 100.01, currency: "USD" }),
+    true
+  );
+  assert.equal(
+    engine.totalsMatch({ amount: 100, currency: "USD" }, { amount: 100, currency: "EUR" }),
+    false
+  );
+  assert.equal(
+    engine.totalsMatch({ amount: 100, currency: "USD" }, { amount: 100, currency: null }),
+    false
+  );
+  assert.equal(
+    engine.totalsMatch({ amount: 100, currency: "USD" }, { amount: 99.95, currency: "USD" }),
+    false
+  );
 });
 
 test("coupon input scoring prefers explicit coupon semantics", () => {

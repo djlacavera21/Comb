@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Ambiguous checkout fixture</title>
+    <link rel="stylesheet" href="fixture.css">
+  </head>
+  <body data-baseline="132.95" data-currency="USD" data-locale="en-US">
+    <main>
+      <h1>Ambiguous checkout fixture</h1>
+      <form>
+        <label for="ambiguous-coupon">Coupon code</label>
+        <input id="ambiguous-coupon" name="coupon" type="text" data-fixture-input>
+        <button type="button" data-fixture-danger>Continue checkout</button>
+      </form>
+      <div class="order-total" data-testid="order-total">
+        <span>Order total</span>
+        <strong data-fixture-total>$132.95</strong>
+      </div>
+    </main>
+    <script src="../../src/content/checkout-engine.js"></script>
+    <script src="fixture-runtime.js"></script>
+  </body>
+</html>

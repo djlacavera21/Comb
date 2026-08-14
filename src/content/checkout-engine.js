@@ -13,7 +13,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function createCombCheckout() {
   "use strict";
 
-  const VERSION = "0.3.0";
+  const VERSION = "0.4.0";
   const MAX_CODES = 20;
   const MAX_CODE_LENGTH = 64;
 
@@ -93,6 +93,7 @@
       "button[name*='remove_coupon' i]",
       "[data-testid*='remove-discount' i]",
       "[data-testid*='remove-coupon' i]",
+      ".cart-coupon-remove",
       ".remove-coupon",
       ".coupon-remove",
       ".woocommerce-remove-coupon"
@@ -107,6 +108,9 @@
       ".promo-success",
       ".woocommerce-error",
       ".woocommerce-message",
+      ".wc-block-components-validation-error",
+      ".alertBox--error",
+      ".alertBox--success",
       "[data-testid*='discount-error' i]",
       "[data-testid*='discount-message' i]"
     ]
@@ -119,15 +123,22 @@
       markers: [
         "form.checkout_coupon",
         ".woocommerce-form-coupon",
+        "form.wc-block-components-totals-coupon__form",
+        ".wc-block-components-totals-coupon__input input",
         "input#coupon_code",
         "input[name='coupon_code']"
       ],
-      inputs: ["input#coupon_code", "input[name='coupon_code']"],
+      inputs: [
+        "input#coupon_code",
+        "input[name='coupon_code']",
+        ".wc-block-components-totals-coupon__input input"
+      ],
       applyButtons: [
         "button[name='apply_coupon']",
         "input[name='apply_coupon']",
         ".checkout_coupon button[type='submit']",
-        ".woocommerce-form-coupon button[type='submit']"
+        ".woocommerce-form-coupon button[type='submit']",
+        ".wc-block-components-totals-coupon__form button[type='submit']"
       ],
       totals: [
         ".order-total .woocommerce-Price-amount",
@@ -139,6 +150,29 @@
         ".woocommerce-remove-coupon",
         "a[href*='remove_coupon' i]",
         ".wc-block-components-chip__remove"
+      ]
+    }),
+    Object.freeze({
+      id: "bigcommerce",
+      label: "BigCommerce",
+      markers: [
+        "form.coupon-form",
+        "input#couponcode",
+        "input[name='couponcode']",
+        ".cart-coupon-list"
+      ],
+      inputs: ["input#couponcode", "input[name='couponcode']"],
+      applyButtons: [
+        ".coupon-form input[type='submit']",
+        ".coupon-form button[type='submit']"
+      ],
+      totals: [
+        ".cart-total-grandTotal .cart-total-amount",
+        ".cart-total-grandTotal"
+      ],
+      removeButtons: [
+        ".cart-coupon-remove",
+        ".cart-coupon-item a[href*='coupon' i]"
       ]
     }),
     Object.freeze({
@@ -189,6 +223,15 @@
       .trim();
   }
 
+  function normalizeMoneyText(value) {
+    return cleanText(value)
+      .replace(/[\u0660-\u0669]/g, (digit) => String(digit.charCodeAt(0) - 0x0660))
+      .replace(/[\u06f0-\u06f9]/g, (digit) => String(digit.charCodeAt(0) - 0x06f0))
+      .replace(/[\uff10-\uff19]/g, (digit) => String(digit.charCodeAt(0) - 0xff10))
+      .replace(/\u066b/g, ".")
+      .replace(/\u066c/g, ",");
+  }
+
   function includesAny(value, terms) {
     const normalized = cleanText(value).toLowerCase();
     return terms.some((term) => normalized.includes(term));
@@ -236,7 +279,7 @@
   }
 
   function parseNumericToken(rawToken) {
-    let token = cleanText(rawToken).replace(/[\s'’]/g, "");
+    let token = normalizeMoneyText(rawToken).replace(/[\s'’]/g, "");
     const negative = token.startsWith("-");
     token = token.replace(/[^\d.,]/g, "");
 
@@ -286,7 +329,7 @@
       return Number.isFinite(value) ? value : null;
     }
 
-    const text = cleanText(value);
+    const text = normalizeMoneyText(value);
     const matches = Array.from(text.matchAll(/-?\d[\d\s.,'’]*/g));
 
     if (!matches.length) {
@@ -304,7 +347,7 @@
 
       const index = match.index || 0;
       const nearby = text.slice(Math.max(0, index - 5), index + match[0].length + 5);
-      const hasCurrency = /[$€£¥₹₩₽]|\b(?:USD|EUR|GBP|CAD|AUD|JPY|INR)\b/i.test(nearby);
+      const hasCurrency = /[$€£¥₹₩₽₺₫₪₱฿]|\b(?:USD|EUR|GBP|CAD|AUD|NZD|JPY|CNY|RMB|INR|KRW|CHF|SEK|NOK|DKK|PLN|BRL|MXN|AED|SAR|TRY|VND)\b/i.test(nearby);
       const hasDecimals = /[.,]\d{2}(?:\D|$)/.test(match[0]);
       const score = (hasCurrency ? 10 : 0) + (hasDecimals ? 4 : 0) + index / 10000;
 
@@ -317,14 +360,28 @@
   }
 
   function inferCurrency(value) {
-    const text = cleanText(value);
+    const text = normalizeMoneyText(value);
 
     if (/\bEUR\b|€/i.test(text)) return "EUR";
     if (/\bGBP\b|£/i.test(text)) return "GBP";
-    if (/\bCAD\b/i.test(text)) return "CAD";
-    if (/\bAUD\b/i.test(text)) return "AUD";
-    if (/\bJPY\b|¥/i.test(text)) return "JPY";
+    if (/\bCAD\b|(?:CA|C)\$/i.test(text)) return "CAD";
+    if (/\bAUD\b|(?:AU|A)\$/i.test(text)) return "AUD";
+    if (/\bNZD\b|NZ\$/i.test(text)) return "NZD";
+    if (/\bCNY\b|\bRMB\b|CN¥|元|人民币/i.test(text)) return "CNY";
+    if (/\bJPY\b|JP¥|¥/i.test(text)) return "JPY";
     if (/\bINR\b|₹/i.test(text)) return "INR";
+    if (/\bKRW\b|₩/i.test(text)) return "KRW";
+    if (/\bCHF\b/i.test(text)) return "CHF";
+    if (/\bSEK\b/i.test(text)) return "SEK";
+    if (/\bNOK\b/i.test(text)) return "NOK";
+    if (/\bDKK\b/i.test(text)) return "DKK";
+    if (/\bPLN\b|zł/i.test(text)) return "PLN";
+    if (/\bBRL\b|R\$/i.test(text)) return "BRL";
+    if (/\bMXN\b|MX\$/i.test(text)) return "MXN";
+    if (/\bAED\b/i.test(text)) return "AED";
+    if (/\bSAR\b/i.test(text)) return "SAR";
+    if (/\bTRY\b|₺/i.test(text)) return "TRY";
+    if (/\bVND\b|₫/i.test(text)) return "VND";
     if (/\bUSD\b|\$/i.test(text)) return "USD";
     return null;
   }
@@ -335,6 +392,14 @@
     }
 
     return Math.max(0, Math.round((before - after) * 100) / 100);
+  }
+
+  function totalsMatch(left, right, tolerance = 0.02) {
+    if (!left || !right || !Number.isFinite(left.amount) || !Number.isFinite(right.amount)) {
+      return false;
+    }
+    if (left.currency !== right.currency) return false;
+    return Math.abs(left.amount - right.amount) <= tolerance;
   }
 
   function queryAll(documentRef, selectors) {
@@ -509,9 +574,16 @@
   }
 
   function findBestCouponInput(documentRef, adapter) {
+    const adapterCandidates = new Set(queryAll(documentRef, adapter.inputs));
     const candidates = queryAll(documentRef, [...adapter.inputs, ...GENERIC_SELECTORS.inputs]);
     return candidates
-      .map((element) => ({ element, score: scoreCouponInput(element) }))
+      .map((element) => {
+        const score = scoreCouponInput(element);
+        return {
+          element,
+          score: score <= -1000 ? score : score + (adapterCandidates.has(element) ? 70 : 0)
+        };
+      })
       .filter((candidate) => candidate.score >= 20)
       .sort((a, b) => b.score - a.score)[0]?.element || null;
   }
@@ -519,21 +591,38 @@
   function findBestApplyButton(documentRef, adapter, input) {
     if (!input) return null;
 
+    const adapterCandidates = new Set(queryAll(documentRef, adapter.applyButtons));
     const candidates = queryAll(documentRef, [
       ...adapter.applyButtons,
       ...GENERIC_SELECTORS.applyButtons
     ]);
 
     return candidates
-      .map((element) => ({ element, score: scoreApplyButton(element, input) }))
+      .map((element) => {
+        const score = scoreApplyButton(element, input);
+        const descriptor = elementText(element).toLowerCase();
+        const structurallyTrusted =
+          adapterCandidates.has(element) &&
+          isVisible(element) &&
+          !includesAny(descriptor, DANGEROUS_ACTION_TERMS);
+        return { element, score: structurallyTrusted ? Math.max(score, 80) : score };
+      })
       .filter((candidate) => candidate.score >= 30)
       .sort((a, b) => b.score - a.score)[0]?.element || null;
   }
 
   function findBestTotalElement(documentRef, adapter) {
+    const adapterCandidates = new Set(queryAll(documentRef, adapter.totals));
     const candidates = queryAll(documentRef, [...adapter.totals, ...GENERIC_SELECTORS.totals]);
     return candidates
-      .map((element) => ({ element, score: scoreTotalElement(element) }))
+      .map((element) => {
+        const score = scoreTotalElement(element);
+        const structurallyTrusted =
+          adapterCandidates.has(element) &&
+          isVisible(element) &&
+          parseMoney(elementText(element)) != null;
+        return { element, score: structurallyTrusted ? Math.max(score, 80) : score };
+      })
       .filter((candidate) => candidate.score >= 20)
       .sort((a, b) => b.score - a.score)[0]?.element || null;
   }
@@ -576,6 +665,7 @@
   }
 
   function findRemoveButton(documentRef, adapter) {
+    const adapterCandidates = new Set(queryAll(documentRef, adapter.removeButtons));
     const candidates = queryAll(documentRef, [
       ...adapter.removeButtons,
       ...GENERIC_SELECTORS.removeButtons
@@ -583,6 +673,7 @@
 
     return candidates.find((element) => {
       if (!isVisible(element)) return false;
+      if (adapterCandidates.has(element)) return true;
       const descriptor = elementText(element).toLowerCase();
       return (
         descriptor.includes("coupon") ||
@@ -600,6 +691,8 @@
       ...GENERIC_SELECTORS.removeButtons,
       ".applied-coupon",
       ".applied-discount",
+      ".wc-block-components-chip",
+      ".cart-coupon-item",
       "[data-testid*='applied-discount' i]"
     ]).filter(isVisible);
 
@@ -726,12 +819,17 @@
     const after = readTotal(documentRef, adapter);
     const messages = readStatus(documentRef);
     const messageStatus = classifyStatus(messages);
-    const savings = calculateSavings(before.amount, after.amount);
-    const accepted = (savings != null && savings > 0) || messageStatus === "accepted";
+    const couponPresent = countExistingCoupons(documentRef, adapter) > 0;
+    const currencyChanged = before.currency !== after.currency;
+    const savings = currencyChanged ? null : calculateSavings(before.amount, after.amount);
+    const accepted =
+      couponPresent || currencyChanged || (savings != null && savings > 0) || messageStatus === "accepted";
 
     return {
       code,
-      status: savings != null && savings > 0
+      status: currencyChanged
+        ? "currency_changed"
+        : savings != null && savings > 0
         ? "working"
         : messageStatus === "rejected"
           ? "rejected"
@@ -743,20 +841,32 @@
       afterTotal: after.amount,
       savings: savings || 0,
       currency: after.currency || before.currency,
+      currencyChanged,
+      couponPresent,
       message: messages[messages.length - 1] || null
     };
   }
 
-  async function removeCoupon(documentRef, adapter, settleOptions) {
+  async function removeCoupon(documentRef, adapter, settleOptions, expectedTotal) {
     const removeButton = findRemoveButton(documentRef, adapter);
 
     if (!removeButton) {
-      return false;
+      return {
+        verified: false,
+        couponPresent: countExistingCoupons(documentRef, adapter) > 0,
+        total: readTotal(documentRef, adapter)
+      };
     }
 
     removeButton.click();
     await waitForCheckoutToSettle(documentRef, settleOptions);
-    return true;
+    const remainingCoupons = countExistingCoupons(documentRef, adapter);
+    const restoredTotal = readTotal(documentRef, adapter);
+    return {
+      verified: remainingCoupons === 0 && totalsMatch(restoredTotal, expectedTotal),
+      couponPresent: remainingCoupons > 0,
+      total: restoredTotal
+    };
   }
 
   async function runCoupons(documentRef, rawCodes, options = {}) {
@@ -793,14 +903,17 @@
       };
     }
 
-    const adapter = ADAPTERS.find((candidate) => candidate.id === initialScan.adapter) || ADAPTERS[2];
+    const adapter = ADAPTERS.find((candidate) => candidate.id === initialScan.adapter) ||
+      ADAPTERS.find((candidate) => candidate.id === "generic");
     const baseline = initialScan.total.amount;
+    const baselineTotal = initialScan.total;
     const results = [];
     let best = null;
     let currentAppliedCode = null;
     let stoppedEarly = false;
     let cancelled = false;
     let restorationFailed = false;
+    let stopReason = null;
 
     onProgress({ phase: "started", totalCodes: codes.length, baseline });
 
@@ -811,6 +924,12 @@
       }
 
       const code = codes[index];
+      if (!totalsMatch(readTotal(documentRef, adapter), baselineTotal)) {
+        stoppedEarly = true;
+        stopReason = "checkout_total_changed_during_run";
+        onProgress({ phase: "stopped", reason: stopReason, code });
+        break;
+      }
       onProgress({ phase: "testing", code, index: index + 1, totalCodes: codes.length });
       const attempt = await applyCode(documentRef, adapter, code, settleOptions);
       results.push(attempt);
@@ -831,14 +950,25 @@
         result: attempt
       });
 
+      if (attempt.currencyChanged) {
+        const removal = await removeCoupon(documentRef, adapter, settleOptions, baselineTotal);
+        if (removal.verified || !removal.couponPresent) currentAppliedCode = null;
+        stoppedEarly = true;
+        stopReason = "checkout_total_changed_during_run";
+        onProgress({ phase: "stopped", reason: stopReason, code });
+        break;
+      }
+
       const hasAnotherCode = index < codes.length - 1;
 
       if (attempt.accepted && hasAnotherCode) {
-        const removed = await removeCoupon(documentRef, adapter, settleOptions);
+        const removal = await removeCoupon(documentRef, adapter, settleOptions, baselineTotal);
 
-        if (!removed) {
+        if (!removal.verified) {
+          if (!removal.couponPresent) currentAppliedCode = null;
           stoppedEarly = true;
-          onProgress({ phase: "stopped", reason: "coupon_could_not_be_removed", code });
+          stopReason = "coupon_removal_unverified";
+          onProgress({ phase: "stopped", reason: stopReason, code });
           break;
         }
 
@@ -846,19 +976,23 @@
       }
     }
 
-    if (best && currentAppliedCode !== best.code) {
-      if (currentAppliedCode) {
-        const removed = await removeCoupon(documentRef, adapter, settleOptions);
+    const checkoutStateUnverified = Boolean(stopReason);
 
-        if (!removed) {
+    if (!checkoutStateUnverified && best && currentAppliedCode !== best.code) {
+      if (currentAppliedCode) {
+        const removal = await removeCoupon(documentRef, adapter, settleOptions, baselineTotal);
+
+        if (!removal.verified) {
+          if (!removal.couponPresent) currentAppliedCode = null;
           stoppedEarly = true;
           restorationFailed = true;
+          stopReason = "coupon_removal_unverified";
         } else {
           currentAppliedCode = null;
         }
       }
 
-      if (!currentAppliedCode) {
+      if (!currentAppliedCode && !stopReason) {
         onProgress({ phase: "restoring", code: best.code });
         const restored = await applyCode(documentRef, adapter, best.code, settleOptions);
 
@@ -868,33 +1002,39 @@
           restorationFailed = true;
         }
       }
-    } else if (!best && currentAppliedCode) {
-      const removed = await removeCoupon(documentRef, adapter, settleOptions);
-      if (removed) {
+    } else if (!checkoutStateUnverified && !best && currentAppliedCode) {
+      const removal = await removeCoupon(documentRef, adapter, settleOptions, baselineTotal);
+      if (removal.verified) {
         currentAppliedCode = null;
       } else {
+        if (!removal.couponPresent) currentAppliedCode = null;
         stoppedEarly = true;
+        stopReason = "coupon_removal_unverified";
       }
     }
 
     const finalTotal = readTotal(documentRef, adapter);
-    const finalSavings = calculateSavings(baseline, finalTotal.amount) || 0;
+    const finalSavings = baselineTotal.currency !== finalTotal.currency
+      ? 0
+      : calculateSavings(baseline, finalTotal.amount) || 0;
     const bestApplied = Boolean(best && currentAppliedCode === best.code && finalSavings > 0);
-    if (best && !bestApplied) restorationFailed = true;
+    if (best && !bestApplied && !stopReason) restorationFailed = true;
     const status = cancelled
       ? "cancelled"
-      : bestApplied
-        ? "complete"
-        : best
-          ? "restore_failed"
-          : "no_savings";
+      : stoppedEarly
+        ? bestApplied
+          ? "partial"
+          : restorationFailed
+            ? "restore_failed"
+            : "stopped"
+        : bestApplied
+          ? "complete"
+          : best
+            ? "restore_failed"
+            : "no_savings";
     const output = {
       status,
-      reason: restorationFailed
-        ? "best_coupon_could_not_be_restored"
-        : stoppedEarly
-          ? "stopped_to_preserve_checkout_state"
-          : null,
+      reason: stopReason || (restorationFailed ? "best_coupon_could_not_be_restored" : null),
       scan: initialScan,
       baseline,
       finalTotal: finalTotal.amount,
@@ -936,6 +1076,7 @@
     parseMoney,
     inferCurrency,
     calculateSavings,
+    totalsMatch,
     scoreCouponInput,
     scoreApplyButton,
     scoreTotalElement,

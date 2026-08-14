@@ -1,6 +1,7 @@
 "use strict";
 
 const elements = {
+  shell: document.querySelector("#combShell"),
   storeHeading: document.querySelector("#storeHeading"),
   adapterBadge: document.querySelector("#adapterBadge"),
   totalRow: document.querySelector("#totalRow"),
@@ -15,6 +16,7 @@ const elements = {
   progressTitle: document.querySelector("#progressTitle"),
   progressCount: document.querySelector("#progressCount"),
   progressBar: document.querySelector("#progressBar"),
+  progressTrack: document.querySelector("#progressTrack"),
   progressDetail: document.querySelector("#progressDetail"),
   resultsSection: document.querySelector("#resultsSection"),
   resultSummary: document.querySelector("#resultSummary"),
@@ -106,6 +108,8 @@ function reasonMessage(reason) {
     no_valid_codes: "Enter at least one coupon token. Links and spaces inside a code are not accepted.",
     run_already_in_progress: "A coupon run is already in progress.",
     stopped_to_preserve_checkout_state: "Comb stopped early because it could not safely reset the checkout.",
+    coupon_removal_unverified: "Comb stopped because the checkout did not prove that the active coupon was removed and the original total restored.",
+    checkout_total_changed_during_run: "The checkout total or currency changed independently during the run, so Comb stopped before trying another code.",
     best_coupon_could_not_be_restored: "A working code was found, but Comb could not verify that it was restored. Review the checkout manually."
   };
 
@@ -166,6 +170,7 @@ function renderScan(data) {
 
 function setRunning(running) {
   state.running = running;
+  elements.shell.setAttribute("aria-busy", String(running));
   elements.codesInput.disabled =
     running ||
     !state.scan ||
@@ -185,6 +190,11 @@ function renderProgress(progress) {
   const percent = total > 0 ? Math.max(0, Math.min(100, (current / total) * 100)) : 4;
   elements.progressCount.textContent = `${current} / ${total}`;
   elements.progressBar.style.width = `${percent}%`;
+  elements.progressTrack.setAttribute("aria-valuenow", String(Math.round(percent)));
+  elements.progressTrack.setAttribute(
+    "aria-valuetext",
+    total > 0 ? `${current} of ${total} coupon codes checked` : "Preparing coupon test"
+  );
 
   if (progress.phase === "testing") {
     elements.progressTitle.textContent = "Testing coupon";
@@ -199,7 +209,7 @@ function renderProgress(progress) {
     elements.progressDetail.textContent = `Reapplying ${progress.code}.`;
   } else if (progress.phase === "stopped") {
     elements.progressTitle.textContent = "Stopped safely";
-    elements.progressDetail.textContent = "Comb could not remove the active test coupon, so it did not continue.";
+    elements.progressDetail.textContent = reasonMessage(progress.reason);
   }
 }
 
@@ -231,6 +241,11 @@ function renderResult(result) {
     headline.textContent = "No checkout changes made";
     detail.textContent = reasonMessage(result.reason);
     setStatus(detail.textContent, "warning");
+  } else if (result.best && result.status === "partial") {
+    if (state.scan) state.scan.existingCouponCount = 1;
+    headline.textContent = `${result.best.code} saves ${formatMoney(result.finalSavings, result.currency)}`;
+    detail.textContent = `${reasonMessage(result.reason)} The best tested code remains applied; review the checkout.`;
+    setStatus(detail.textContent, "warning");
   } else if (result.best) {
     if (state.scan) state.scan.existingCouponCount = 1;
     headline.textContent = `${result.best.code} saves ${formatMoney(result.finalSavings, result.currency)}`;
@@ -252,6 +267,7 @@ function renderResult(result) {
 
   elements.resultSummary.append(headline, detail);
   for (const attempt of result.results || []) appendResult(attempt);
+  elements.resultSummary.focus();
 }
 
 async function initialize() {

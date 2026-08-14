@@ -23,3 +23,17 @@ jobs:
         run: node scripts/validate-extension.js
       - name: Run unit tests
         run: node --test tests/*.test.cjs
+      - name: Run real-browser adapter and keyboard fixtures
+        env:
+          CHROME_PATH: /usr/bin/google-chrome
+        run: node scripts/run-browser-fixtures.js --require-browser
+      - name: Build reproducible store package
+        run: node scripts/build-release.js --verify
+      - name: Upload verified store package
+        uses: actions/upload-artifact@v4
+        with:
+          name: comb-${{ github.sha }}-store-package
+          path: |
+            dist/comb-*.zip
+            dist/comb-*.zip.sha256
+          if-no-files-found: error

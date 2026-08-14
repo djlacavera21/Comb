@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Shopify-style fixture</title>
+    <link rel="stylesheet" href="fixture.css">
+  </head>
+  <body data-baseline="132.95" data-shipping="7.95" data-currency="USD" data-locale="en-US">
+    <main>
+      <h1>Shopify-style checkout fixture</h1>
+      <div data-discount-field>
+        <form>
+          <label for="shopify-discount">Discount code</label>
+          <input id="shopify-discount" name="reductions" type="text" autocomplete="off" data-fixture-input>
+          <button type="submit" data-testid="discount-redeem-button" data-fixture-apply>Apply discount</button>
+        </form>
+      </div>
+      <p role="alert" data-testid="discount-message" data-fixture-status hidden></p>
+      <div data-testid="applied-discount" data-fixture-applied hidden>
+        <span data-fixture-applied-code></span>
+        <button type="button" data-testid="remove-discount" aria-label="Remove discount" data-fixture-remove>Remove</button>
+      </div>
+      <div class="summary">
+        <span>Payment due</span>
+        <strong data-checkout-payment-due-target aria-label="Order total" data-fixture-total>$132.95</strong>
+      </div>
+      <div class="danger-zone">
+        <button type="button" data-fixture-danger>Continue to payment</button>
+      </div>
+    </main>
+    <script src="../../src/content/checkout-engine.js"></script>
+    <script src="fixture-runtime.js"></script>
+  </body>
+</html>

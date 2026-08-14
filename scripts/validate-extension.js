@@ -29,7 +29,7 @@ function walk(directory) {
 if (manifest.manifest_version !== 3) fail("manifest_version must be 3");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 if (manifest.version !== packageJson.version) fail("manifest and package versions must match");
-if (!/^0\.3\./.test(manifest.version)) fail("manifest version must match the v0.3 milestone");
+if (!/^0\.4\./.test(manifest.version)) fail("manifest version must match the v0.4 milestone");
 
 const expectedPermissions = ["activeTab", "alarms", "scripting", "storage"];
 const permissions = Array.isArray(manifest.permissions) ? manifest.permissions : [];
@@ -43,18 +43,18 @@ for (const permission of permissions) {
 }
 
 if (Array.isArray(manifest.host_permissions) && manifest.host_permissions.length) {
-  fail("v0.3 must not declare permanent host permissions");
+  fail("v0.4 must not declare permanent host permissions");
 }
 
 const optionalHosts = Array.isArray(manifest.optional_host_permissions)
   ? manifest.optional_host_permissions
   : [];
 if (optionalHosts.length !== 1 || optionalHosts[0] !== "https://*/*") {
-  fail("v0.3 must declare only runtime-approved HTTPS feed origins");
+  fail("v0.4 must declare only runtime-approved HTTPS feed origins");
 }
 
 if (manifest.content_scripts) {
-  fail("v0.3 must inject only after a user gesture, not through static content scripts");
+  fail("v0.4 must inject only after a user gesture, not through static content scripts");
 }
 
 const requiredFiles = [
@@ -133,11 +133,11 @@ for (const file of packageFiles) {
 }
 
 if (packageJson.dependencies && Object.keys(packageJson.dependencies).length) {
-  fail("v0.3 must remain dependency-free");
+  fail("v0.4 must remain dependency-free");
 }
 
 if (packageJson.devDependencies && Object.keys(packageJson.devDependencies).length) {
-  fail("v0.3 must remain dependency-free");
+  fail("v0.4 must remain dependency-free");
 }
 
 if (!fs.existsSync(path.join(root, "src/shared/feed-verifier.js"))) {
@@ -151,6 +151,54 @@ const checkoutEngineSource = fs.readFileSync(path.join(root, "src/content/checko
 const checkoutEngineVersion = checkoutEngineSource.match(/const VERSION = "([^"]+)";/);
 if (!checkoutEngineVersion || checkoutEngineVersion[1] !== manifest.version) {
   fail("checkout engine and manifest versions must match");
+}
+
+for (const requiredAdapterBoundary of [
+  'id: "bigcommerce"',
+  "wc-block-components-totals-coupon__form",
+  "coupon_removal_unverified",
+  "checkout_total_changed_during_run",
+  "totalsMatch(restoredTotal, expectedTotal)"
+]) {
+  if (!checkoutEngineSource.includes(requiredAdapterBoundary)) {
+    fail(`v0.4 checkout reliability boundary is missing: ${requiredAdapterBoundary}`);
+  }
+}
+
+const popupHtml = fs.readFileSync(path.join(root, "src/popup/popup.html"), "utf8");
+const optionsHtml = fs.readFileSync(path.join(root, "src/options/options.html"), "utf8");
+if (!popupHtml.includes('role="progressbar"') || !popupHtml.includes('aria-describedby="inputHelp"')) {
+  fail("popup keyboard and progress accessibility contract is missing");
+}
+for (const requiredImportButton of ["trustKeyButton", "signedFeedButton", "importButton"]) {
+  if (!optionsHtml.includes(`id="${requiredImportButton}"`)) {
+    fail(`settings keyboard import control is missing: ${requiredImportButton}`);
+  }
+}
+
+for (const requiredTool of [
+  "scripts/run-browser-fixtures.js",
+  "scripts/build-release.js",
+  "tests/fixtures/woocommerce-blocks.html",
+  "tests/fixtures/bigcommerce.html",
+  "tests/fixtures/removal-failure.html",
+  "tests/fixtures/restoration-mismatch.html",
+  "tests/fixtures/currency-drift.html"
+]) {
+  if (!fs.existsSync(path.join(root, requiredTool))) fail(`v0.4 verification tool is missing: ${requiredTool}`);
+}
+const browserFixtureSource = fs.readFileSync(path.join(root, "scripts/run-browser-fixtures.js"), "utf8");
+for (const requiredBrowserBoundary of [
+  "creator_attribution=creator-42",
+  "creator URL tags and attribution cookie must remain unchanged",
+  "dangerClicks"
+]) {
+  if (!browserFixtureSource.includes(requiredBrowserBoundary)) {
+    fail(`v0.4 browser safety boundary is missing: ${requiredBrowserBoundary}`);
+  }
+}
+if (!packageJson.engines || packageJson.engines.node !== ">=22") {
+  fail("v0.4 tooling requires the stable WebSocket API in Node 22 or newer");
 }
 
 for (const file of walk(root).filter((entry) => entry.endsWith(".json") && !entry.includes(`${path.sep}.git${path.sep}`))) {

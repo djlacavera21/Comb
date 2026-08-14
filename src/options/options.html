@@ -12,7 +12,7 @@
       <header class="page-header">
         <div class="brand-mark" aria-hidden="true">C</div>
         <div>
-          <p class="eyebrow">Comb v0.3</p>
+          <p class="eyebrow">Comb v0.4</p>
           <h1>Codes and trusted feeds</h1>
           <p>Manage local coupon lists and cryptographically verified community feeds. Comb never uploads checkout data.</p>
         </div>
@@ -33,7 +33,7 @@
             <p class="eyebrow">Explicit trust chain</p>
             <h2 id="feedsHeading">Signed community feeds</h2>
           </div>
-          <span id="feedSummaryCount">0 feeds · 0 keys</span>
+          <span id="feedSummaryCount">0 feeds · 0 keys · 0 sources</span>
         </div>
         <p class="feed-intro">Comb accepts code-only feeds after an ECDSA signature verifies against a public key you explicitly trust. Feed files cannot contain affiliate tags, referral URLs, scripts, or arbitrary metadata.</p>
 
@@ -44,8 +44,8 @@
                 <h3 id="keysHeading">Trusted public keys</h3>
                 <p>Import the publisher’s public trust-key JSON first.</p>
               </div>
-              <label class="button button-secondary compact-button" for="trustKeyInput">Import key</label>
-              <input class="sr-only" id="trustKeyInput" type="file" accept="application/json,.json">
+              <button class="button button-secondary compact-button" id="trustKeyButton" type="button" aria-describedby="keysHeading">Import key</button>
+              <input id="trustKeyInput" type="file" accept="application/json,.json" tabindex="-1" hidden>
             </div>
             <div class="feed-empty" id="trustKeyEmpty">No feed publishers trusted.</div>
             <div class="trust-key-list" id="trustKeyList"></div>
@@ -57,8 +57,8 @@
                 <h3 id="installedFeedsHeading">Installed signed feeds</h3>
                 <p>Newer sequence numbers update an installed feed.</p>
               </div>
-              <label class="button button-secondary compact-button" for="signedFeedInput">Import feed</label>
-              <input class="sr-only" id="signedFeedInput" type="file" accept="application/json,.json">
+              <button class="button button-secondary compact-button" id="signedFeedButton" type="button" aria-describedby="installedFeedsHeading">Import feed</button>
+              <input id="signedFeedInput" type="file" accept="application/json,.json" tabindex="-1" hidden>
             </div>
             <div class="feed-empty" id="signedFeedEmpty">No signed coupon feeds installed.</div>
             <div class="signed-feed-list" id="signedFeedList"></div>
@@ -109,8 +109,8 @@
         </div>
         <div class="action-row">
           <button class="button button-secondary" id="exportButton" type="button">Export JSON</button>
-          <label class="button button-secondary file-button" for="importInput">Import JSON</label>
-          <input class="sr-only" id="importInput" type="file" accept="application/json,.json">
+          <button class="button button-secondary file-button" id="importButton" type="button">Import JSON</button>
+          <input id="importInput" type="file" accept="application/json,.json" tabindex="-1" hidden>
           <button class="button button-danger" id="clearButton" type="button">Erase all</button>
         </div>
       </section>

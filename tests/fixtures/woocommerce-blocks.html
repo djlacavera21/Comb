@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>WooCommerce Blocks fixture</title>
+    <link rel="stylesheet" href="fixture.css">
+  </head>
+  <body data-baseline="132.95" data-shipping="7.95" data-currency="USD" data-locale="en-US">
+    <main>
+      <h1>WooCommerce Blocks checkout fixture</h1>
+      <form class="wc-block-components-totals-coupon__form">
+        <div class="wc-block-components-text-input wc-block-components-totals-coupon__input">
+          <label for="wc-block-components-totals-coupon__input-coupon">Enter code</label>
+          <input id="wc-block-components-totals-coupon__input-coupon" type="text" autocomplete="off" data-fixture-input>
+        </div>
+        <button class="wc-block-components-button wc-block-components-totals-coupon__button" type="submit" data-fixture-apply>
+          <span>Apply</span>
+        </button>
+      </form>
+      <div class="wc-block-components-validation-error" role="alert" data-fixture-status hidden></div>
+      <div class="wc-block-components-chip" data-fixture-applied hidden>
+        <span data-fixture-applied-code></span>
+        <button class="wc-block-components-chip__remove" type="button" aria-label="Remove coupon" data-fixture-remove>Remove</button>
+      </div>
+      <div class="wc-block-components-totals-footer-item">
+        <span>Order total</span>
+        <span class="wc-block-formatted-money-amount" data-fixture-total>$132.95</span>
+      </div>
+      <div class="danger-zone">
+        <button type="button" data-fixture-danger>Place order</button>
+      </div>
+    </main>
+    <script src="../../src/content/checkout-engine.js"></script>
+    <script src="fixture-runtime.js"></script>
+  </body>
+</html>

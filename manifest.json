@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Comb — Private Coupon Tester",
   "short_name": "Comb",
-  "version": "0.3.0",
-  "description": "Try local or signature-verified coupon codes, securely refresh trusted feeds, and preserve creator attribution.",
+  "version": "0.4.0",
+  "description": "Test coupons with verified checkout restoration, trusted feed updates, and protected creator attribution.",
   "permissions": [
     "activeTab",
     "alarms",

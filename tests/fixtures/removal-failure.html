@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Removal failure fixture</title>
+    <link rel="stylesheet" href="fixture.css">
+  </head>
+  <body data-baseline="132.95" data-currency="USD" data-locale="en-US" data-remove-fails="true">
+    <main>
+      <h1>Coupon removal failure fixture</h1>
+      <form>
+        <label for="failure-coupon">Coupon code</label>
+        <input id="failure-coupon" name="coupon" type="text" data-fixture-input>
+        <button type="button" data-fixture-apply>Apply coupon</button>
+      </form>
+      <p role="alert" data-fixture-status hidden></p>
+      <div class="applied-coupon" data-fixture-applied hidden>
+        <span data-fixture-applied-code></span>
+        <button class="coupon-remove" type="button" aria-label="Remove coupon" data-fixture-remove>Remove coupon</button>
+      </div>
+      <div class="order-total" data-testid="order-total">
+        <span>Order total</span>
+        <strong data-fixture-total>$132.95</strong>
+      </div>
+      <div class="danger-zone">
+        <button type="button" data-fixture-danger>Place order</button>
+      </div>
+    </main>
+    <script src="../../src/content/checkout-engine.js"></script>
+    <script src="fixture-runtime.js"></script>
+  </body>
+</html>

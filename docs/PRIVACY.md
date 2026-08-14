@@ -1,4 +1,4 @@
-# Comb v0.3 Privacy Specification
+# Comb v0.4 Privacy Specification
 
 ## Data Comb stores
 
@@ -36,6 +36,8 @@ If the user enters a public HTTPS feed URL and approves its origin in Chrome's p
 As with any network connection, the feed operator can ordinarily observe network-level information such as the request time, IP address, and common transport or browser headers. Comb does not add a user identifier.
 
 Messages between the checkout page, service worker, and popup remain inside the browser extension. They contain coupon codes under test, detected merchant hostname, adapter name, status text reduced to a short coupon-related message, and numeric before/after totals.
+
+The browser fixtures used in continuous integration are entirely synthetic. They run against invented local pages and contain no merchant session, account, purchase, creator, or checkout data.
 
 ## Permissions
 

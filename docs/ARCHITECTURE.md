@@ -2,9 +2,9 @@
 
 ## Goals
 
-Comb's first release proves the difficult local loop: find the relevant checkout controls, test codes without clicking unrelated controls, measure the real price change, and leave the cart in the best recoverable state.
+Comb proves the difficult local loop: find the relevant checkout controls, test codes without clicking unrelated controls, measure the real price change, and leave the cart in the best recoverable state.
 
-The MVP optimizes for inspectability and safe failure. It is dependency-free, uses ordinary JavaScript, and can be loaded directly from the repository.
+The v0.4 build optimizes for inspectability and safe failure. It is dependency-free, uses ordinary JavaScript, and can be loaded directly from the repository.
 
 ## Components
 
@@ -28,7 +28,7 @@ It has no API for navigation, cookies, affiliate tags, page requests, or order s
 
 The service worker loads a packaged verifier that treats community feeds as inert data. A feed becomes eligible only after its ECDSA P-256 signature verifies against a public key the user explicitly imported. Strict schema validation then checks expiry, exact merchant scope, code-token syntax, outcome counts, duplicate entries, and lifetime limits. Sequence numbers provide rollback and substitution resistance.
 
-No feed field can select DOM elements, execute logic, supply a URL, or change the Creator Attribution Guarantee. In v0.3, source URLs live in a separate local configuration guarded by `source-policy.js`; they never enter the feed schema or checkout engine.
+No feed field can select DOM elements, execute logic, supply a URL, or change the Creator Attribution Guarantee. Source URLs live in a separate local configuration guarded by `source-policy.js`; they never enter the feed schema or checkout engine.
 
 ### Approved-source updater
 
@@ -44,11 +44,14 @@ All feed-state mutations share one serialized queue, so a scheduled refresh cann
 
 The checkout engine runs in Chrome's isolated content-script world. It has no network client and never receives payment or identity data. Its adapter pipeline is:
 
-1. WooCommerce selectors;
-2. Shopify-style selectors;
-3. scored generic selectors.
+1. WooCommerce classic and Blocks selectors;
+2. BigCommerce Cornerstone selectors derived from its public templates;
+3. Shopify-style selectors;
+4. scored generic selectors.
 
-An adapter must produce a coupon input and coupon-specific apply control. The total detector ranks visible price elements, strongly favoring grand/order totals and penalizing subtotal, tax, shipping, savings, and line-item labels.
+An adapter must produce a coupon input and coupon-specific apply control. Known platform selectors can establish structural trust for localized controls only inside narrowly scoped coupon forms; the generic adapter still requires explicit coupon/apply semantics. The total detector ranks visible price elements, strongly favoring grand/order totals and penalizing subtotal, tax, shipping, savings, and line-item labels.
+
+Money parsing normalizes regional grouping and decimal separators plus Arabic, Persian, and full-width digits. It recognizes a broader ISO/symbol set, but any detected currency change during a transaction invalidates the comparison and causes a safe stop.
 
 ### Coupon transaction
 
@@ -61,10 +64,21 @@ Each run treats the checkout as a recoverable transaction:
 5. Wait for the page DOM to settle.
 6. Compare the payable total and inspect coupon-scoped status messages.
 7. Remove the tested coupon using a coupon-specific removal control.
-8. Stop early if safe removal is unavailable.
-9. Reapply the best verified code.
+8. Verify that all coupon markers disappeared and the payable amount/currency returned to the baseline within a two-cent rendering tolerance.
+9. Stop before another attempt if removal, baseline restoration, or currency stability cannot be proven.
+10. Reapply the best measured code and verify its final savings against the original baseline.
 
 The engine never clicks buttons whose text indicates purchase, pay, order, checkout, or cart-item removal.
+
+Accepted but unmeasured shipping discounts are reported but not ranked as the winner. Comb removes them before continuing unless the final payable total proves a savings amount.
+
+### Browser contracts
+
+`scripts/run-browser-fixtures.js` starts a local-only fixture server and drives headless Chrome directly through the Chrome DevTools Protocol, without an automation dependency. Sanitized contracts cover WooCommerce Blocks, Shopify-style, BigCommerce Cornerstone, generic detection, ambiguous-control refusal, the existing-coupon gate, failed-removal no-stacking behavior, creator URL/cookie preservation, popup tab order, accessible control names, progress semantics, and settings file-import controls. CI passes `--require-browser`; a missing browser is therefore a failure rather than a skip.
+
+### Release package
+
+`scripts/build-release.js` uses a deterministic, stored-entry ZIP writer implemented with Node built-ins. It sorts the exact runtime file list, normalizes every entry timestamp to `SOURCE_DATE_EPOCH` or the Git commit time, fixes file modes, writes no platform-specific extras, builds twice, and emits a SHA-256 sidecar. The manifest stays at the archive root. GitHub Actions uploads the verified pair; Chrome Web Store publication supplies the installable extension signature.
 
 ## Message protocol
 
@@ -88,7 +102,7 @@ The engine never clicks buttons whose text indicates purchase, pay, order, check
 
 ## Threat boundaries
 
-| Risk | MVP control |
+| Risk | Release control |
 | --- | --- |
 | Persistent observation of browsing | `activeTab`; no `host_permissions` |
 | Creator commission diversion | Zero-affiliate design; no cookie/navigation/traffic APIs |
@@ -100,8 +114,10 @@ The engine never clicks buttons whose text indicates purchase, pay, order, check
 | Remote-code supply chain | No dependencies or remote executable code |
 | Accidental purchase | Purchase/payment verbs are excluded; no order API exists |
 | Replacing a pre-existing deal | Existing-coupon gate and explicit override |
-| Leaving a worse cart state | Per-attempt removal and best-code restoration |
+| Leaving a worse cart state | Coupon-marker disappearance plus baseline amount/currency restoration before the next attempt |
 | Ambiguous page controls | Minimum selector scores and conservative refusal |
+| Localized structural mis-selection | Platform-specific selectors only, backed by sanitized real-browser contracts |
+| False cross-currency savings | Currency drift invalidates the comparison and stops the run |
 | Oversized or hostile messages | Code length/count limits and plain serializable results |
 
 ## Feed boundary

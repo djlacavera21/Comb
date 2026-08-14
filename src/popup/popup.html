@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="popup.css">
   </head>
   <body>
-    <main class="shell">
+    <main class="shell" id="combShell" aria-busy="false">
       <header class="header">
         <div class="brand-mark" aria-hidden="true">C</div>
         <div class="brand-copy">
@@ -56,30 +56,31 @@
           maxlength="1300"
           spellcheck="false"
           placeholder="SAVE10&#10;WELCOME20&#10;FREESHIP"
+          aria-describedby="inputHelp"
           disabled
         ></textarea>
         <p class="input-help" id="inputHelp">Saved only in this browser for this merchant. URLs are rejected.</p>
       </section>
 
-      <section class="progress-card card" id="progressCard" hidden aria-live="polite">
+      <section class="progress-card card" id="progressCard" hidden aria-live="polite" aria-atomic="true">
         <div class="progress-copy">
           <strong id="progressTitle">Testing codes</strong>
           <span id="progressCount">0 / 0</span>
         </div>
-        <div class="progress-track" aria-hidden="true">
+        <div class="progress-track" id="progressTrack" role="progressbar" aria-label="Coupon test progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
           <span id="progressBar"></span>
         </div>
         <p id="progressDetail">Starting a safe checkout test…</p>
       </section>
 
       <section class="results" id="resultsSection" hidden aria-labelledby="resultsHeading">
-        <div class="result-summary" id="resultSummary"></div>
+        <div class="result-summary" id="resultSummary" tabindex="-1"></div>
         <h2 id="resultsHeading">Test results</h2>
         <ol id="resultsList"></ol>
       </section>
 
       <div class="actions">
-        <button class="button button-primary" id="runButton" type="button" disabled>
+        <button class="button button-primary" id="runButton" type="button" aria-controls="progressCard resultsSection" disabled>
           <span aria-hidden="true">⬡</span>
           Try codes
         </button>

@@ -10,7 +10,7 @@ The result is simple: using Comb does not make Comb the last affiliate click.
 
 Comb must not take referral credit away from the creator, publisher, organization, or person who sent the shopper to a merchant.
 
-For v0.3, this is a strict zero-affiliate design:
+For v0.4, this is a strict zero-affiliate design:
 
 - Comb has no affiliate ID and earns no checkout commission.
 - Comb never changes the page URL or its query parameters.
@@ -34,6 +34,8 @@ The popup displays **Creator attribution protected** on every checkout. The READ
 - packaged source reads or writes `document.cookie`;
 - packaged source opens a new tab/window or calls a redirect API;
 - affiliate/referral mutation logic appears in executable source.
+
+The required real-Chrome suite also runs a full coupon transaction on a synthetic creator-tagged checkout and asserts that both the checkout URL and its attribution cookie are byte-for-byte unchanged afterward. This regression test complements the static prohibitions with an executed product contract.
 
 Repository review remains necessary—the validator is a guardrail, not a proof—but a future change cannot casually introduce these behaviors while keeping CI green.
 
