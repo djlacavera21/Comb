@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "extensionVersion": "0.5.0",
+  "extensionVersion": "0.6.0",
   "lastReviewed": "2026-08-14",
   "shared": {
     "name": "Comb — Private Coupon Tester",
@@ -67,6 +67,15 @@
       "operatorVisibility": "The user-selected feed operator can ordinarily observe the requested path, request time, IP address, and common transport/browser headers.",
       "combDeveloperReceivesCheckoutData": false
     },
+    "compatibilityReport": {
+      "userTriggeredOnly": true,
+      "automaticUpload": false,
+      "destination": "A local JSON download selected by the user.",
+      "includedData": "Comb version, timestamp, allowlisted adapter/reason, and coarse detection booleans only.",
+      "excludedData": "Merchant URL/hostname, page content/selectors, coupon codes, totals/currency values, cookies, affiliate/referral tags, and creator identifiers.",
+      "extensionTransmitsToDeveloper": false,
+      "userMayShareSeparately": true
+    },
     "limitedUseCertifications": {
       "noSaleOrUnapprovedTransfer": true,
       "singlePurposeOnly": true,
@@ -81,7 +90,9 @@
     "verifiedBy": [
       "scripts/validate-extension.js",
       "scripts/run-browser-fixtures.js",
+      "tests/compatibility-report.test.cjs",
       "docs/ATTRIBUTION.md",
+      "docs/COMPATIBILITY.md",
       "docs/SECURITY_REVIEW.md"
     ]
   },

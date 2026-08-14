@@ -22,6 +22,7 @@ const elements = {
   resultSummary: document.querySelector("#resultSummary"),
   resultsList: document.querySelector("#resultsList"),
   optionsButton: document.querySelector("#optionsButton"),
+  reportButton: document.querySelector("#reportButton"),
   privacyButton: document.querySelector("#privacyButton")
 };
 
@@ -120,6 +121,7 @@ function renderScan(data) {
   state.tabId = data.tabId;
   state.hostname = data.hostname;
   state.scan = data.scan;
+  elements.reportButton.disabled = !state.scan;
   state.localCodeKeys = new Set(
     (data.localCodes || []).map((code) => code.toLocaleUpperCase("en-US"))
   );
@@ -166,6 +168,21 @@ function renderScan(data) {
   }
 
   refreshRunButton();
+}
+
+function saveCompatibilityReport() {
+  if (!state.scan || !globalThis.CombCompatibilityReport) return;
+
+  const content = globalThis.CombCompatibilityReport.stringifyCompatibilityReport(state.scan, {
+    extensionVersion: chrome.runtime.getManifest().version
+  });
+  const objectUrl = URL.createObjectURL(new Blob([content], { type: "application/json" }));
+  const anchor = document.createElement("a");
+  anchor.href = objectUrl;
+  anchor.download = "comb-compatibility-report.json";
+  anchor.click();
+  setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
+  setStatus("Safe report saved locally. Comb did not upload it; attach it only if you choose.");
 }
 
 function setRunning(running) {
@@ -229,6 +246,7 @@ function appendResult(attempt) {
 }
 
 function renderResult(result) {
+  if (state.scan && result && result.reason) state.scan.reason = result.reason;
   elements.progressCard.hidden = true;
   elements.resultsSection.hidden = false;
   elements.resultsList.replaceChildren();
@@ -346,6 +364,7 @@ elements.codesInput.addEventListener("input", refreshRunButton);
 elements.runButton.addEventListener("click", startRun);
 elements.cancelButton.addEventListener("click", cancelRun);
 elements.optionsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
+elements.reportButton.addEventListener("click", saveCompatibilityReport);
 elements.privacyButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
 
 initialize();

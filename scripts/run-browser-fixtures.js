@@ -242,7 +242,7 @@ async function verifyHappyFixture(client, baseUrl, specification) {
   const scan = await evaluate(client, "globalThis.CombCheckout.scanCheckout(document)");
   assert.equal(scan.detected, true, `${specification.file} should be detected`);
   assert.equal(scan.adapter, specification.adapter);
-  assert.equal(scan.engineVersion, "0.5.0");
+  assert.equal(scan.engineVersion, "0.6.0");
   assert.equal(scan.total.currency, specification.currency);
   assert.ok(Math.abs(scan.total.amount - specification.baseline) < 0.01);
   assert.equal(scan.existingCouponCount, 0);
@@ -365,6 +365,7 @@ const chromeUiStub = `(() => {
     runtime: {
       onMessage: { addListener() {} },
       openOptionsPage() {},
+      getManifest() { return { version: "0.6.0" }; },
       async sendMessage(message) {
         if (message.type === "COMB_GET_LIBRARY") {
           return { ok: true, result: { version: 1, merchants: {} } };
@@ -455,12 +456,35 @@ async function verifyUiAccessibility(client, baseUrl) {
     "document.readyState === 'complete' && !document.querySelector('#codesInput').disabled"
   );
   assert.deepEqual(await evaluate(client, accessibleControlAudit), []);
+  const safeReport = await evaluate(client, `globalThis.CombCompatibilityReport.stringifyCompatibilityReport({
+    detected: false,
+    adapter: "generic",
+    reason: "coupon_apply_button_not_found",
+    input: { id: "coupon-creator-42", label: "alex@example.test" },
+    total: { amount: 132.95, currency: "USD" },
+    hostname: "fixture.local",
+    codes: ["SAVE10"],
+    attribution: { affiliateId: "creator-secret" }
+  }, {
+    extensionVersion: "0.6.0",
+    generatedAt: "2026-08-14T12:00:00.000Z"
+  })`);
+  const parsedReport = JSON.parse(safeReport);
+  assert.equal(parsedReport.schema, "comb.compatibility-report/v1");
+  assert.equal(parsedReport.compatibility.adapter, "generic");
+  assert.equal(parsedReport.creatorAttribution.protected, true);
+  assert.equal(parsedReport.privacy.automaticUpload, false);
+  assert.equal(parsedReport.privacy.sharingRequiresSeparateUserAction, true);
+  for (const secret of ["fixture.local", "132.95", "USD", "SAVE10", "creator-secret", "alex@example.test", "coupon-creator-42"]) {
+    assert.equal(safeReport.includes(secret), false, `safe report leaked ${secret}`);
+  }
+  process.stdout.write("✓ privacy-safe compatibility report contract\n");
   await evaluate(client, "document.activeElement && document.activeElement.blur()");
   const popupFocusOrder = [];
-  for (let index = 0; index < 4; index += 1) popupFocusOrder.push(await pressTab(client));
+  for (let index = 0; index < 5; index += 1) popupFocusOrder.push(await pressTab(client));
   assert.deepEqual(
     popupFocusOrder.map((entry) => entry.id),
-    ["optionsButton", "codesInput", "runButton", "privacyButton"]
+    ["optionsButton", "codesInput", "runButton", "reportButton", "privacyButton"]
   );
   for (const entry of popupFocusOrder) {
     assert.notEqual(entry.outlineStyle, "none", `${entry.id} must show keyboard focus`);

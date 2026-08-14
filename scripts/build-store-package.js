@@ -33,9 +33,12 @@ function main() {
   const runtimeName = `comb-${version}.zip`;
   const kitEntries = [
     entry("README.md", "store/SUBMISSION.md"),
+    entry("CHANGELOG.md", "CHANGELOG.md"),
     entry("evidence/ATTRIBUTION.md", "docs/ATTRIBUTION.md"),
+    entry("evidence/COMPATIBILITY.md", "docs/COMPATIBILITY.md"),
     entry("evidence/RELEASE.md", "docs/RELEASE.md"),
     entry("evidence/SECURITY_REVIEW.md", "docs/SECURITY_REVIEW.md"),
+    entry("evidence/SUPPORT_TRIAGE.md", "docs/SUPPORT_TRIAGE.md"),
     entry("evidence/manifest.json", "manifest.json"),
     entry("listing/assets/comb-128.png", "icons/comb-128.png"),
     entry("listing/assets/comb-screenshot-01-1280x800.png", "store/assets/comb-screenshot-01-1280x800.png"),
@@ -45,6 +48,7 @@ function main() {
     entry("listing/edge-description.txt", "store/edge-description.txt"),
     entry("listing/listing.json", "store/listing.json"),
     entry("listing/release-notes.txt", "store/release-notes.txt"),
+    entry("listing/review-response-playbook.md", "store/REVIEW_RESPONSE_PLAYBOOK.md"),
     entry("listing/review-notes.md", "store/review-notes.md"),
     entry("policies/PRIVACY.md", "docs/PRIVACY.md"),
     entry(`upload/${runtimeName}`, `dist/${runtimeName}`),

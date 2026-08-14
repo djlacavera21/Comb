@@ -4,13 +4,13 @@
 
 Comb proves the difficult local loop: find the relevant checkout controls, test codes without clicking unrelated controls, measure the real price change, and leave the cart in the best recoverable state.
 
-The v0.5 build optimizes for inspectability, safe failure, and a reviewable browser-store handoff. It is dependency-free, uses ordinary JavaScript, and can be loaded directly from the repository.
+The v0.6 build optimizes for inspectability, safe failure, privacy-safe support intake, and a reviewable browser-store handoff. It is dependency-free, uses ordinary JavaScript, and can be loaded directly from the repository.
 
 ## Components
 
 ### Popup
 
-The popup is the only primary user interface. Opening it grants temporary `activeTab` access. It shows the detected adapter and total, accepts codes, streams progress, renders a result for every tested code, and keeps the creator-attribution guarantee visible.
+The popup is the only primary user interface. Opening it grants temporary `activeTab` access. It shows the detected adapter and total, accepts codes, streams progress, renders a result for every tested code, keeps the creator-attribution guarantee visible, and can save an allowlisted compatibility report locally after a user gesture.
 
 ### Service worker
 
@@ -74,13 +74,13 @@ Accepted but unmeasured shipping discounts are reported but not ranked as the wi
 
 ### Browser contracts
 
-`scripts/run-browser-fixtures.js` starts a local-only fixture server and drives headless Chrome directly through the Chrome DevTools Protocol, without an automation dependency. Sanitized contracts cover WooCommerce classic/Blocks, two Shopify-style variants, BigCommerce Cornerstone, generic and RTL detection, MXN/EUR/CHF/AED/USD totals, separate subtotal/tax/shipping rows, ambiguous-control refusal, the existing-coupon gate, failed-removal no-stacking behavior, creator URL/cookie preservation, popup tab order, accessible control names, progress semantics, and settings file-import controls. CI passes `--require-browser`; a missing browser is therefore a failure rather than a skip.
+`scripts/run-browser-fixtures.js` starts a local-only fixture server and drives headless Chrome directly through the Chrome DevTools Protocol, without an automation dependency. Sanitized contracts cover WooCommerce classic/Blocks, two Shopify-style variants, BigCommerce Cornerstone, generic and RTL detection, MXN/EUR/CHF/AED/USD totals, separate subtotal/tax/shipping rows, ambiguous-control refusal, the existing-coupon gate, failed-removal no-stacking behavior, creator URL/cookie preservation, safe-report non-disclosure, popup tab order, accessible control names, progress semantics, and settings file-import controls. CI passes `--require-browser`; a missing browser is therefore a failure rather than a skip.
 
 ### Release package
 
 `scripts/build-release.js` uses a deterministic, stored-entry ZIP writer implemented with Node built-ins. It sorts the exact runtime file list, normalizes every entry timestamp to `SOURCE_DATE_EPOCH` or the Git commit time, fixes file modes, writes no platform-specific extras, builds twice, and emits a SHA-256 sidecar. The manifest stays at the archive root.
 
-`scripts/validate-store.js` separately binds copy-ready Chrome/Edge metadata to the manifest, exact permission explanations, conservative on-device data categories, Limited Use commitments, creator-attribution evidence, description/search limits, and PNG dimensions. `scripts/build-store-package.js` runs both validation boundaries and places the runtime ZIP plus listing copy, assets, privacy policy, and public review in a second deterministic reviewer kit. GitHub Actions uploads both archives and sidecars; browser-store publication supplies the installable extension signature.
+`scripts/validate-store.js` separately binds copy-ready Chrome/Edge metadata to the manifest, exact permission explanations, conservative on-device data categories, Limited Use commitments, safe-report disclosure, creator-attribution evidence, description/search limits, and PNG dimensions. `scripts/build-store-package.js` runs both validation boundaries and places the runtime ZIP plus listing copy, assets, privacy policy, support evidence, and public review in a second deterministic reviewer kit. GitHub Actions uploads both archives and sidecars; browser-store publication supplies the installable extension signature.
 
 ## Message protocol
 

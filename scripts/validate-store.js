@@ -55,7 +55,7 @@ function validateAsset(asset, label) {
 
 if (listing.schemaVersion !== 1) fail("store listing schemaVersion must be 1");
 if (listing.extensionVersion !== manifest.version) fail("store listing and manifest versions must match");
-if (listing.lastReviewed !== "2026-08-14") fail("store listing review date must match the v0.5 review");
+if (listing.lastReviewed !== "2026-08-14") fail("store listing review date must match the v0.6 review");
 if (listing.shared?.name !== manifest.name) fail("store name must match the manifest");
 if (listing.shared?.shortDescription !== manifest.description) {
   fail("store short description must match the manifest description");
@@ -118,6 +118,17 @@ for (const dataType of expectedDataTypes) {
 if (listing.privacy?.optionalFeedNetwork?.enabledByDefault !== false) {
   fail("optional network feeds must remain disabled by default");
 }
+const compatibilityReport = listing.privacy?.compatibilityReport || {};
+if (compatibilityReport.userTriggeredOnly !== true || compatibilityReport.automaticUpload !== false ||
+    compatibilityReport.extensionTransmitsToDeveloper !== false ||
+    compatibilityReport.userMayShareSeparately !== true) {
+  fail("compatibility reports must remain user-triggered, local, and never extension-transmitted");
+}
+for (const excludedField of ["URL/hostname", "coupon codes", "creator identifiers"]) {
+  if (!String(compatibilityReport.excludedData || "").includes(excludedField)) {
+    fail(`compatibility-report disclosure is missing: ${excludedField}`);
+  }
+}
 for (const [certification, value] of Object.entries(listing.privacy?.limitedUseCertifications || {})) {
   if (value !== true) fail(`Limited Use certification must remain true: ${certification}`);
 }
@@ -150,8 +161,9 @@ for (const [label, description] of [["Chrome", chromeDescription], ["Edge", edge
   }
   if (/v0\.4/.test(description)) fail(`${label} description contains stale v0.4 copy`);
 }
-if (!releaseNotes.includes("v0.5") || !releaseNotes.includes("attribution cookies")) {
-  fail("v0.5 release notes must mention the attribution regression");
+if (!releaseNotes.includes("v0.6") || !releaseNotes.includes("attribution cookies") ||
+    !releaseNotes.includes("safe compatibility report")) {
+  fail("v0.6 release notes must mention safe reporting and the attribution regression");
 }
 for (const phrase of [
   "affiliate_id=creator-42&utm_source=creator",
@@ -194,6 +206,7 @@ for (const phrase of ["not an external audit", "creator URL and cookie", "npm ru
   if (!securityReview.includes(phrase)) fail(`security review is missing: ${phrase}`);
 }
 read("store/SUBMISSION.md");
+read("store/REVIEW_RESPONSE_PLAYBOOK.md");
 
 if (errors.length) {
   process.stderr.write(`Comb store validation failed:\n- ${errors.join("\n- ")}\n`);

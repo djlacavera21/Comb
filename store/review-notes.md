@@ -1,4 +1,4 @@
-# Comb v0.5 reviewer notes
+# Comb v0.6 reviewer notes
 
 Comb has one purpose: test coupon-code tokens on the user-authorized active checkout and preserve the best measurable discount without changing creator affiliate attribution.
 
@@ -28,13 +28,18 @@ The privacy form should conservatively select **Financial and payment informatio
 
 The Comb developer receives none of that checkout data. The current merchant receives only the coupon token entered into its existing visible coupon field, as required for the requested test. If the user connects an optional feed URL, that user-selected operator can ordinarily observe the requested path, time, IP address, and common network headers. The request omits credentials and referrers and sends no checkout URL, merchant history, outcomes, creator tag, identity, or payment data.
 
+## Privacy-safe compatibility report
+
+The popup's **Save safe report** button creates a local `comb.compatibility-report/v1` JSON file only after a user gesture. Comb does not upload or transmit it. The generator constructs a fixed allowlisted object containing version/timestamp, adapter/reason enums, and detection booleans; it omits merchant URL/hostname, page text/selectors, codes, totals/currency values, cookies, affiliate/referral tags, and creator identifiers. Unit and required real-Chrome tests inject secret-looking values and fail if the serialized report contains them.
+
 ## Functional review path
 
 1. Load the ZIP and pin Comb to the toolbar.
 2. Open a checkout with a visible coupon field and payable total, then open Comb.
 3. Confirm the popup shows the detected merchant/adapter and **Creator attribution protected**.
 4. Enter coupon-code tokens and choose **Try codes**. Comb never clicks the checkout's purchase control.
-5. Open **Settings** to inspect/export/delete local lists or import an explicitly trusted public feed key.
-6. To use the repository's sanitized checkout, clone the linked public source, run `npm run demo`, open `http://127.0.0.1:4173/demo/checkout.html`, and try `SAVE10`, `WELCOME20`, `FREESHIP`, and `NOTREAL`.
+5. Choose **Save safe report**, inspect the downloaded JSON, and confirm that it contains no merchant, total, code, page, cookie, or creator-tag value.
+6. Open **Settings** to inspect/export/delete local lists or import an explicitly trusted public feed key.
+7. To use the repository's sanitized checkout, clone the linked public source, run `npm run demo`, open `http://127.0.0.1:4173/demo/checkout.html`, and try `SAVE10`, `WELCOME20`, `FREESHIP`, and `NOTREAL`.
 
 The runtime upload ZIP intentionally excludes demo/test files. Public evidence and exact commands are in `docs/SECURITY_REVIEW.md` and `docs/RELEASE.md`.

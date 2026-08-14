@@ -1,0 +1,79 @@
+name: Checkout compatibility report
+description: Report a checkout Comb cannot safely recognize, using only sanitized details.
+title: "Compatibility: "
+labels:
+  - compatibility
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping Comb improve safely. **Do not include a checkout URL, merchant hostname, screenshot, page source, cookie, coupon code, total, address, payment detail, order detail, account identifier, affiliate tag, or creator identifier.**
+
+        In the Comb popup, choose **Save safe report**. Comb creates the file locally and does not upload it. Paste that generated JSON below only if you choose to share it.
+  - type: input
+    id: comb-version
+    attributes:
+      label: Comb version
+      description: Find this in Comb settings or the generated safe report.
+      placeholder: "0.6.0"
+    validations:
+      required: true
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser family
+      options:
+        - Chrome
+        - Microsoft Edge
+        - Chromium-based browser
+    validations:
+      required: true
+  - type: dropdown
+    id: symptom
+    attributes:
+      label: What happened?
+      options:
+        - Checkout was not recognized
+        - Coupon input was not recognized
+        - Safe Apply control was ambiguous
+        - Payable total was not recognized
+        - Comb stopped while restoring checkout state
+        - A recognized checkout changed markup
+    validations:
+      required: true
+  - type: input
+    id: platform
+    attributes:
+      label: Checkout platform
+      description: Optional. Use only a generic platform name such as WooCommerce, Shopify, or BigCommerce.
+      placeholder: "WooCommerce"
+  - type: input
+    id: theme-version
+    attributes:
+      label: Theme or checkout version
+      description: Optional. Include a public product/theme version only; do not include the merchant name.
+      placeholder: "Blocks 12.x"
+  - type: textarea
+    id: safe-report
+    attributes:
+      label: Comb safe compatibility report
+      description: Paste only JSON created by the popup's Save safe report button. Do not paste a hand-edited checkout capture.
+      render: json
+      placeholder: "Paste comb-compatibility-report.json here"
+    validations:
+      required: true
+  - type: textarea
+    id: synthetic-reproduction
+    attributes:
+      label: Synthetic reproduction notes
+      description: Optional. Describe the control order using invented labels and amounts. Never paste live HTML or a screenshot.
+      placeholder: "Example: invented coupon input followed by two buttons; the second button is the purchase control."
+  - type: checkboxes
+    id: privacy-confirmation
+    attributes:
+      label: Privacy confirmation
+      options:
+        - label: I checked that this issue contains no live URL, hostname, page source, screenshot, cookie, coupon code, total, identity, payment/order data, affiliate tag, or creator identifier.
+          required: true
+        - label: I understand Comb intentionally stops on unknown or ambiguous markup instead of risking the checkout or creator attribution.
+          required: true

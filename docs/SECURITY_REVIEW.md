@@ -1,7 +1,7 @@
-# Comb v0.5 Public Security and Creator-Attribution Review
+# Comb v0.6 Public Security and Creator-Attribution Review
 
-Review date: August 14, 2026  
-Scope: Comb v0.5 runtime, permissions, checkout transaction, signed-feed updater, store disclosures, and release tooling  
+Review date: August 14, 2026<br>
+Scope: Comb v0.6 runtime, permissions, checkout transaction, signed-feed updater, compatibility-report boundary, store disclosures, and release tooling<br>
 Status: scoped repository self-review complete; no unresolved critical or high-severity finding identified in this scope
 
 This is a transparent maintainer self-review, **not an external audit**, certification, penetration test, or guarantee that every merchant checkout will behave correctly. Store reviewers and independent contributors should verify the evidence below rather than relying on the status line.
@@ -18,6 +18,7 @@ This is a transparent maintainer self-review, **not an external audit**, certifi
 | Can one test coupon stack onto the next? | A new attempt starts only after coupon markers disappear and the original amount/currency return. | Removal-failure and restoration-mismatch stop contracts. |
 | Do store disclosures cover local processing? | Yes. They conservatively declare displayed financial total, merchant hostname, and checkout/coupon website content even when kept on-device. | `store/listing.json`, privacy policy, and automated store validator. |
 | Are release files reviewable? | Yes. The runtime ZIP has an exact allowlist, normalized metadata, a SHA-256 sidecar, and a repeated-build equality check. | Runtime builder plus deterministic outer review kit. |
+| Can a support report leak live checkout values automatically? | No. Reports are user-triggered local downloads built from a new allowlisted object; there is no upload path. | Unit secret-injection test, real-Chrome serialization contract, static schema/disclosure checks. |
 
 ## Creator Attribution Guarantee regression
 
@@ -31,7 +32,7 @@ The tagging issue is treated as a release-blocking product contract, not marketi
 
 Static validation separately rejects packaged cookie APIs, `document.cookie`, URL/history mutation, navigation, tab creation/update, request interception, declarative rewriting, dynamic code evaluation, and remote package resources. Both layers must pass. This demonstrates the Comb implementation boundary; it does not make claims about a merchant's private accounting rules when a merchant independently associates a coupon token with a campaign.
 
-## v0.5 verification matrix
+## v0.6 verification matrix
 
 | Boundary | Coverage |
 | --- | --- |
@@ -41,6 +42,7 @@ Static validation separately rejects packaged cookie APIs, `document.cookie`, UR
 | Safe failure | Ambiguous controls, pre-existing coupon, failed removal, marker-only removal without total restoration, and mid-run currency drift. |
 | Attribution | Synthetic creator query tags and attribution cookie remain unchanged through a full coupon transaction. |
 | UI access | Popup/settings keyboard order, visible focus, accessible names, native import controls, progress semantics, and reduced motion. |
+| Compatibility intake | Allowlisted adapter/reason/boolean report; secret-looking URL, hostname, page, code, total, currency, cookie, affiliate, and creator values excluded. |
 | Feed trust | Signature, expiry, strict schema, bounded size/lifetime, signer/feed pinning, rollback/substitution, origin policy, and serialized mutations. |
 | Store handoff | Copy-ready Chrome/Edge metadata, conservative on-device data categories, Limited Use commitments, exact assets, and deterministic reviewer kit. |
 
@@ -63,6 +65,7 @@ The first command validates the runtime and submission disclosures. Unit tests c
 - A merchant can block extension injection, place checkout controls in inaccessible cross-origin frames, or expose no safe coupon-removal path. Comb stops rather than bypassing those controls.
 - Shipping discounts may remain unmeasurable before an address and method are chosen.
 - Comb cannot see protected/HttpOnly attribution cookies. Protection comes from lacking mutation/navigation mechanisms and affiliate incentive, not from reading the cookie.
+- A user can hand-edit a downloaded report or accidentally add sensitive text to an issue. The issue form requires a privacy acknowledgement and forbids live captures, but public sharing remains the user's separate action.
 - An optional feed operator can observe ordinary network metadata for a user-requested connection. Comb cannot hide the user's IP from that selected server.
 - Local browser storage inherits the confidentiality and device-access properties of the user's browser profile.
 - Dependency-free static scanning and synthetic browser tests reduce attack surface but do not prove absence of all defects.

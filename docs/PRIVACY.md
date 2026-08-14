@@ -1,4 +1,4 @@
-# Comb v0.5 Privacy Policy and Data-Use Specification
+# Comb v0.6 Privacy Policy and Data-Use Specification
 
 Effective: August 14, 2026
 
@@ -17,6 +17,12 @@ The Chrome Web Store and Edge Add-ons submissions conservatively disclose these 
 Comb also stores explicitly trusted public feed keys, verified signed coupon-feed envelopes, and any feed-source URL the user approves. Source records include the pinned feed ID and signer, granted origin, last-check and last-update times, and a short status or error. Signed-feed records contain publisher name, public-key fingerprint, feed identity and sequence, issue/expiry times, exact merchant hostnames, coupon tokens, verification timestamps, and publisher-provided aggregate success/failure counts. Private signing keys never enter the extension.
 
 Messages between the checkout page, service worker, and popup stay inside the browser extension. They contain coupon tokens under test, current merchant hostname, adapter name, a short coupon-related message, and numeric before/after totals.
+
+## User-saved compatibility reports
+
+The popup can create `comb.compatibility-report/v1` only after the user chooses **Save safe report**. The file is saved locally and is never uploaded by Comb. It contains the Comb version/timestamp, an allowlisted adapter and safe-stop reason, coarse detection booleans, the Creator Attribution Guarantee, and explicit non-disclosure flags.
+
+The report generator builds a new allowlisted object. It does not redact or serialize the checkout scan. The output therefore excludes merchant hostname/URL, page content and selectors, coupon codes, amounts and currency values, cookies, affiliate/referral tags, and creator identifiers. Sharing the downloaded report through a public issue remains a separate user choice; [COMPATIBILITY.md](COMPATIBILITY.md) defines the public-report boundary.
 
 ## Data Comb deliberately does not access
 
@@ -65,10 +71,10 @@ Comb's handling of user data is limited to its disclosed single purpose. The pro
 - not use or transfer user data for personalized advertising; and
 - not allow humans to read user data except at the user's affirmative request, for a specific security/abuse investigation, or where legally required.
 
-Any future analytics, outcome reporting, affiliate model, account, or backend would require a separate public design, new consent where applicable, updated store disclosures and privacy policy, and review of the Creator Attribution Guarantee before implementation. It is not part of v0.5.
+Any future analytics, outcome reporting, affiliate model, account, or backend would require a separate public design, new consent where applicable, updated store disclosures and privacy policy, and review of the Creator Attribution Guarantee before implementation. It is not part of v0.6.
 
 ## Security and policy changes
 
 Comb's packaged-code validator blocks cookie, navigation, traffic-interception, remote-code, and purchase-click capabilities. Required continuous integration also exercises sanitized real-browser checkout and creator-attribution contracts. These controls reduce risk but are not a substitute for independent review.
 
-Material policy changes will be versioned in the public repository before a corresponding extension release. Questions can be opened as sanitized issues at [github.com/djlacavera21/Comb/issues](https://github.com/djlacavera21/Comb/issues). Do not include checkout URLs, cookies, payment details, addresses, affiliate IDs, or order data in a public issue; use GitHub private vulnerability reporting for sensitive security reports when available.
+Material policy changes will be versioned in the public repository before a corresponding extension release. Questions can be opened through the sanitized [checkout compatibility form](https://github.com/djlacavera21/Comb/issues/new?template=compatibility.yml). Do not include checkout URLs, screenshots, page source, cookies, codes, totals, payment details, addresses, affiliate IDs, creator identifiers, or order data in a public issue; use GitHub private vulnerability reporting for sensitive security reports when available.

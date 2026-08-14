@@ -87,12 +87,21 @@
         <button class="button button-secondary" id="cancelButton" type="button" hidden>Cancel</button>
       </div>
 
+      <section class="report-row" aria-labelledby="reportHeading">
+        <div>
+          <strong id="reportHeading">Compatibility problem?</strong>
+          <p id="reportHelp">Save a local report with no URL, totals, codes, page text, cookies, or creator tags.</p>
+        </div>
+        <button class="button button-secondary" id="reportButton" type="button" aria-describedby="reportHelp" disabled>Save safe report</button>
+      </section>
+
       <footer>
         <span>No tracking. No affiliate swap. No purchase clicks.</span>
         <button id="privacyButton" type="button">Privacy</button>
       </footer>
     </main>
 
+    <script src="../shared/compatibility-report.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

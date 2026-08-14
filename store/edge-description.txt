@@ -4,6 +4,8 @@ The creator-tagging issue is fixed by design. Comb never adds or replaces an aff
 
 Comb has no account, developer backend, analytics, advertising, default feed, outcome upload, or remote executable code. Merchant hostnames and coupon lists stay in extension-local storage. The user can export or erase them. During a run, Comb temporarily handles only visible coupon controls, coupon-specific messages, and the displayed payable total needed to measure the discount; the Comb developer does not receive that checkout data.
 
+If a checkout is not recognized, Save safe report creates a local allowlisted JSON file only when the user chooses it. Comb never uploads the report, and it omits merchant URL/hostname, page content/selectors, coupon codes, totals/currency values, cookies, affiliate tags, and creator identifiers.
+
 Optional signed community feeds are inert code-only JSON. They remain off until the user trusts a publisher key or supplies a public HTTPS feed URL and approves the exact origin. Source requests omit credentials and referrers, reject redirects, and contain no checkout URL, merchant history, outcomes, creator tags, identity, or payment data. Every envelope must pass local signature, schema, expiry, signer-pin, feed-ID, and rollback checks.
 
 Comb never clicks payment, purchase, checkout, or place-order controls. If coupon removal, baseline restoration, currency stability, or control identity cannot be verified, Comb stops. Always review the final coupon, payable total, shipping, tax, and order details before purchasing.

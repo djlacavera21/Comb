@@ -34,7 +34,7 @@ Comb handles checkout pages, so conservative behavior, creator attribution, and 
 - Do not add URLs, scripts, conditions that behave as executable logic, affiliate IDs, referral IDs, publisher sub-IDs, or opaque metadata.
 - Never commit a feed private key. Public trust keys and signed feed fixtures are allowed only when their purpose and trust status are explicit.
 - A sequence number must increase whenever signed payload content changes.
-- Key rotation requires a new explicitly imported public key; v0.5 does not silently delegate trust.
+- Key rotation requires a new explicitly imported public key; v0.6 does not silently delegate trust.
 
 ## Approved-source rules
 
@@ -46,7 +46,7 @@ Comb handles checkout pages, so conservative behavior, creator attribution, and 
 
 ## Privacy rules
 
-Never commit real checkout captures. Fixtures must use invented names, products, domains, totals, codes, and order data. Bug reports should include only the minimum sanitized markup needed to reproduce selector behavior.
+Never commit real checkout captures. Fixtures must use invented names, products, domains, totals, codes, and order data. Use the generated safe-report workflow in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md); do not paste live markup into an issue.
 
 Browser fixtures belong in `tests/fixtures/`, must contain no live checkout data, and must assert that purchase controls receive zero clicks. Attribution-sensitive changes must also preserve the synthetic creator-tagged URL and cookie contract. A local run may report `SKIP` when Chrome is unavailable; the required CI run must pass.
 

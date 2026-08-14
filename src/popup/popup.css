@@ -298,6 +298,36 @@ textarea:disabled {
   flex: 1;
 }
 
+.report-row {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  margin-top: 12px;
+  padding: 10px 11px;
+}
+
+.report-row strong {
+  display: block;
+  font-size: 10px;
+}
+
+.report-row p {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.35;
+  margin: 3px 0 0;
+}
+
+.report-row .button {
+  flex: 0 0 104px;
+  font-size: 9px;
+  padding: 7px 8px;
+}
+
 footer {
   align-items: center;
   color: #7f9188;

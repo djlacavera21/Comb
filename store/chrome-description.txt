@@ -8,6 +8,8 @@ PRIVATE BY ARCHITECTURE
 
 Comb has no account, analytics SDK, advertising SDK, developer backend, default feed, outcome upload, or remote executable code. Merchant hostnames and coupon lists stay in extension-local storage and can be exported or erased. During a user-started run, Comb temporarily handles the visible coupon controls, coupon-specific status messages, and displayed payable total needed to measure a discount. The Comb developer does not receive that checkout data.
 
+If a checkout is not recognized, Save safe report creates a local allowlisted JSON file only when you choose it. Comb never uploads the report. It omits the merchant URL/hostname, page content/selectors, coupon codes, totals/currency values, cookies, affiliate tags, and creator identifiers.
+
 Optional community feeds are off until you import a trusted publisher key or connect a public HTTPS feed URL. A connected source requires a browser origin prompt. Requests omit credentials and referrers, reject redirects, and contain no checkout URL, merchant history, coupon outcomes, creator tags, identity, or payment data. Every feed must pass local signature, expiry, rollback, and strict code-only schema checks.
 
 SAFE CHECKOUT BOUNDARY

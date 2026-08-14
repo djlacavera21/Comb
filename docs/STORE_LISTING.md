@@ -1,4 +1,4 @@
-# Comb v0.5 Browser Store Submission Record
+# Comb v0.6 Browser Store Submission Record
 
 The copy-ready Chrome Web Store and Microsoft Edge Add-ons fields live in [`../store/listing.json`](../store/listing.json). `npm run lint` validates their version, text boundaries, permissions, privacy categories, Limited Use commitments, URLs, search-term limits, and exact PNG dimensions.
 
@@ -18,8 +18,10 @@ This is backed by a required real-Chrome checkout transaction, not just listing 
 | Release notes | [`../store/release-notes.txt`](../store/release-notes.txt) |
 | Certification/reviewer notes | [`../store/review-notes.md`](../store/review-notes.md) |
 | Submission sequence | [`../store/SUBMISSION.md`](../store/SUBMISSION.md) |
+| Store-review response playbook | [`../store/REVIEW_RESPONSE_PLAYBOOK.md`](../store/REVIEW_RESPONSE_PLAYBOOK.md) |
 | Public privacy policy | [`PRIVACY.md`](PRIVACY.md) |
 | Public security review | [`SECURITY_REVIEW.md`](SECURITY_REVIEW.md) |
+| Compatibility-report boundary | [`COMPATIBILITY.md`](COMPATIBILITY.md) |
 
 ## Single purpose
 
@@ -51,6 +53,8 @@ If the user connects an optional public feed URL, that user-selected operator ca
 
 All Limited Use commitments in `store/listing.json` remain release-blocking: no sale/unapproved transfer, unrelated use, credit/lending use, personalized advertising, or human reading outside narrow user-request/security/legal cases.
 
+The popup's **Save safe report** action creates a local allowlisted JSON file only after a user gesture. It makes no request and omits merchant URL/hostname, page content/selectors, codes, totals/currency values, cookies, and creator tags. The developer receives none of it unless a user separately chooses to share the safe JSON.
+
 ## Validated upload assets
 
 | Asset | Dimensions | Store use |
@@ -62,7 +66,7 @@ All Limited Use commitments in `store/listing.json` remain release-blocking: no 
 
 Editable SVG sources sit beside the generated promotional PNGs. Only the validated PNGs are placed in the review kit.
 
-## Policy references used for v0.5
+## Policy references used for v0.6
 
 - [Chrome Web Store listing fields and assets](https://developer.chrome.com/docs/webstore/cws-dashboard-listing)
 - [Chrome Web Store privacy fields](https://developer.chrome.com/docs/webstore/cws-dashboard-privacy)

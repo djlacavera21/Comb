@@ -23,6 +23,7 @@ const releaseFiles = Object.freeze([
   "src/popup/popup.css",
   "src/popup/popup.html",
   "src/popup/popup.js",
+  "src/shared/compatibility-report.js",
   "src/shared/feed-verifier.js",
   "src/shared/source-policy.js",
   "src/shared/theme.css"

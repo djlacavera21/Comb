@@ -29,7 +29,7 @@ function walk(directory) {
 if (manifest.manifest_version !== 3) fail("manifest_version must be 3");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 if (manifest.version !== packageJson.version) fail("manifest and package versions must match");
-if (!/^0\.5\./.test(manifest.version)) fail("manifest version must match the v0.5 milestone");
+if (!/^0\.6\./.test(manifest.version)) fail("manifest version must match the v0.6 milestone");
 if (manifest.homepage_url !== "https://github.com/djlacavera21/Comb") {
   fail("manifest homepage must identify the public source repository");
 }
@@ -46,18 +46,18 @@ for (const permission of permissions) {
 }
 
 if (Array.isArray(manifest.host_permissions) && manifest.host_permissions.length) {
-  fail("v0.5 must not declare permanent host permissions");
+  fail("v0.6 must not declare permanent host permissions");
 }
 
 const optionalHosts = Array.isArray(manifest.optional_host_permissions)
   ? manifest.optional_host_permissions
   : [];
 if (optionalHosts.length !== 1 || optionalHosts[0] !== "https://*/*") {
-  fail("v0.5 must declare only runtime-approved HTTPS feed origins");
+  fail("v0.6 must declare only runtime-approved HTTPS feed origins");
 }
 
 if (manifest.content_scripts) {
-  fail("v0.5 must inject only after a user gesture, not through static content scripts");
+  fail("v0.6 must inject only after a user gesture, not through static content scripts");
 }
 
 const requiredFiles = [
@@ -136,11 +136,11 @@ for (const file of packageFiles) {
 }
 
 if (packageJson.dependencies && Object.keys(packageJson.dependencies).length) {
-  fail("v0.5 must remain dependency-free");
+  fail("v0.6 must remain dependency-free");
 }
 
 if (packageJson.devDependencies && Object.keys(packageJson.devDependencies).length) {
-  fail("v0.5 must remain dependency-free");
+  fail("v0.6 must remain dependency-free");
 }
 
 if (!fs.existsSync(path.join(root, "src/shared/feed-verifier.js"))) {
@@ -164,7 +164,7 @@ for (const requiredAdapterBoundary of [
   "totalsMatch(restoredTotal, expectedTotal)"
 ]) {
   if (!checkoutEngineSource.includes(requiredAdapterBoundary)) {
-    fail(`v0.5 checkout reliability boundary is missing: ${requiredAdapterBoundary}`);
+    fail(`v0.6 checkout reliability boundary is missing: ${requiredAdapterBoundary}`);
   }
 }
 
@@ -172,6 +172,29 @@ const popupHtml = fs.readFileSync(path.join(root, "src/popup/popup.html"), "utf8
 const optionsHtml = fs.readFileSync(path.join(root, "src/options/options.html"), "utf8");
 if (!popupHtml.includes('role="progressbar"') || !popupHtml.includes('aria-describedby="inputHelp"')) {
   fail("popup keyboard and progress accessibility contract is missing");
+}
+for (const reportBoundary of [
+  "Save safe report",
+  "no URL, totals, codes, page text, cookies, or creator tags",
+  "../shared/compatibility-report.js"
+]) {
+  if (!popupHtml.includes(reportBoundary)) fail(`popup compatibility-report boundary is missing: ${reportBoundary}`);
+}
+const compatibilityReportSource = fs.readFileSync(path.join(root, "src/shared/compatibility-report.js"), "utf8");
+for (const reportBoundary of [
+  "comb.compatibility-report/v1",
+  "automaticUpload: false",
+  "sharingRequiresSeparateUserAction: true",
+  "includesMerchantUrlOrHostname: false",
+  "includesPageContentOrSelectors: false",
+  "includesCouponCodes: false",
+  "includesTotalsOrCurrencyValues: false",
+  "includesCookiesOrCreatorTags: false",
+  "Existing creator affiliate tags, referral parameters, and cookies remain untouched."
+]) {
+  if (!compatibilityReportSource.includes(reportBoundary)) {
+    fail(`compatibility-report privacy boundary is missing: ${reportBoundary}`);
+  }
 }
 for (const requiredImportButton of ["trustKeyButton", "signedFeedButton", "importButton"]) {
   if (!optionsHtml.includes(`id="${requiredImportButton}"`)) {
@@ -196,6 +219,13 @@ for (const requiredTool of [
   "scripts/deterministic-zip.js",
   "scripts/validate-store.js",
   "tests/deterministic-zip.test.cjs",
+  "tests/compatibility-report.test.cjs",
+  "CHANGELOG.md",
+  ".github/ISSUE_TEMPLATE/config.yml",
+  ".github/ISSUE_TEMPLATE/compatibility.yml",
+  "docs/COMPATIBILITY.md",
+  "docs/SUPPORT_TRIAGE.md",
+  "store/REVIEW_RESPONSE_PLAYBOOK.md",
   "tests/fixtures/woocommerce-blocks.html",
   "tests/fixtures/woocommerce-classic-es.html",
   "tests/fixtures/shopify-swiss.html",
@@ -205,7 +235,25 @@ for (const requiredTool of [
   "tests/fixtures/restoration-mismatch.html",
   "tests/fixtures/currency-drift.html"
 ]) {
-  if (!fs.existsSync(path.join(root, requiredTool))) fail(`v0.5 verification tool is missing: ${requiredTool}`);
+  if (!fs.existsSync(path.join(root, requiredTool))) fail(`v0.6 verification tool is missing: ${requiredTool}`);
+}
+const compatibilityFormSource = fs.readFileSync(
+  path.join(root, ".github/ISSUE_TEMPLATE/compatibility.yml"),
+  "utf8"
+);
+for (const intakeBoundary of [
+  "Save safe report",
+  "Do not include a checkout URL",
+  "Paste only JSON created by the popup",
+  "contains no live URL, hostname, page source, screenshot, cookie, coupon code, total",
+  "stops on unknown or ambiguous markup"
+]) {
+  if (!compatibilityFormSource.includes(intakeBoundary)) {
+    fail(`compatibility issue form is missing: ${intakeBoundary}`);
+  }
+}
+if (/type:\s*upload\b/.test(compatibilityFormSource)) {
+  fail("compatibility issue form must not invite live checkout file uploads");
 }
 const browserFixtureSource = fs.readFileSync(path.join(root, "scripts/run-browser-fixtures.js"), "utf8");
 for (const requiredBrowserBoundary of [
@@ -214,17 +262,18 @@ for (const requiredBrowserBoundary of [
   "woocommerce-classic-es.html",
   "shopify-swiss.html",
   "generic-rtl-aed.html",
+  "privacy-safe compatibility report contract",
   "dangerClicks"
 ]) {
   if (!browserFixtureSource.includes(requiredBrowserBoundary)) {
-    fail(`v0.5 browser safety boundary is missing: ${requiredBrowserBoundary}`);
+    fail(`v0.6 browser safety boundary is missing: ${requiredBrowserBoundary}`);
   }
 }
 if (!packageJson.engines || packageJson.engines.node !== ">=22") {
-  fail("v0.5 tooling requires the stable WebSocket API in Node 22 or newer");
+  fail("v0.6 tooling requires the stable WebSocket API in Node 22 or newer");
 }
 if (packageJson.scripts?.["release:build"] !== "node scripts/build-store-package.js --verify") {
-  fail("v0.5 release build must produce the validated store review kit");
+  fail("v0.6 release build must produce the validated store review kit");
 }
 
 for (const file of walk(root).filter((entry) => entry.endsWith(".json") && !entry.includes(`${path.sep}.git${path.sep}`))) {

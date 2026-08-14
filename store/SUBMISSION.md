@@ -1,15 +1,16 @@
-# Comb v0.5 submission checklist
+# Comb v0.6 submission checklist
 
-This kit is a reviewer handoff. Upload `upload/comb-0.5.0.zip` to the browser store; do not upload this outer review-kit ZIP as the extension package.
+This kit is a reviewer handoff. Upload `upload/comb-0.6.0.zip` to the browser store; do not upload this outer review-kit ZIP as the extension package.
 
 ## Shared checks
 
 - Confirm the release commit and required CI workflow are green.
-- Verify `upload/comb-0.5.0.zip.sha256` before upload.
-- Confirm `manifest.json` is at the root of the runtime ZIP and reports version `0.5.0`.
+- Verify `upload/comb-0.6.0.zip.sha256` before upload.
+- Confirm `manifest.json` is at the root of the runtime ZIP and reports version `0.6.0`.
 - Use the public privacy-policy URL recorded in `listing/listing.json`.
 - Copy the permission, local data-handling, optional-feed, remote-code, and creator-attribution disclosures without weakening them.
 - Preserve the phrase **The creator-tagging issue is fixed** and its precise explanation that existing affiliate URL tags, referral parameters, and cookies remain untouched.
+- Keep the safe compatibility report described as user-triggered, local-only, and allowlisted; do not imply automatic diagnostics or telemetry.
 
 ## Chrome Web Store
 
@@ -21,6 +22,8 @@ This kit is a reviewer handoff. Upload `upload/comb-0.5.0.zip` to the browser st
 6. Declare no remote code.
 7. Select the three conservative local data types and complete every Limited Use certification recorded in the listing metadata.
 8. Supply `listing/review-notes.md`, save the draft, preview the public listing, and submit for review.
+
+If a reviewer asks for clarification, use `listing/review-response-playbook.md` and attach only synthetic/public evidence. Never attach a live checkout capture.
 
 ## Microsoft Edge Add-ons
 

@@ -44,13 +44,21 @@
 - Public security and creator-attribution self-review with executed URL/cookie preservation evidence.
 - Any anonymous outcome reporting only after separate consent, minimization, and abuse-control design.
 
-## v0.6 — Release-candidate feedback
+## v0.6 — Privacy-safe release-candidate feedback (shipped)
 
-- Publish through Chrome Web Store and Microsoft Edge Add-ons after dashboard review.
-- Add sanitized fixtures from verified compatibility reports without collecting live checkout captures.
-- Track adapter regressions by platform/theme version and stop safely on unknown markup.
-- Formalize release tags, changelog, support triage, and store-review response playbooks.
-- Invite independent review of the permission, signed-feed, and creator-attribution boundaries.
+- User-triggered, local-only compatibility report with fixed adapter/reason allowlists and coarse detection booleans.
+- Regression proof that URLs/hostnames, page content/selectors, codes, totals/currencies, cookies, and creator tags cannot enter the report.
+- Privacy-gated GitHub issue form that rejects live checkout captures and requires a generated safe report.
+- Executed adapter/platform matrix, release changelog, support triage, and store-review response playbook.
+- Unchanged zero-affiliate creator-attribution guarantee and no analytics/outcome upload.
+
+## v0.7 — Public browser-store launch
+
+- Publish through Chrome Web Store and Microsoft Edge Add-ons after developer-dashboard review.
+- Add synthetic fixtures derived from verified sanitized compatibility reports without collecting live checkout captures.
+- Track adapter regressions by public platform/theme version and continue stopping safely on unknown markup.
+- Invite independent review of the permission, signed-feed, compatibility-report, and creator-attribution boundaries.
+- Respond to browser-store review using the public evidence kit without weakening disclosures.
 
 ## v1.0 — Trustworthy shopping assistant
 
