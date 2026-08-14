@@ -1,6 +1,6 @@
 # Comb Roadmap
 
-## v0.1 — Local proof of value
+## v0.1 — Local proof of value (shipped)
 
 - Manifest V3 Chrome/Edge extension.
 - Temporary, user-initiated page access.
@@ -9,20 +9,22 @@
 - Per-merchant local code library and synthetic demo.
 - Enforced zero-affiliate creator-attribution guarantee.
 
-## v0.2 — Adapter reliability
+## v0.2 — Signed community-feed foundation (shipped)
+
+- Explicitly trusted ECDSA P-256 publisher keys.
+- Signed, versioned, non-executable, affiliate-neutral coupon feeds.
+- Strict code-only schema with expiry, size, lifetime, and exact-merchant limits.
+- Rollback, same-sequence substitution, cross-publisher replacement, and tamper protection.
+- Freshness and aggregate-outcome ranking, with manual offline import.
+
+## v0.3 — Reliability and controlled distribution
 
 - Fixture-driven adapter contract tests in a real browser.
 - Additional adapters based on sanitized community fixtures.
 - Better international money parsing and shipping-discount handling.
 - Accessibility audit and keyboard-only run flow.
+- Optional feed retrieval only from an origin the user explicitly approves, without remote executable code.
 - Reproducible signed ZIP build with checksums.
-
-## v0.3 — Community coupon data
-
-- Signed, versioned, non-executable, affiliate-neutral coupon feed.
-- Code provenance and freshness indicators.
-- Optional anonymous outcome reporting with separate consent and data minimization.
-- Abuse controls for poisoned or misleading submissions.
 
 ## v0.4 — Store release hardening
 
@@ -30,6 +32,7 @@
 - Automated end-to-end checkout fixture matrix.
 - Localization and currency test corpus.
 - Public security and creator-attribution review.
+- Any anonymous outcome reporting only after separate consent, minimization, and abuse-control design.
 
 ## v1.0 — Trustworthy shopping assistant
 

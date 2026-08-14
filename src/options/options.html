@@ -12,9 +12,9 @@
       <header class="page-header">
         <div class="brand-mark" aria-hidden="true">C</div>
         <div>
-          <p class="eyebrow">Comb v0.1</p>
-          <h1>Local coupon library</h1>
-          <p>Manage the code lists stored in this browser. Nothing here is uploaded.</p>
+          <p class="eyebrow">Comb v0.2</p>
+          <h1>Codes and trusted feeds</h1>
+          <p>Manage local coupon lists and cryptographically verified community feeds. Nothing here is uploaded.</p>
         </div>
       </header>
 
@@ -24,6 +24,45 @@
           <p class="eyebrow">Permanent product rule</p>
           <h2 id="guaranteeHeading">Creator Attribution Guarantee</h2>
           <p>If a creator sent you to a store, Comb leaves their attribution intact. This build has no affiliate ID, never rewrites a referral URL, never changes attribution cookies, and never opens a hidden commission link.</p>
+        </div>
+      </section>
+
+      <section class="feed-manager card" aria-labelledby="feedsHeading">
+        <div class="section-heading feed-heading">
+          <div>
+            <p class="eyebrow">Offline trust chain</p>
+            <h2 id="feedsHeading">Signed community feeds</h2>
+          </div>
+          <span id="feedSummaryCount">0 feeds · 0 keys</span>
+        </div>
+        <p class="feed-intro">Comb accepts code-only feed files after an ECDSA signature verifies against a public key you explicitly trust. Feed files cannot contain affiliate tags, referral URLs, scripts, or arbitrary metadata.</p>
+
+        <div class="feed-grid">
+          <section class="feed-column" aria-labelledby="keysHeading">
+            <div class="subheading">
+              <div>
+                <h3 id="keysHeading">Trusted public keys</h3>
+                <p>Import the publisher’s public trust-key JSON first.</p>
+              </div>
+              <label class="button button-secondary compact-button" for="trustKeyInput">Import key</label>
+              <input class="sr-only" id="trustKeyInput" type="file" accept="application/json,.json">
+            </div>
+            <div class="feed-empty" id="trustKeyEmpty">No feed publishers trusted.</div>
+            <div class="trust-key-list" id="trustKeyList"></div>
+          </section>
+
+          <section class="feed-column" aria-labelledby="installedFeedsHeading">
+            <div class="subheading">
+              <div>
+                <h3 id="installedFeedsHeading">Installed signed feeds</h3>
+                <p>Newer sequence numbers update an installed feed.</p>
+              </div>
+              <label class="button button-secondary compact-button" for="signedFeedInput">Import feed</label>
+              <input class="sr-only" id="signedFeedInput" type="file" accept="application/json,.json">
+            </div>
+            <div class="feed-empty" id="signedFeedEmpty">No signed coupon feeds installed.</div>
+            <div class="signed-feed-list" id="signedFeedList"></div>
+          </section>
         </div>
       </section>
 
@@ -48,7 +87,7 @@
         <div>
           <p class="eyebrow">Your data</p>
           <h2 id="dataHeading">Export, import, or erase</h2>
-          <p>Exports contain merchant hostnames and coupon tokens only.</p>
+          <p>Local-library exports contain merchant hostnames and your coupon tokens only. Trusted feeds are managed separately above.</p>
         </div>
         <div class="action-row">
           <button class="button button-secondary" id="exportButton" type="button">Export JSON</button>

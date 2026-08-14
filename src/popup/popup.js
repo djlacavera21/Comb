@@ -7,6 +7,8 @@ const elements = {
   detectedTotal: document.querySelector("#detectedTotal"),
   statusText: document.querySelector("#statusText"),
   codesInput: document.querySelector("#codesInput"),
+  sourceBadge: document.querySelector("#sourceBadge"),
+  inputHelp: document.querySelector("#inputHelp"),
   runButton: document.querySelector("#runButton"),
   cancelButton: document.querySelector("#cancelButton"),
   progressCard: document.querySelector("#progressCard"),
@@ -25,7 +27,9 @@ const state = {
   tabId: null,
   hostname: null,
   scan: null,
-  running: false
+  running: false,
+  localCodeKeys: new Set(),
+  communityCodeKeys: new Set()
 };
 
 function cleanText(value) {
@@ -112,8 +116,24 @@ function renderScan(data) {
   state.tabId = data.tabId;
   state.hostname = data.hostname;
   state.scan = data.scan;
+  state.localCodeKeys = new Set(
+    (data.localCodes || []).map((code) => code.toLocaleUpperCase("en-US"))
+  );
+  state.communityCodeKeys = new Set(
+    (data.communityCodes || []).map((candidate) => candidate.code.toLocaleUpperCase("en-US"))
+  );
   elements.storeHeading.textContent = data.hostname;
   elements.codesInput.value = (data.codes || []).join("\n");
+
+  if (data.communityCodes && data.communityCodes.length) {
+    const feedCount = new Set(data.communityCodes.map((candidate) => candidate.feedId)).size;
+    elements.sourceBadge.textContent = `${data.communityCodes.length} signed`;
+    elements.inputHelp.textContent =
+      `Includes signature-verified codes from ${feedCount} trusted feed${feedCount === 1 ? "" : "s"}. Only your own codes are saved locally.`;
+  } else {
+    elements.sourceBadge.textContent = "20 max";
+    elements.inputHelp.textContent = "Saved only in this browser for this merchant. URLs are rejected.";
+  }
 
   if (data.scan && data.scan.adapterLabel) {
     elements.adapterBadge.textContent = data.scan.adapterLabel;
@@ -133,7 +153,12 @@ function renderScan(data) {
     setStatus("An existing coupon is active. Comb will not risk replacing it; remove it manually first.", "warning");
   } else {
     elements.codesInput.disabled = false;
-    setStatus("Checkout controls verified. Comb will test only the coupon Apply control.");
+    const signedCount = data.communityCodes ? data.communityCodes.length : 0;
+    setStatus(
+      signedCount
+        ? `Checkout controls verified. ${signedCount} signature-verified community code${signedCount === 1 ? " is" : "s are"} ready.`
+        : "Checkout controls verified. Comb will test only the coupon Apply control."
+    );
   }
 
   refreshRunButton();
@@ -251,6 +276,10 @@ async function initialize() {
 async function startRun() {
   const codes = validCodes();
   if (!codes.length || state.running) return;
+  const localCodes = codes.filter((code) => {
+    const key = code.toLocaleUpperCase("en-US");
+    return state.localCodeKeys.has(key) || !state.communityCodeKeys.has(key);
+  });
 
   setRunning(true);
   elements.resultsSection.hidden = true;
@@ -261,6 +290,7 @@ async function startRun() {
       type: "COMB_RUN",
       tabId: state.tabId,
       codes,
+      localCodes,
       saveCodes: true
     });
     renderResult(result);

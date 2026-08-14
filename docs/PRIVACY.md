@@ -1,8 +1,10 @@
-# Comb v0.1 Privacy Specification
+# Comb v0.2 Privacy Specification
 
 ## Data Comb stores
 
-Comb stores only coupon-code lists keyed by merchant hostname. This data stays in the browser's extension-local storage. The options page can export or delete it.
+Comb stores coupon-code lists keyed by merchant hostname, explicitly trusted public feed keys, and manually imported signed coupon-feed envelopes. This data stays in the browser's extension-local storage. The options page can export or delete local lists and remove keys or feeds.
+
+Signed-feed records contain only publisher name, public-key fingerprint, feed identity and sequence, issue/expiry times, exact merchant hostnames, coupon tokens, verification timestamps, and aggregate success/failure counts. Private signing keys never enter the extension.
 
 ## Data Comb reads temporarily
 
@@ -21,7 +23,7 @@ Comb neither reads nor writes affiliate cookies. It does not change referral par
 
 ## Data Comb transmits
 
-Nothing in v0.1. There is no Comb server, analytics SDK, advertising SDK, affiliate rewrite, error collector, or remote coupon feed.
+Nothing in v0.2. There is no Comb server, analytics SDK, advertising SDK, affiliate rewrite, error collector, automatic feed download, or outcome upload. Feed files are imported from the user's device and verified locally.
 
 Messages between the checkout page, service worker, and popup remain inside the browser extension. They contain coupon codes under test, detected merchant hostname, adapter name, status text reduced to a short coupon-related message, and numeric before/after totals.
 
@@ -29,10 +31,10 @@ Messages between the checkout page, service worker, and popup remain inside the 
 
 - `activeTab`: temporary access to the current page after the user invokes Comb.
 - `scripting`: inject the packaged checkout engine into that temporarily authorized page.
-- `storage`: keep the user's local merchant coupon lists.
+- `storage`: keep the user's local merchant coupon lists, trusted public keys, and manually imported signed feeds.
 
 Comb requests no permanent host patterns, cookie permission, traffic-interception permission, or browsing-history permission.
 
 ## Deletion and export
 
-Open Comb's extension options to export the local coupon library, delete one merchant, or erase the entire library.
+Open Comb's extension options to export the local coupon library, delete one merchant, erase the entire local library, remove a signed feed, or remove a trusted key and every feed signed by it.

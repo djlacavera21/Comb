@@ -10,7 +10,7 @@ The result is simple: using Comb does not make Comb the last affiliate click.
 
 Comb must not take referral credit away from the creator, publisher, organization, or person who sent the shopper to a merchant.
 
-For v0.1, this is a strict zero-affiliate design:
+For v0.2, this is a strict zero-affiliate design:
 
 - Comb has no affiliate ID and earns no checkout commission.
 - Comb never changes the page URL or its query parameters.
@@ -41,10 +41,10 @@ Repository review remains necessaryâ€”the validator is a guardrail, not a proofâ
 
 A merchant may internally associate a public coupon code with a campaign. Comb cannot control a merchant's private attribution rules. To prevent Comb itself from becoming the competing affiliate:
 
-- v0.1 codes are supplied by the shopper and stored locally;
+- codes are supplied by the shopper or imported from a signature-verified, code-only feed;
 - entries are code tokens, not URLs;
 - Comb attaches no publisher, sub-ID, click ID, network ID, or commission metadata;
-- future community-feed entries must remain non-executable and affiliate-neutral.
+- the signed-feed schema rejects extra fields, including affiliate or referral metadata, before a feed can be installed.
 
 ## Future monetization rule
 

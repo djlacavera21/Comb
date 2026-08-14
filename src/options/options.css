@@ -17,6 +17,7 @@ body {
 
 .page-header h1,
 .guarantee h2,
+.feed-manager h2,
 .library h2,
 .data-actions h2 {
   margin: 0;
@@ -36,6 +37,7 @@ body {
 }
 
 .guarantee,
+.feed-manager,
 .library,
 .data-actions {
   margin-bottom: 18px;
@@ -65,6 +67,7 @@ body {
 }
 
 .guarantee h2,
+.feed-manager h2,
 .library h2,
 .data-actions h2 {
   font-size: 19px;
@@ -88,6 +91,124 @@ body {
   font-size: 11px;
   font-weight: 800;
   padding: 5px 9px;
+}
+
+.feed-intro {
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 10px 0 18px;
+  max-width: 700px;
+}
+
+.feed-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.feed-column {
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(237, 198, 111, 0.14);
+  border-radius: 13px;
+  min-width: 0;
+  padding: 15px;
+}
+
+.subheading {
+  align-items: flex-start;
+  display: flex;
+  gap: 12px;
+  justify-content: space-between;
+}
+
+.subheading h3 {
+  font-size: 14px;
+  margin: 0;
+}
+
+.subheading p {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.4;
+  margin: 4px 0 0;
+}
+
+.compact-button {
+  flex: 0 0 auto;
+  font-size: 11px;
+  min-height: 34px;
+  padding: 7px 10px;
+}
+
+.compact-button.disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.feed-empty {
+  color: #83958b;
+  font-size: 11px;
+  padding: 22px 2px 8px;
+  text-align: center;
+}
+
+.trust-key-list,
+.signed-feed-list {
+  margin-top: 10px;
+}
+
+.feed-record {
+  align-items: center;
+  border-top: 1px solid rgba(237, 198, 111, 0.12);
+  display: flex;
+  gap: 10px;
+  justify-content: space-between;
+  padding: 11px 0;
+}
+
+.feed-record:first-child {
+  border-top: 0;
+}
+
+.feed-record > div {
+  min-width: 0;
+}
+
+.feed-record strong,
+.feed-record span,
+.feed-record code {
+  display: block;
+}
+
+.feed-record strong {
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.feed-record span,
+.feed-record code {
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.45;
+  margin-top: 3px;
+}
+
+.feed-record code {
+  color: var(--brass-300);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  overflow-wrap: anywhere;
+}
+
+.feed-record button {
+  background: transparent;
+  color: var(--danger);
+  cursor: pointer;
+  flex: 0 0 auto;
+  font-size: 10px;
+  padding: 5px;
 }
 
 .empty-state {
@@ -173,6 +294,10 @@ body {
 }
 
 @media (max-width: 700px) {
+  .feed-grid {
+    grid-template-columns: 1fr;
+  }
+
   .data-actions {
     align-items: flex-start;
     flex-direction: column;

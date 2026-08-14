@@ -17,6 +17,7 @@ function walk(directory) {
   const output = [];
 
   for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
+    if (entry.isDirectory() && [".git", "node_modules", "dist"].includes(entry.name)) continue;
     const absolutePath = path.join(directory, entry.name);
     if (entry.isDirectory()) output.push(...walk(absolutePath));
     else output.push(absolutePath);
@@ -26,7 +27,9 @@ function walk(directory) {
 }
 
 if (manifest.manifest_version !== 3) fail("manifest_version must be 3");
-if (!/^0\.1\./.test(manifest.version)) fail("manifest version must match the v0.1 milestone");
+const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
+if (manifest.version !== packageJson.version) fail("manifest and package versions must match");
+if (!/^0\.2\./.test(manifest.version)) fail("manifest version must match the v0.2 milestone");
 
 const expectedPermissions = ["activeTab", "scripting", "storage"];
 const permissions = Array.isArray(manifest.permissions) ? manifest.permissions : [];
@@ -40,11 +43,11 @@ for (const permission of permissions) {
 }
 
 if (Array.isArray(manifest.host_permissions) && manifest.host_permissions.length) {
-  fail("v0.1 must not declare permanent host permissions");
+  fail("v0.2 must not declare permanent host permissions");
 }
 
 if (manifest.content_scripts) {
-  fail("v0.1 must inject only after a user gesture, not through static content scripts");
+  fail("v0.2 must inject only after a user gesture, not through static content scripts");
 }
 
 const requiredFiles = [
@@ -99,13 +102,29 @@ for (const file of packageFiles) {
   }
 }
 
-const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 if (packageJson.dependencies && Object.keys(packageJson.dependencies).length) {
-  fail("v0.1 must remain dependency-free");
+  fail("v0.2 must remain dependency-free");
 }
 
 if (packageJson.devDependencies && Object.keys(packageJson.devDependencies).length) {
-  fail("v0.1 must remain dependency-free");
+  fail("v0.2 must remain dependency-free");
+}
+
+if (!fs.existsSync(path.join(root, "src/shared/feed-verifier.js"))) {
+  fail("signed-feed verifier is missing");
+}
+
+const checkoutEngineSource = fs.readFileSync(path.join(root, "src/content/checkout-engine.js"), "utf8");
+const checkoutEngineVersion = checkoutEngineSource.match(/const VERSION = "([^"]+)";/);
+if (!checkoutEngineVersion || checkoutEngineVersion[1] !== manifest.version) {
+  fail("checkout engine and manifest versions must match");
+}
+
+for (const file of walk(root).filter((entry) => entry.endsWith(".json") && !entry.includes(`${path.sep}.git${path.sep}`))) {
+  const source = fs.readFileSync(file, "utf8");
+  if (/"d"\s*:\s*"[A-Za-z0-9_-]{20,}"/.test(source)) {
+    fail(`${path.relative(root, file)} appears to contain an ECDSA private signing key`);
+  }
 }
 
 if (errors.length) {
