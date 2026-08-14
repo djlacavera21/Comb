@@ -12,7 +12,7 @@ A valid compatibility issue includes the generated `comb.compatibility-report/v1
 
 | Priority | Trigger | First response |
 | --- | --- | --- |
-| P0 private security | Code execution, secret exposure, unauthorized transmission, or purchase action | Move to private vulnerability reporting; do not reproduce on a live checkout |
+| P0 private security | Code execution, secret exposure, unauthorized transmission, or purchase action | Request/enable a private channel before collecting details; do not reproduce on a live checkout |
 | P0 attribution | Any evidence Comb changed a URL tag, referral parameter, cookie, or opened a competing referral path | Stop release; preserve the report privately; rerun static and creator-tagged browser contracts |
 | P1 state safety | Coupon stacking, removal without baseline restoration, currency drift ignored, or purchase control touched | Stop the affected adapter; add a synthetic failing contract before a fix |
 | P2 compatibility | Unknown markup or conservative false negative with no checkout mutation | Classify adapter/theme version; add a sanitized fixture; retain safe stop until verified |

@@ -6,7 +6,9 @@ Comb is pre-release software. Security fixes currently target the latest commit 
 
 ## Reporting a vulnerability
 
-Do not include active checkout URLs, hostnames, screenshots, page source, session cookies, coupon codes, totals, payment details, addresses, affiliate IDs, creator identifiers, or order data in a public report. Use Comb's generated safe-report workflow for non-sensitive compatibility problems. For a vulnerability that cannot be described safely in public, use [GitHub private vulnerability reporting](https://github.com/djlacavera21/Comb/security/advisories/new).
+Do not include active checkout URLs, hostnames, screenshots, page source, session cookies, coupon codes, totals, payment details, addresses, affiliate IDs, creator identifiers, or order data in a public report. Use Comb's generated safe-report workflow for non-sensitive compatibility problems.
+
+GitHub private vulnerability reporting is not currently enabled for this repository. If a vulnerability cannot be described safely in public, open a sanitized issue containing only the title **Private security channel requested** and no vulnerability or checkout details. The maintainer must enable or create an appropriate private channel before requesting further information. Never send sensitive material until that channel exists.
 
 ## Design constraints
 

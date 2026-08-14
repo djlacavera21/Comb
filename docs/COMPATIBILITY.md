@@ -23,7 +23,7 @@ It never contains the merchant hostname or URL, DOM labels/selectors, page text 
 4. Paste the generated JSON and supply only a generic platform/theme version if known.
 5. Describe any reproduction with invented labels, products, codes, totals, and identities.
 
-Never attach a screenshot, HAR file, checkout URL, live HTML, cookie export, console dump, order data, payment data, address, account identifier, affiliate tag, or creator identifier. If a security issue cannot be explained without sensitive data, use GitHub private vulnerability reporting and minimize it there as well.
+Never attach a screenshot, HAR file, checkout URL, live HTML, cookie export, console dump, order data, payment data, address, account identifier, affiliate tag, or creator identifier. If a security issue cannot be explained without sensitive data, follow [../SECURITY.md](../SECURITY.md): request a private channel without posting any details, and minimize the report after a private channel exists.
 
 ## Executed support matrix
 

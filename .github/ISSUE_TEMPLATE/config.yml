@@ -1,8 +1,8 @@
 blank_issues_enabled: false
 contact_links:
-  - name: Private security report
-    url: https://github.com/djlacavera21/Comb/security/advisories/new
-    about: Report vulnerabilities or anything containing sensitive checkout data privately.
+  - name: Security reporting guidance
+    url: https://github.com/djlacavera21/Comb/security/policy
+    about: Read how to request a private channel without publishing sensitive details.
   - name: Compatibility-reporting guide
     url: https://github.com/djlacavera21/Comb/blob/main/docs/COMPATIBILITY.md
     about: Review the sanitization rules before filing a checkout compatibility report.

@@ -237,6 +237,11 @@ for (const requiredTool of [
 ]) {
   if (!fs.existsSync(path.join(root, requiredTool))) fail(`v0.6 verification tool is missing: ${requiredTool}`);
 }
+const issueConfigSource = fs.readFileSync(path.join(root, ".github/ISSUE_TEMPLATE/config.yml"), "utf8");
+if (!issueConfigSource.includes("https://github.com/djlacavera21/Comb/security/policy") ||
+    issueConfigSource.includes("security/advisories/new")) {
+  fail("issue intake must not link to private vulnerability reporting while it is disabled");
+}
 const compatibilityFormSource = fs.readFileSync(
   path.join(root, ".github/ISSUE_TEMPLATE/compatibility.yml"),
   "utf8"
