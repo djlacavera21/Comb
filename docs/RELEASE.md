@@ -78,7 +78,7 @@ The runtime archive contains only the exact packaged files declared in `scripts/
 `scripts/build-store-package.js` first validates store metadata and PNG dimensions, then runs the verified runtime build. It packages the runtime ZIP/sidecar with:
 
 - shared Chrome/Edge listing metadata and copy;
-- the 128×128 icon, 300×300 Edge logo, 440×280 tile, and 1280×800 screenshot;
+- the 128×128 icon, 300×300 Edge logo, 440×280 tile, and five numbered 1280×800 screenshots;
 - reviewer/certification instructions and the store-response playbook;
 - the public privacy policy, Creator Attribution Guarantee, v0.7 security review, compatibility guide, machine support matrix, independent-review guide, support triage, and changelog;
 - snapshots of the manual release workflow plus matrix/candidate/artifact validators; and

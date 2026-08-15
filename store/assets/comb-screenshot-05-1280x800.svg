@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" role="img" aria-labelledby="title desc">
+  <title id="title">Comb safe stop and private compatibility report</title>
+  <desc id="desc">Comb stops without changing checkout state when controls are ambiguous and offers a local safe report that excludes checkout and creator data</desc>
+  <defs>
+    <linearGradient id="background" x1="35" y1="20" x2="1245" y2="790" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#123629"/>
+      <stop offset="0.55" stop-color="#0b241b"/>
+      <stop offset="1" stop-color="#071a14"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(1070 96) rotate(130) scale(620 540)">
+      <stop stop-color="#e5a24f" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#e5a24f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f7dda0"/>
+      <stop offset="1" stop-color="#d4a84f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="800" fill="url(#background)"/>
+  <rect width="1280" height="800" fill="url(#glow)"/>
+  <g opacity="0.1" fill="none" stroke="#edc66f" stroke-width="2">
+    <path d="M90 66 125 86v40l-35 20-35-20V86z"/>
+    <path d="M120 137 155 157v40l-35 20-35-20v-40z"/>
+    <path d="M60 137 95 157v40l-35 20-35-20v-40z"/>
+    <path d="M1188 614 1223 634v40l-35 20-35-20v-40z"/>
+    <path d="M1158 685 1193 705v40l-35 20-35-20v-40z"/>
+  </g>
+
+  <g transform="translate(82 70)">
+    <path d="M32 0 62 17v35L32 70 2 52V17z" fill="#0b241b" stroke="url(#brass)" stroke-width="3"/>
+    <text x="20" y="48" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="34" font-weight="800">C</text>
+    <text x="80" y="25" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" letter-spacing="2">PRIVATE COUPON TESTER</text>
+    <text x="80" y="57" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="32" font-weight="800">Comb</text>
+  </g>
+
+  <text x="82" y="224" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="43" font-weight="800">Unknown checkout?</text>
+  <text x="82" y="272" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="43" font-weight="800">Comb stops.</text>
+  <text x="82" y="326" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="27" font-weight="750">Private evidence—only if you choose.</text>
+  <text x="82" y="388" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="18">When controls are ambiguous, Comb makes no change.</text>
+  <text x="82" y="420" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="18">A safe report can be saved locally—never uploaded.</text>
+
+  <g transform="translate(82 472)">
+    <circle cx="13" cy="13" r="13" fill="#71d39b"/>
+    <path d="m7 13 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="40" y="18" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700">No merchant URL, hostname, or page text</text>
+    <circle cx="13" cy="67" r="13" fill="#71d39b"/>
+    <path d="m7 67 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="40" y="72" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700">No coupon codes, totals, or currency values</text>
+    <circle cx="13" cy="121" r="13" fill="#71d39b"/>
+    <path d="m7 121 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="40" y="126" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700">No cookies, creator tags, or identifiers</text>
+  </g>
+
+  <rect x="628" y="42" width="576" height="724" rx="34" fill="#000" fill-opacity="0.3"/>
+  <g transform="translate(652 58)">
+    <rect width="528" height="692" rx="22" fill="#081d16" stroke="#edc66f" stroke-opacity="0.25"/>
+    <g transform="translate(24 20)">
+      <path d="M22 0 42 12v23L22 47 2 35V12z" fill="#0b241b" stroke="url(#brass)" stroke-width="2.2"/>
+      <text x="14" y="33" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="800">C</text>
+      <text x="58" y="16" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="8" font-weight="700" letter-spacing="1.2">PRIVATE COUPON TESTER</text>
+      <text x="58" y="40" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="23" font-weight="800">Comb</text>
+
+      <g transform="translate(0 63)">
+        <rect width="480" height="62" rx="12" fill="#71d39b" fill-opacity="0.09" stroke="#71d39b" stroke-opacity="0.32"/>
+        <circle cx="23" cy="22" r="10" fill="#71d39b"/>
+        <path d="m18 22 3 3 6-7" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"/>
+        <text x="42" y="20" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="800">Creator attribution protected</text>
+        <text x="42" y="40" fill="#bcd9c8" font-family="DejaVu Sans, sans-serif" font-size="9.5">Safety stops never relax the zero-affiliate boundary.</text>
+      </g>
+
+      <g transform="translate(0 141)">
+        <rect width="480" height="155" rx="14" fill="#e5a24f" fill-opacity="0.08" stroke="#e5a24f" stroke-opacity="0.42"/>
+        <circle cx="27" cy="29" r="12" fill="#e5a24f"/>
+        <text x="23" y="34" fill="#071a14" font-family="DejaVu Sans, sans-serif" font-size="15" font-weight="900">!</text>
+        <text x="50" y="26" fill="#f7dda0" font-family="DejaVu Sans, sans-serif" font-size="9" font-weight="800" letter-spacing="1.2">SAFE STOP</text>
+        <text x="22" y="62" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="20" font-weight="900">No checkout changes made</text>
+        <text x="22" y="90" fill="#d6c8ae" font-family="DejaVu Sans, sans-serif" font-size="11.5">A coupon field was found, but its safe Apply control</text>
+        <text x="22" y="111" fill="#d6c8ae" font-family="DejaVu Sans, sans-serif" font-size="11.5">was ambiguous. Comb stopped before any click.</text>
+        <text x="22" y="136" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="700">No purchase click · No coupon change · No attribution change</text>
+      </g>
+
+      <g transform="translate(0 313)">
+        <rect width="480" height="242" rx="14" fill="#fff" fill-opacity="0.045" stroke="#edc66f" stroke-opacity="0.2"/>
+        <text x="20" y="29" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="9" font-weight="800" letter-spacing="1.2">LOCAL COMPATIBILITY REPORT</text>
+        <text x="20" y="58" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="900">Help improve Comb without sharing checkout data</text>
+        <text x="20" y="84" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="10.5">The allowlisted JSON includes only coarse detection signals:</text>
+
+        <g transform="translate(20 105)">
+          <circle cx="7" cy="7" r="7" fill="#71d39b"/><path d="m4 7 2 2 4-5" fill="none" stroke="#071a14" stroke-width="1.8"/>
+          <text x="22" y="11" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="10.5">Adapter family + fixed reason enum</text>
+          <circle cx="7" cy="37" r="7" fill="#71d39b"/><path d="m4 37 2 2 4-5" fill="none" stroke="#071a14" stroke-width="1.8"/>
+          <text x="22" y="41" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="10.5">Boolean control-presence signals</text>
+          <circle cx="7" cy="67" r="7" fill="#71d39b"/><path d="m4 67 2 2 4-5" fill="none" stroke="#071a14" stroke-width="1.8"/>
+          <text x="22" y="71" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="10.5">Extension version + privacy flags</text>
+        </g>
+
+        <rect x="20" y="194" width="440" height="34" rx="9" fill="url(#brass)"/>
+        <text x="165" y="216" fill="#071a14" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="900">Save safe report locally</text>
+      </g>
+
+      <g transform="translate(0 574)">
+        <rect width="480" height="48" rx="10" fill="#71d39b" fill-opacity="0.08" stroke="#71d39b" stroke-opacity="0.25"/>
+        <text x="18" y="21" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="10.5" font-weight="800">Never uploaded by Comb.</text>
+        <text x="18" y="37" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="9">Share the safe JSON only if you separately choose.</text>
+      </g>
+    </g>
+  </g>
+  <text x="1177" y="779" text-anchor="end" fill="#82958b" font-family="DejaVu Sans, sans-serif" font-size="10">Synthetic safe-stop state · Comb v0.7</text>
+</svg>
