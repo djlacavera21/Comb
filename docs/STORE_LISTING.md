@@ -2,6 +2,8 @@
 
 The copy-ready Chrome Web Store and Microsoft Edge Add-ons fields live in [`../store/listing.json`](../store/listing.json). `npm run lint` validates their version, text boundaries, permissions, privacy categories, Limited Use commitments, URLs, search-term limits, and exact PNG dimensions.
 
+Current GitHub release and browser-store states are recorded separately in [PUBLICATION_STATUS.md](PUBLICATION_STATUS.md) and [`../store/publication-record.json`](../store/publication-record.json). Neither a green candidate nor a GitHub release is evidence of browser-store availability.
+
 ## Public message
 
 > **The creator-tagging issue is fixed.** Comb leaves existing creator affiliate tags, referral parameters, and attribution cookies untouched so the original creator can keep proper attribution.
@@ -67,13 +69,16 @@ The popup's **Save safe report** action creates a local allowlisted JSON file on
 
 Editable SVG sources sit beside the generated promotional PNGs. Only the validated PNGs are placed in the review kit.
 
-## Policy references used for v0.7
+## Official policy references rechecked 2026-08-15
 
 - [Chrome Web Store listing fields and assets](https://developer.chrome.com/docs/webstore/cws-dashboard-listing)
 - [Chrome Web Store privacy fields](https://developer.chrome.com/docs/webstore/cws-dashboard-privacy)
 - [Chrome Web Store user-data FAQ](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq)
 - [Chrome Web Store privacy policy requirements](https://developer.chrome.com/docs/webstore/program-policies/privacy)
+- [Chrome Web Store publication lifecycle](https://developer.chrome.com/docs/webstore/publish)
+- [Chrome Web Store item states](https://developer.chrome.com/docs/webstore/api/reference/rest/v2/ItemState)
 - [Microsoft Edge Add-ons publication fields](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/publish-extension)
+- [Microsoft Edge Add-ons submission states](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/submission-states)
 - [Microsoft Edge extension developer policies](https://learn.microsoft.com/en-us/legal/microsoft-edge/extensions/developer-policies)
 
 Store dashboards can change after this review date. Recheck the official forms before submission and update both metadata and validator together if a requirement changes.

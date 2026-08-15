@@ -49,3 +49,5 @@ The matrix `baseline` is the payable total visible when Comb scans the fixture. 
 | Currency drift | `generic` safe stop | `comb-safety-contract-v1` / `currency-drift-synthetic-v1` | en-US / USD | Stop before another attempt |
 
 This matrix is evidence of bounded contracts, not a claim that every live merchant or theme is supported. A new public platform/theme snapshot becomes supported only after a privacy-safe report informs an independently written synthetic fixture and its safety assertions land in the required suite. Live checkout captures never become fixtures.
+
+The exact report-to-proposal separation process and offline scaffold are documented in [SYNTHETIC_FIXTURES.md](SYNTHETIC_FIXTURES.md). The scaffold accepts only the allowlisted report schema, discards its timestamp, emits invented placeholder values, and never generates or derives HTML.

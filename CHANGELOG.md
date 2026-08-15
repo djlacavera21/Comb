@@ -2,6 +2,19 @@
 
 All notable Comb changes are recorded here. At browser-store publication, the release version must match `manifest.json`, `package.json`, the checkout engine, store metadata, and an immutable `vX.Y.Z` source tag created only after required CI succeeds.
 
+## Unreleased
+
+### Added
+
+- A machine-validated publication record with exact Chrome and Edge lifecycle states, immutable release-asset requirements, and fail-closed public-availability claims.
+- An offline report-to-fixture proposal scaffold that accepts only the exact safe-report schema, copies coarse allowlisted signals, discards timestamps, and emits invented placeholders without generating HTML.
+- A privacy-gated synthetic-fixture issue form and authoring guide that require public documentation, independent markup authorship, safe stops, and unchanged creator attribution.
+
+### Preserved
+
+- The verified v0.7 candidate remains on `main`, unreleased and unsubmitted, while this work is prepared separately.
+- No telemetry, outcome upload, live checkout evidence, affiliate identity, or creator-attribution mutation was added.
+
 ## [0.7.0] - 2026-08-14
 
 ### Added

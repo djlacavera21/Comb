@@ -1,0 +1,57 @@
+{
+  "schema": "comb.publication-record/v1",
+  "product": {
+    "version": "0.7.0",
+    "branch": "main",
+    "candidateCommit": "e1ab9ca18b51a8a08ff9d99cdb6b91d8a56441ee",
+    "verificationRunUrl": "https://github.com/djlacavera21/Comb/actions/runs/31851839052",
+    "verificationConclusion": "success",
+    "verifiedAt": "2026-08-14T23:53:15Z",
+    "checksums": {
+      "runtimeArchive": "135a6c655cd5cf4e896035a1ee694aaa289e576ca7107307dda463d52c63405f",
+      "storeReviewKitArchive": "f4f551bbb57e2b67ce377ffb1f91e32ea96f5d16f5f9ddc138cc1c916ae274db"
+    }
+  },
+  "githubRelease": {
+    "status": "not_released",
+    "tag": null,
+    "targetCommit": null,
+    "releaseUrl": null,
+    "workflowRunUrl": null,
+    "publishedAt": null,
+    "assets": []
+  },
+  "stores": {
+    "chrome": {
+      "status": "not_submitted",
+      "version": null,
+      "itemId": null,
+      "submissionId": null,
+      "submittedAt": null,
+      "reviewedAt": null,
+      "publishedAt": null,
+      "listingUrl": null,
+      "publiclyAvailable": false,
+      "reviewEvidenceUrls": []
+    },
+    "edge": {
+      "status": "not_submitted",
+      "version": null,
+      "itemId": null,
+      "submissionId": null,
+      "submittedAt": null,
+      "reviewedAt": null,
+      "publishedAt": null,
+      "listingUrl": null,
+      "publiclyAvailable": false,
+      "reviewEvidenceUrls": []
+    }
+  },
+  "claimBoundary": {
+    "githubReleaseIsStoreAvailability": false,
+    "storeAvailabilityRequiresPublishedStatus": true,
+    "liveCheckoutEvidenceAllowed": false,
+    "creatorAttributionEvidence": "synthetic-url-and-cookie-preservation",
+    "outcomeReporting": "absent"
+  }
+}

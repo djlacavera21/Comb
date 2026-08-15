@@ -13,6 +13,7 @@ This kit is a reviewer handoff. Upload `upload/comb-0.7.0.zip` to the browser st
 - Preserve the phrase **The creator-tagging issue is fixed** and its precise explanation that existing affiliate URL tags, referral parameters, and cookies remain untouched.
 - Keep the safe compatibility report described as user-triggered, local-only, and allowlisted; do not imply automatic diagnostics or telemetry.
 - Keep the fixture matrix described as synthetic contract evidence, not universal live-merchant compatibility.
+- Check `evidence/publication-record.json` before and after every account-level action (the source file is `store/publication-record.json`). A draft, pending review, staged build, trusted-tester build, or GitHub release is not public store availability.
 
 ## Chrome Web Store
 
@@ -24,6 +25,7 @@ This kit is a reviewer handoff. Upload `upload/comb-0.7.0.zip` to the browser st
 6. Declare no remote code.
 7. Select the three conservative local data types and complete every Limited Use certification recorded in the listing metadata.
 8. Supply `listing/review-notes.md`, save the draft, preview the public listing, and submit for review.
+9. Record the Chrome item/submission IDs and exact dashboard state. Set public availability only after the state is `published` and an official listing URL resolves.
 
 If a reviewer asks for clarification, use `listing/review-response-playbook.md` and attach only synthetic/public evidence. Never attach a live checkout capture.
 
@@ -35,6 +37,7 @@ If a reviewer asks for clarification, use `listing/review-response-playbook.md` 
 4. Copy no more than the five validated search terms from `listing/listing.json`.
 5. Use `listing/review-notes.md` as certification notes and repeat the privacy disclosure exactly.
 6. Preview the listing and submit for certification.
+7. Record the Edge item/submission IDs and exact Partner Center state. Set public availability only for `in_store` or `in_store_update_in_review` with an official listing URL.
 
 Store publication supplies the installable signature. Neither ZIP in this kit should be described as developer-signed.
 

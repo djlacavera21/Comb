@@ -22,4 +22,4 @@ A valid compatibility issue includes the generated `comb.compatibility-report/v1
 
 Every compatibility fix needs a synthetic fixture with invented data, an expected adapter ID, total/currency assertions, apply/removal counts, zero purchase clicks, and a safe-failure case for nearby ambiguous markup. If attribution-sensitive code changes, the creator-tagged URL/cookie contract must remain byte-for-byte unchanged.
 
-Do not accept a selector learned only from a live capture. Prefer public platform semantics or synthetic markup that demonstrates the smallest stable contract. Unknown theme versions remain unsupported until the fixture passes locally and in required CI.
+Do not accept a selector learned only from a live capture. Prefer public platform semantics or synthetic markup that demonstrates the smallest stable contract. Use the report-to-proposal separation in [SYNTHETIC_FIXTURES.md](SYNTHETIC_FIXTURES.md); only allowlisted coarse signals may cross into the independently authored fixture process. Unknown theme versions remain unsupported until the fixture passes locally and in required CI.

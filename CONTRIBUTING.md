@@ -46,7 +46,7 @@ Comb handles checkout pages, so conservative behavior, creator attribution, and 
 
 ## Privacy rules
 
-Never commit real checkout captures. Fixtures must use invented names, products, domains, totals, codes, and order data. Use the generated safe-report workflow in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md); do not paste live markup into an issue.
+Never commit real checkout captures. Fixtures must use invented names, products, domains, totals, codes, and order data. Use the generated safe-report workflow in [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md); do not paste live markup into an issue. Before a compatibility report informs a new contract, follow [docs/SYNTHETIC_FIXTURES.md](docs/SYNTHETIC_FIXTURES.md) so only allowlisted coarse signals cross into an independently authored proposal.
 
 Browser fixtures belong in `tests/fixtures/`, must contain no live checkout data, and must have one exact record in `tests/fixtures/support-matrix.json` with zero purchase clicks. The matrix validator rejects remote resources, live hosts, identifiers, unknown values, missing coverage, and version drift. Attribution-sensitive changes must also preserve the sole synthetic creator-tagged URL and cookie contract. A local run may report `SKIP` when Chrome is unavailable; the required CI run must pass.
 

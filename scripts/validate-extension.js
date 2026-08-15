@@ -218,22 +218,29 @@ for (const requiredTool of [
   "scripts/build-store-package.js",
   "scripts/deterministic-zip.js",
   "scripts/validate-release-candidate.js",
+  "scripts/validate-publication-record.js",
   "scripts/validate-store.js",
   "scripts/validate-fixture-matrix.js",
+  "scripts/create-synthetic-fixture-proposal.js",
   "scripts/verify-release-artifacts.js",
   "tests/deterministic-zip.test.cjs",
   "tests/compatibility-report.test.cjs",
   "tests/fixture-matrix.test.cjs",
   "tests/release-artifacts.test.cjs",
   "tests/release-candidate.test.cjs",
+  "tests/publication-record.test.cjs",
+  "tests/synthetic-fixture-proposal.test.cjs",
   "CHANGELOG.md",
   ".github/ISSUE_TEMPLATE/config.yml",
   ".github/ISSUE_TEMPLATE/compatibility.yml",
   ".github/ISSUE_TEMPLATE/independent-review.yml",
+  ".github/ISSUE_TEMPLATE/synthetic-fixture.yml",
   ".github/workflows/release.yml",
   ".github/workflows/verify.yml",
   "docs/COMPATIBILITY.md",
   "docs/INDEPENDENT_REVIEW.md",
+  "docs/PUBLICATION_STATUS.md",
+  "docs/SYNTHETIC_FIXTURES.md",
   "docs/SUPPORT_TRIAGE.md",
   "store/REVIEW_RESPONSE_PLAYBOOK.md",
   "tests/fixtures/woocommerce-blocks.html",
@@ -270,6 +277,40 @@ for (const intakeBoundary of [
 }
 if (/type:\s*upload\b/.test(compatibilityFormSource)) {
   fail("compatibility issue form must not invite live checkout file uploads");
+}
+const syntheticFixtureFormSource = fs.readFileSync(
+  path.join(root, ".github/ISSUE_TEMPLATE/synthetic-fixture.yml"),
+  "utf8"
+);
+for (const fixtureBoundary of [
+  "not a live checkout capture",
+  "generic official platform documentation",
+  "independently authored this proposal",
+  "no live checkout data",
+  "preserve creator attribution"
+]) {
+  if (!syntheticFixtureFormSource.includes(fixtureBoundary)) {
+    fail(`synthetic-fixture issue form is missing: ${fixtureBoundary}`);
+  }
+}
+if (/type:\s*upload\b/.test(syntheticFixtureFormSource)) {
+  fail("synthetic-fixture issue form must not invite evidence uploads");
+}
+const syntheticProposalSource = fs.readFileSync(
+  path.join(root, "scripts/create-synthetic-fixture-proposal.js"),
+  "utf8"
+);
+for (const proposalBoundary of [
+  "allowlisted-enums-and-booleans-only",
+  "generatedAtCopied: false",
+  "liveMarkupAllowed: false",
+  "creatorIdentifiersAllowed: false",
+  "requiresIndependentMarkupAuthoring: true",
+  "preserve-existing-url-parameters-and-cookies"
+]) {
+  if (!syntheticProposalSource.includes(proposalBoundary)) {
+    fail(`synthetic fixture proposal boundary is missing: ${proposalBoundary}`);
+  }
 }
 const independentReviewFormSource = fs.readFileSync(
   path.join(root, ".github/ISSUE_TEMPLATE/independent-review.yml"),
@@ -356,8 +397,11 @@ if (packageJson.scripts?.["release:build"] !== "node scripts/build-store-package
   fail("v0.7 release build must produce the validated store review kit");
 }
 if (packageJson.scripts?.lint !==
-    "node scripts/validate-fixture-matrix.js && node scripts/validate-extension.js && node scripts/validate-store.js") {
-  fail("v0.7 lint must validate the matrix, runtime/workflow, and store boundaries");
+    "node scripts/validate-fixture-matrix.js && node scripts/validate-extension.js && node scripts/validate-store.js && node scripts/validate-publication-record.js") {
+  fail("v0.7 lint must validate the matrix, runtime/workflow, store, and publication boundaries");
+}
+if (packageJson.scripts?.["fixture:proposal"] !== "node scripts/create-synthetic-fixture-proposal.js") {
+  fail("fixture proposal command must use the privacy-safe offline scaffold");
 }
 
 for (const file of walk(root).filter((entry) => entry.endsWith(".json") && !entry.includes(`${path.sep}.git${path.sep}`))) {
