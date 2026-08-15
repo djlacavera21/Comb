@@ -1,0 +1,51 @@
+name: Dispatch verified Comb v0.7.0 release
+run-name: Dispatch Comb v0.7.0 from e1ab9ca
+
+on:
+  push:
+    branches:
+      - codex/dispatch-v0.7.0-e1ab9ca
+    paths:
+      - .github/workflows/dispatch-v0.7.0.yml
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: comb-release-dispatch-v0.7.0
+  cancel-in-progress: false
+
+jobs:
+  dispatch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      EXPECTED_VERSION: "0.7.0"
+      AUTHORIZED_SHA: e1ab9ca18b51a8a08ff9d99cdb6b91d8a56441ee
+      CREATOR_ATTRIBUTION_RELEASE_BLOCKING: "true"
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Revalidate authorization and current main
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$GITHUB_REF" = "refs/heads/codex/dispatch-v0.7.0-e1ab9ca"
+          test "$CREATOR_ATTRIBUTION_RELEASE_BLOCKING" = "true"
+          test "$AUTHORIZED_SHA" = "e1ab9ca18b51a8a08ff9d99cdb6b91d8a56441ee"
+          current_main="$(gh api "/repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq .object.sha)"
+          if [ "$current_main" != "$AUTHORIZED_SHA" ]; then
+            echo "Dispatch rejected: main moved from the authorized release commit."
+            exit 1
+          fi
+      - name: Dispatch the guarded release workflow on main
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh workflow run ".github/workflows/release.yml" \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref main \
+            -f version="$EXPECTED_VERSION" \
+            -f commit_sha="$AUTHORIZED_SHA" \
+            -f confirm_creator_attribution=true
+          echo "Guarded release workflow dispatched for v$EXPECTED_VERSION at $AUTHORIZED_SHA."
