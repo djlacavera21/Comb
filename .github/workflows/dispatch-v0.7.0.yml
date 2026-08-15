@@ -1,51 +1,19 @@
-name: Dispatch verified Comb v0.7.0 release
-run-name: Dispatch Comb v0.7.0 from e1ab9ca
+name: Retired Comb v0.7.0 release dispatcher
 
+# Audit receipt only. The one-shot dispatcher succeeded in run 31853782756 and
+# started guarded release run 31853787164 for v0.7.0 at the authorized commit.
+# There is intentionally no push trigger and no token write permission.
 on:
-  push:
-    branches:
-      - codex/dispatch-v0.7.0-e1ab9ca
-    paths:
-      - .github/workflows/dispatch-v0.7.0.yml
+  workflow_dispatch:
 
-permissions:
-  actions: write
-  contents: read
-
-concurrency:
-  group: comb-release-dispatch-v0.7.0
-  cancel-in-progress: false
+permissions: {}
 
 jobs:
-  dispatch:
+  retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 2
-    env:
-      EXPECTED_VERSION: "0.7.0"
-      AUTHORIZED_SHA: e1ab9ca18b51a8a08ff9d99cdb6b91d8a56441ee
-      CREATOR_ATTRIBUTION_RELEASE_BLOCKING: "true"
-      GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Revalidate authorization and current main
-        shell: bash
+      - name: Explain retired dispatcher
         run: |
-          set -euo pipefail
-          test "$GITHUB_REF" = "refs/heads/codex/dispatch-v0.7.0-e1ab9ca"
-          test "$CREATOR_ATTRIBUTION_RELEASE_BLOCKING" = "true"
-          test "$AUTHORIZED_SHA" = "e1ab9ca18b51a8a08ff9d99cdb6b91d8a56441ee"
-          current_main="$(gh api "/repos/${GITHUB_REPOSITORY}/git/ref/heads/main" --jq .object.sha)"
-          if [ "$current_main" != "$AUTHORIZED_SHA" ]; then
-            echo "Dispatch rejected: main moved from the authorized release commit."
-            exit 1
-          fi
-      - name: Dispatch the guarded release workflow on main
-        shell: bash
-        run: |
-          set -euo pipefail
-          gh workflow run ".github/workflows/release.yml" \
-            --repo "$GITHUB_REPOSITORY" \
-            --ref main \
-            -f version="$EXPECTED_VERSION" \
-            -f commit_sha="$AUTHORIZED_SHA" \
-            -f confirm_creator_attribution=true
-          echo "Guarded release workflow dispatched for v$EXPECTED_VERSION at $AUTHORIZED_SHA."
+          echo "This one-shot dispatcher is retired."
+          echo "Comb v0.7.0 was published by guarded release run 31853787164."
+          exit 1
