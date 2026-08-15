@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="800" viewBox="0 0 1280 800" role="img" aria-labelledby="title desc">
+  <title id="title">Comb signature-verified community coupon feeds</title>
+  <desc id="desc">Comb settings show a trusted public key, a signature-verified coupon feed, and an optional approved update source</desc>
+  <defs>
+    <linearGradient id="background" x1="40" y1="20" x2="1235" y2="785" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#123629"/>
+      <stop offset="0.55" stop-color="#0b241b"/>
+      <stop offset="1" stop-color="#071a14"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(1060 98) rotate(130) scale(620 540)">
+      <stop stop-color="#d4a84f" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#d4a84f" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f7dda0"/>
+      <stop offset="1" stop-color="#d4a84f"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="800" fill="url(#background)"/>
+  <rect width="1280" height="800" fill="url(#glow)"/>
+  <g opacity="0.1" fill="none" stroke="#edc66f" stroke-width="2">
+    <path d="M90 66 125 86v40l-35 20-35-20V86z"/>
+    <path d="M120 137 155 157v40l-35 20-35-20v-40z"/>
+    <path d="M60 137 95 157v40l-35 20-35-20v-40z"/>
+    <path d="M1187 614 1222 634v40l-35 20-35-20v-40z"/>
+    <path d="M1157 685 1192 705v40l-35 20-35-20v-40z"/>
+  </g>
+
+  <g transform="translate(82 70)">
+    <path d="M32 0 62 17v35L32 70 2 52V17z" fill="#0b241b" stroke="url(#brass)" stroke-width="3"/>
+    <text x="20" y="48" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="34" font-weight="800">C</text>
+    <text x="80" y="25" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="700" letter-spacing="2">PRIVATE COUPON TESTER</text>
+    <text x="80" y="57" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="32" font-weight="800">Comb</text>
+  </g>
+
+  <text x="82" y="224" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="43" font-weight="800">Trusted community</text>
+  <text x="82" y="272" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="43" font-weight="800">codes.</text>
+  <text x="82" y="326" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="28" font-weight="750">Signed—not sponsored.</text>
+  <text x="82" y="388" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="18">Import coupon tokens from publishers you choose.</text>
+  <text x="82" y="420" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="18">Affiliate URLs and arbitrary metadata are rejected.</text>
+
+  <g transform="translate(82 472)">
+    <circle cx="13" cy="13" r="13" fill="#71d39b"/>
+    <path d="m7 13 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="40" y="18" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700">ECDSA P-256 signature verification</text>
+    <circle cx="13" cy="67" r="13" fill="#71d39b"/>
+    <path d="m7 67 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="40" y="72" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700">Expiry, identity, and rollback protection</text>
+    <circle cx="13" cy="121" r="13" fill="#71d39b"/>
+    <path d="m7 121 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="40" y="126" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="700">Optional origin access is revocable</text>
+  </g>
+
+  <rect x="596" y="42" width="608" height="724" rx="34" fill="#000" fill-opacity="0.3"/>
+  <g transform="translate(620 58)">
+    <rect width="560" height="692" rx="22" fill="#081d16" stroke="#edc66f" stroke-opacity="0.25"/>
+    <g transform="translate(26 22)">
+      <path d="M22 0 42 12v23L22 47 2 35V12z" fill="#0b241b" stroke="url(#brass)" stroke-width="2.2"/>
+      <text x="14" y="33" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="24" font-weight="800">C</text>
+      <text x="58" y="17" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="8" font-weight="800" letter-spacing="1.2">COMB SETTINGS</text>
+      <text x="58" y="41" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="22" font-weight="800">Community feeds</text>
+      <rect x="396" y="8" width="110" height="29" rx="15" fill="#d4a84f" fill-opacity="0.1" stroke="#edc66f" stroke-opacity="0.25"/>
+      <text x="414" y="27" fill="#f7dda0" font-family="DejaVu Sans, sans-serif" font-size="10" font-weight="800">1 feed · 1 key</text>
+
+      <g transform="translate(0 66)">
+        <rect width="508" height="62" rx="12" fill="#71d39b" fill-opacity="0.09" stroke="#71d39b" stroke-opacity="0.35"/>
+        <circle cx="24" cy="22" r="10" fill="#71d39b"/>
+        <path d="m19 22 3 3 6-7" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4"/>
+        <text x="43" y="20" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="800">Signature, expiry, schema, and sequence verified</text>
+        <text x="43" y="40" fill="#bcd9c8" font-family="DejaVu Sans, sans-serif" font-size="9.5">Coupon tokens are available without affiliate links or executable code.</text>
+      </g>
+
+      <g transform="translate(0 143)">
+        <text x="0" y="11" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="8" font-weight="800" letter-spacing="1.2">TRUSTED PUBLIC KEY</text>
+        <rect y="24" width="508" height="94" rx="13" fill="#fff" fill-opacity="0.045" stroke="#edc66f" stroke-opacity="0.2"/>
+        <text x="17" y="52" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="800">Comb Community</text>
+        <text x="17" y="75" fill="#edc66f" font-family="DejaVu Sans Mono, monospace" font-size="10">P-256 · fingerprint 94be:52c1:8a70:3d11</text>
+        <text x="17" y="97" fill="#8fa097" font-family="DejaVu Sans, sans-serif" font-size="9.5">Public key only · private signing material stays offline</text>
+        <rect x="421" y="38" width="70" height="25" rx="13" fill="#71d39b" fill-opacity="0.12" stroke="#71d39b" stroke-opacity="0.3"/>
+        <text x="438" y="54" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="9" font-weight="800">TRUSTED</text>
+      </g>
+
+      <g transform="translate(0 278)">
+        <text x="0" y="11" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="8" font-weight="800" letter-spacing="1.2">SIGNED FEED</text>
+        <rect y="24" width="508" height="102" rx="13" fill="#fff" fill-opacity="0.045" stroke="#edc66f" stroke-opacity="0.2"/>
+        <text x="17" y="52" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="800">Community Savings</text>
+        <text x="17" y="76" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="10">4 coupon codes · sequence 12 · expires Sep 30, 2026</text>
+        <text x="17" y="99" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="9.5">Signer, feed identity, schema, and higher sequence verified</text>
+        <rect x="419" y="38" width="72" height="25" rx="13" fill="#71d39b"/>
+        <text x="433" y="54" fill="#071a14" font-family="DejaVu Sans, sans-serif" font-size="9" font-weight="900">VERIFIED</text>
+      </g>
+
+      <g transform="translate(0 422)">
+        <text x="0" y="11" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="8" font-weight="800" letter-spacing="1.2">OPTIONAL APPROVED SOURCE</text>
+        <rect y="24" width="508" height="112" rx="13" fill="#fff" fill-opacity="0.045" stroke="#edc66f" stroke-opacity="0.2"/>
+        <text x="17" y="52" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="800">community-savings</text>
+        <text x="17" y="76" fill="#edc66f" font-family="DejaVu Sans Mono, monospace" font-size="10">https://feeds.example.test/comb.json</text>
+        <text x="17" y="99" fill="#b8c7be" font-family="DejaVu Sans, sans-serif" font-size="9.5">Verified just now · credentials and referrer omitted</text>
+        <rect x="393" y="71" width="98" height="26" rx="13" fill="#d4a84f" fill-opacity="0.1" stroke="#edc66f" stroke-opacity="0.25"/>
+        <text x="408" y="88" fill="#f7dda0" font-family="DejaVu Sans, sans-serif" font-size="9" font-weight="800">REMOVE ACCESS</text>
+      </g>
+
+      <g transform="translate(0 578)">
+        <rect width="508" height="50" rx="11" fill="#d4a84f" fill-opacity="0.09" stroke="#edc66f" stroke-opacity="0.24"/>
+        <text x="23" y="30" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="11.5" font-weight="800">Coupon tokens only · No affiliate URLs · No remote code</text>
+      </g>
+    </g>
+  </g>
+  <text x="1177" y="779" text-anchor="end" fill="#82958b" font-family="DejaVu Sans, sans-serif" font-size="10">Synthetic settings state · Comb v0.7</text>
+</svg>

@@ -65,13 +65,18 @@ The popup's **Save safe report** action creates a local allowlisted JSON file on
 | `icons/comb-128.png` | 128×128 | Chrome icon; meets Edge minimum |
 | `store/assets/comb-store-logo-300.png` | 300×300 | Edge recommended logo |
 | `store/assets/comb-small-promo-440x280.png` | 440×280 | Chrome small promo / Edge small tile |
-| `store/assets/comb-screenshot-01-1280x800.png` | 1280×800 | Chrome and Edge screenshot |
+| `store/assets/comb-screenshot-01-1280x800.png` | 1280×800 | Coupon workflow and protected attribution |
+| `store/assets/comb-screenshot-02-1280x800.png` | 1280×800 | Creator-tagging fix with unchanged synthetic URL and cookie evidence |
+| `store/assets/comb-screenshot-03-1280x800.png` | 1280×800 | Measured results and the best verified code |
+| `store/assets/comb-screenshot-04-1280x800.png` | 1280×800 | Trusted keys and signature-verified community feeds |
+| `store/assets/comb-screenshot-05-1280x800.png` | 1280×800 | Safe stop and privacy-bounded compatibility reporting |
 
-Editable SVG sources sit beside the generated promotional PNGs. Only the validated PNGs are placed in the review kit.
+Editable SVG sources sit beside the generated promotional PNGs. The five validated PNGs fill Chrome's five-screenshot allowance and remain within Edge's six-screenshot limit; only those PNGs are placed in the review kit.
 
 ## Official policy references rechecked 2026-08-15
 
 - [Chrome Web Store listing fields and assets](https://developer.chrome.com/docs/webstore/cws-dashboard-listing)
+- [Chrome Web Store image requirements](https://developer.chrome.com/docs/webstore/images)
 - [Chrome Web Store privacy fields](https://developer.chrome.com/docs/webstore/cws-dashboard-privacy)
 - [Chrome Web Store user-data FAQ](https://developer.chrome.com/docs/webstore/program-policies/user-data-faq)
 - [Chrome Web Store privacy policy requirements](https://developer.chrome.com/docs/webstore/program-policies/privacy)

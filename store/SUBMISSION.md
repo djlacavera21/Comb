@@ -20,7 +20,7 @@ This kit is a reviewer handoff. Upload `upload/comb-0.7.0.zip` to the browser st
 1. Upload the runtime ZIP from `upload/`.
 2. Copy the shared name, description, category, language, homepage, support, and privacy-policy fields from `listing/listing.json`.
 3. Copy `listing/chrome-description.txt` and `listing/release-notes.txt`.
-4. Upload the 128×128 icon, 440×280 small promo tile, and 1280×800 screenshot from `listing/assets/`.
+4. Upload the 128×128 icon, 440×280 small promo tile, and all five numbered 1280×800 screenshots from `listing/assets/` in order.
 5. Copy the single-purpose and per-permission explanations.
 6. Declare no remote code.
 7. Select the three conservative local data types and complete every Limited Use certification recorded in the listing metadata.
@@ -33,7 +33,7 @@ If a reviewer asks for clarification, use `listing/review-response-playbook.md` 
 
 1. Import or upload the same runtime ZIP.
 2. Copy the shared fields and `listing/edge-description.txt` for the `en` locale.
-3. Upload the 300×300 logo, optional 440×280 small tile, and 1280×800 screenshot.
+3. Upload the 300×300 logo, optional 440×280 small tile, and all five numbered 1280×800 screenshots in order.
 4. Copy no more than the five validated search terms from `listing/listing.json`.
 5. Use `listing/review-notes.md` as certification notes and repeat the privacy disclosure exactly.
 6. Preview the listing and submit for certification.

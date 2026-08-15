@@ -181,15 +181,53 @@ for (const phrase of [
 validateAsset(listing.chrome?.assets?.icon, "Chrome icon");
 validateAsset(listing.chrome?.assets?.smallPromo, "Chrome small promo tile");
 const chromeScreenshots = listing.chrome?.assets?.screenshots || [];
-if (chromeScreenshots.length < 1 || chromeScreenshots.length > 5) {
-  fail("Chrome must declare one to five screenshots");
+const expectedScreenshotPaths = [1, 2, 3, 4, 5]
+  .map((number) => `store/assets/comb-screenshot-${String(number).padStart(2, "0")}-1280x800.png`);
+const screenshotSources = expectedScreenshotPaths.map((assetPath, index) => {
+  const source = read(assetPath.replace(/\.png$/, ".svg"));
+  for (const phrase of ["width=\"1280\"", "height=\"800\"", "Comb v0.7"]) {
+    if (!source.includes(phrase)) fail(`screenshot source ${index + 1} is missing: ${phrase}`);
+  }
+  return source;
+});
+for (const phrase of [
+  "The tagging issue is fixed.",
+  "affiliate_id=creator-42&amp;utm_source=creator",
+  "creator_attribution=creator-42",
+  "Proper attribution remains with the original creator."
+]) {
+  if (!screenshotSources[1].includes(phrase)) fail(`creator-attribution screenshot is missing: ${phrase}`);
 }
-chromeScreenshots.forEach((asset, index) => validateAsset(asset, `Chrome screenshot ${index + 1}`));
+function validateScreenshotSet(screenshots, label) {
+  if (!Array.isArray(screenshots) || screenshots.length !== expectedScreenshotPaths.length) {
+    fail(`${label} must declare the complete five-screenshot set`);
+    return;
+  }
+  if (JSON.stringify(screenshots.map((asset) => asset.path)) !== JSON.stringify(expectedScreenshotPaths)) {
+    fail(`${label} screenshots must use the numbered 01–05 store assets in order`);
+  }
+  if (new Set(screenshots.map((asset) => asset.caption)).size !== screenshots.length) {
+    fail(`${label} screenshot captions must be unique`);
+  }
+  screenshots.forEach((asset, index) => {
+    validateAsset(asset, `${label} screenshot ${index + 1}`);
+    if (asset?.width !== 1280 || asset?.height !== 800) {
+      fail(`${label} screenshot ${index + 1} must declare 1280x800 dimensions`);
+    }
+    if (String(asset?.caption || "").length < 60 || String(asset?.caption || "").length > 240) {
+      fail(`${label} screenshot ${index + 1} needs a 60-to-240-character caption`);
+    }
+  });
+}
+validateScreenshotSet(chromeScreenshots, "Chrome");
 validateAsset(listing.edge?.assets?.logo, "Edge logo");
 validateAsset(listing.edge?.assets?.smallTile, "Edge small tile");
 const edgeScreenshots = listing.edge?.assets?.screenshots || [];
-if (edgeScreenshots.length > 6) fail("Edge must declare at most six screenshots");
-edgeScreenshots.forEach((asset, index) => validateAsset(asset, `Edge screenshot ${index + 1}`));
+validateScreenshotSet(edgeScreenshots, "Edge");
+if (JSON.stringify(edgeScreenshots.map((asset) => asset.caption)) !==
+    JSON.stringify(chromeScreenshots.map((asset) => asset.caption))) {
+  fail("Chrome and Edge must use the same screenshot captions in the same order");
+}
 
 const searchTerms = listing.edge?.searchTerms || [];
 if (searchTerms.length < 1 || searchTerms.length > 7) fail("Edge must have one to seven search terms");

@@ -107,7 +107,9 @@ function main() {
       "submission checklist": read("store/SUBMISSION.md"),
       "release notes": read("store/release-notes.txt"),
       "options version label": read("src/options/options.html"),
-      "store screenshot source": read("store/assets/comb-screenshot-01-1280x800.svg")
+      "store screenshot source": [1, 2, 3, 4, 5]
+        .map((number) => read(`store/assets/comb-screenshot-${String(number).padStart(2, "0")}-1280x800.svg`))
+        .join("\n")
     }
   };
   const errors = validateReleaseCandidate(candidate);

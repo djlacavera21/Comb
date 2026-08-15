@@ -124,6 +124,30 @@
           "width": 1280,
           "height": 800,
           "caption": "Comb testing coupon codes on a synthetic checkout while keeping creator attribution protected."
+        },
+        {
+          "path": "store/assets/comb-screenshot-02-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "The creator-tagging issue is fixed: synthetic URL parameters and an attribution cookie remain unchanged after coupon testing."
+        },
+        {
+          "path": "store/assets/comb-screenshot-03-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb measures every code against the payable total, restores between attempts, and leaves the best verified code applied."
+        },
+        {
+          "path": "store/assets/comb-screenshot-04-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb verifies trusted P-256 public keys and signed coupon feeds while rejecting affiliate URLs and remote code."
+        },
+        {
+          "path": "store/assets/comb-screenshot-05-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb stops on ambiguous controls and can save a local compatibility report that excludes checkout and creator data."
         }
       ]
     }
@@ -153,7 +177,32 @@
         {
           "path": "store/assets/comb-screenshot-01-1280x800.png",
           "width": 1280,
-          "height": 800
+          "height": 800,
+          "caption": "Comb testing coupon codes on a synthetic checkout while keeping creator attribution protected."
+        },
+        {
+          "path": "store/assets/comb-screenshot-02-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "The creator-tagging issue is fixed: synthetic URL parameters and an attribution cookie remain unchanged after coupon testing."
+        },
+        {
+          "path": "store/assets/comb-screenshot-03-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb measures every code against the payable total, restores between attempts, and leaves the best verified code applied."
+        },
+        {
+          "path": "store/assets/comb-screenshot-04-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb verifies trusted P-256 public keys and signed coupon feeds while rejecting affiliate URLs and remote code."
+        },
+        {
+          "path": "store/assets/comb-screenshot-05-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb stops on ambiguous controls and can save a local compatibility report that excludes checkout and creator data."
         }
       ]
     }
