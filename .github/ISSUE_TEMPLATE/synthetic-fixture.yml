@@ -1,0 +1,76 @@
+name: Synthetic fixture proposal
+description: Propose an independently authored checkout contract using public documentation and invented values only.
+title: "Synthetic fixture: "
+labels:
+  - compatibility
+  - synthetic-fixture
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This form is for a new synthetic contract—not a live checkout capture. **Do not include a merchant URL/hostname, screenshot, HTML, selector, page text, cookie, coupon code, total, identity, payment/order data, affiliate tag, creator identifier, or private reviewer message.** Read `docs/SYNTHETIC_FIXTURES.md` first.
+  - type: input
+    id: source-issue
+    attributes:
+      label: Public compatibility issue
+      description: Optional. Link only a public issue that already contains the exact safe-report schema.
+      placeholder: "https://github.com/djlacavera21/Comb/issues/123"
+  - type: input
+    id: fixture-id
+    attributes:
+      label: Proposed fixture ID
+      description: Use a generic lowercase kebab-case identifier with no merchant or creator name.
+      placeholder: "generic-apply-missing"
+    validations:
+      required: true
+  - type: dropdown
+    id: adapter
+    attributes:
+      label: Coarse adapter contract
+      options:
+        - generic
+        - woocommerce
+        - shopify
+        - bigcommerce
+        - unknown
+    validations:
+      required: true
+  - type: input
+    id: public-contract
+    attributes:
+      label: Public platform documentation
+      description: Optional. Link generic official platform documentation or a public open-source theme contract, never a merchant checkout.
+      placeholder: "https://developer.example.org/public-checkout-contract"
+  - type: textarea
+    id: invented-structure
+    attributes:
+      label: Independently invented structure
+      description: Describe new synthetic labels, control order, and amounts. Use only invented values and do not paraphrase live markup.
+      placeholder: "Invented $100 payable total; coupon input; one Apply button; separate purchase button that must never be clicked."
+    validations:
+      required: true
+  - type: dropdown
+    id: expected-result
+    attributes:
+      label: Expected contract
+      options:
+        - Recognize and safely test coupons
+        - Stop because the coupon input is missing
+        - Stop because the Apply control is missing or ambiguous
+        - Stop because the payable total is missing or ambiguous
+        - Stop because an existing coupon is present
+        - Stop because checkout restoration cannot be verified
+        - Stop because the amount or currency changes unexpectedly
+    validations:
+      required: true
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Fixture boundaries
+      options:
+        - label: I independently authored this proposal from public documentation and invented values, without copying or paraphrasing a live checkout.
+          required: true
+        - label: This issue contains no live checkout data, merchant/creator identifier, affiliate tag, or private reviewer correspondence.
+          required: true
+        - label: The fixture must preserve creator attribution, avoid purchase controls, and stop safely on ambiguity.
+          required: true

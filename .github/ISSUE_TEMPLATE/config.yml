@@ -9,3 +9,6 @@ contact_links:
   - name: Independent-review guide
     url: https://github.com/djlacavera21/Comb/blob/main/docs/INDEPENDENT_REVIEW.md
     about: Reproduce a public commit's safety and creator-attribution boundaries using synthetic evidence only.
+  - name: Synthetic-fixture authoring guide
+    url: https://github.com/djlacavera21/Comb/blob/main/docs/SYNTHETIC_FIXTURES.md
+    about: Convert only safe coarse signals into an independently written fixture using invented values.

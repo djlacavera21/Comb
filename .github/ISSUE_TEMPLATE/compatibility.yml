@@ -77,3 +77,5 @@ body:
           required: true
         - label: I understand Comb intentionally stops on unknown or ambiguous markup instead of risking the checkout or creator attribution.
           required: true
+        - label: I understand any resulting fixture will be independently written from public documentation and invented values, not copied from my checkout.
+          required: true

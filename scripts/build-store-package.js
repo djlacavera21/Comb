@@ -17,6 +17,10 @@ function entry(name, relativePath) {
 }
 
 function main() {
+  execFileSync(process.execPath, ["scripts/validate-publication-record.js"], {
+    cwd: root,
+    stdio: "inherit"
+  });
   execFileSync(process.execPath, ["scripts/validate-store.js"], {
     cwd: root,
     stdio: "inherit"
@@ -37,14 +41,19 @@ function main() {
     entry("evidence/ATTRIBUTION.md", "docs/ATTRIBUTION.md"),
     entry("evidence/COMPATIBILITY.md", "docs/COMPATIBILITY.md"),
     entry("evidence/INDEPENDENT_REVIEW.md", "docs/INDEPENDENT_REVIEW.md"),
+    entry("evidence/PUBLICATION_STATUS.md", "docs/PUBLICATION_STATUS.md"),
     entry("evidence/RELEASE.md", "docs/RELEASE.md"),
     entry("evidence/SECURITY_REVIEW.md", "docs/SECURITY_REVIEW.md"),
     entry("evidence/SUPPORT_TRIAGE.md", "docs/SUPPORT_TRIAGE.md"),
+    entry("evidence/SYNTHETIC_FIXTURES.md", "docs/SYNTHETIC_FIXTURES.md"),
     entry("evidence/manifest.json", "manifest.json"),
+    entry("evidence/publication-record.json", "store/publication-record.json"),
     entry("evidence/support-matrix.json", "tests/fixtures/support-matrix.json"),
     entry("evidence/release-workflow.yml", ".github/workflows/release.yml"),
     entry("evidence/validate-fixture-matrix.js", "scripts/validate-fixture-matrix.js"),
+    entry("evidence/validate-publication-record.js", "scripts/validate-publication-record.js"),
     entry("evidence/validate-release-candidate.js", "scripts/validate-release-candidate.js"),
+    entry("evidence/create-synthetic-fixture-proposal.js", "scripts/create-synthetic-fixture-proposal.js"),
     entry("evidence/verify-release-artifacts.js", "scripts/verify-release-artifacts.js"),
     entry("listing/assets/comb-128.png", "icons/comb-128.png"),
     entry("listing/assets/comb-screenshot-01-1280x800.png", "store/assets/comb-screenshot-01-1280x800.png"),

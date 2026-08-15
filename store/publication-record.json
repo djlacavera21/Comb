@@ -1,0 +1,78 @@
+{
+  "schema": "comb.publication-record/v1",
+  "product": {
+    "version": "0.7.0",
+    "branch": "main",
+    "candidateCommit": "e1ab9ca18b51a8a08ff9d99cdb6b91d8a56441ee",
+    "verificationRunUrl": "https://github.com/djlacavera21/Comb/actions/runs/31851839052",
+    "verificationConclusion": "success",
+    "verifiedAt": "2026-08-14T23:53:15Z",
+    "checksums": {
+      "runtimeArchive": "135a6c655cd5cf4e896035a1ee694aaa289e576ca7107307dda463d52c63405f",
+      "storeReviewKitArchive": "f4f551bbb57e2b67ce377ffb1f91e32ea96f5d16f5f9ddc138cc1c916ae274db"
+    }
+  },
+  "githubRelease": {
+    "status": "released",
+    "tag": "v0.7.0",
+    "targetCommit": "e1ab9ca18b51a8a08ff9d99cdb6b91d8a56441ee",
+    "releaseUrl": "https://github.com/djlacavera21/Comb/releases/tag/v0.7.0",
+    "workflowRunUrl": "https://github.com/djlacavera21/Comb/actions/runs/31853787164",
+    "publishedAt": "2026-08-15T00:30:11Z",
+    "assets": [
+      {
+        "name": "comb-0.7.0-store-review-kit.zip",
+        "sha256": "f4f551bbb57e2b67ce377ffb1f91e32ea96f5d16f5f9ddc138cc1c916ae274db",
+        "downloadUrl": "https://github.com/djlacavera21/Comb/releases/download/v0.7.0/comb-0.7.0-store-review-kit.zip"
+      },
+      {
+        "name": "comb-0.7.0-store-review-kit.zip.sha256",
+        "sha256": "b4cecd81f0b0b84f58203fc49ebe4196075386af34e8557c131a39237b486daf",
+        "downloadUrl": "https://github.com/djlacavera21/Comb/releases/download/v0.7.0/comb-0.7.0-store-review-kit.zip.sha256"
+      },
+      {
+        "name": "comb-0.7.0.zip",
+        "sha256": "135a6c655cd5cf4e896035a1ee694aaa289e576ca7107307dda463d52c63405f",
+        "downloadUrl": "https://github.com/djlacavera21/Comb/releases/download/v0.7.0/comb-0.7.0.zip"
+      },
+      {
+        "name": "comb-0.7.0.zip.sha256",
+        "sha256": "82eee052e58fcaff6d326e96bdf824727b6d6932f822050db18b8d1799e6bb5e",
+        "downloadUrl": "https://github.com/djlacavera21/Comb/releases/download/v0.7.0/comb-0.7.0.zip.sha256"
+      }
+    ]
+  },
+  "stores": {
+    "chrome": {
+      "status": "not_submitted",
+      "version": null,
+      "itemId": null,
+      "submissionId": null,
+      "submittedAt": null,
+      "reviewedAt": null,
+      "publishedAt": null,
+      "listingUrl": null,
+      "publiclyAvailable": false,
+      "reviewEvidenceUrls": []
+    },
+    "edge": {
+      "status": "not_submitted",
+      "version": null,
+      "itemId": null,
+      "submissionId": null,
+      "submittedAt": null,
+      "reviewedAt": null,
+      "publishedAt": null,
+      "listingUrl": null,
+      "publiclyAvailable": false,
+      "reviewEvidenceUrls": []
+    }
+  },
+  "claimBoundary": {
+    "githubReleaseIsStoreAvailability": false,
+    "storeAvailabilityRequiresPublishedStatus": true,
+    "liveCheckoutEvidenceAllowed": false,
+    "creatorAttributionEvidence": "synthetic-url-and-cookie-preservation",
+    "outcomeReporting": "absent"
+  }
+}

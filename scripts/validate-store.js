@@ -55,7 +55,7 @@ function validateAsset(asset, label) {
 
 if (listing.schemaVersion !== 1) fail("store listing schemaVersion must be 1");
 if (listing.extensionVersion !== manifest.version) fail("store listing and manifest versions must match");
-if (listing.lastReviewed !== "2026-08-14") fail("store listing review date must match the v0.7 review");
+if (listing.lastReviewed !== "2026-08-15") fail("store listing review date must match the current official-policy review");
 if (listing.shared?.name !== manifest.name) fail("store name must match the manifest");
 if (listing.shared?.shortDescription !== manifest.description) {
   fail("store short description must match the manifest description");
@@ -201,11 +201,19 @@ if (searchTerms.join(" ").trim().split(/\s+/).length > 21) fail("Edge search ter
 
 const privacy = read("docs/PRIVACY.md");
 const securityReview = read("docs/SECURITY_REVIEW.md");
+const publicationStatus = read("docs/PUBLICATION_STATUS.md");
+const syntheticFixtures = read("docs/SYNTHETIC_FIXTURES.md");
 for (const phrase of ["on-device", "Limited Use commitments", "user-selected feed operator", "Financial and payment information"]) {
   if (!privacy.includes(phrase)) fail(`privacy policy is missing: ${phrase}`);
 }
 for (const phrase of ["not an external audit", "creator URL and cookie", "npm run release:build"]) {
   if (!securityReview.includes(phrase)) fail(`security review is missing: ${phrase}`);
+}
+for (const phrase of ["not publicly available", "The creator-tagging issue is fixed", "official publication status"]) {
+  if (!publicationStatus.includes(phrase)) fail(`publication status is missing: ${phrase}`);
+}
+for (const phrase of ["independently written", "discards the report timestamp", "never generates or derives HTML"]) {
+  if (!syntheticFixtures.includes(phrase)) fail(`synthetic fixture guide is missing: ${phrase}`);
 }
 read("store/SUBMISSION.md");
 read("store/REVIEW_RESPONSE_PLAYBOOK.md");

@@ -28,4 +28,4 @@ Select **No, I am not using remote code**. All JavaScript and CSS is packaged in
 
 ## Evidence to attach
 
-Provide the deterministic runtime checksum, public security review, Creator Attribution Guarantee, machine support matrix, independent-review guide, privacy policy, manifest snapshot, required CI URL, and exact GitHub release SHA. Never send a live checkout capture or user report to a store reviewer.
+Provide the deterministic runtime checksum, public security review, Creator Attribution Guarantee, machine support matrix, independent-review guide, publication-status record, privacy policy, manifest snapshot, required CI URL, and exact GitHub release SHA. Never send a live checkout capture or user report to a store reviewer.

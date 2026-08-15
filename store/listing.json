@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "extensionVersion": "0.7.0",
-  "lastReviewed": "2026-08-14",
+  "lastReviewed": "2026-08-15",
   "shared": {
     "name": "Comb — Private Coupon Tester",
     "shortDescription": "Test coupons with verified checkout restoration, trusted feed updates, and protected creator attribution.",
@@ -90,13 +90,17 @@
     "verifiedBy": [
       "scripts/validate-extension.js",
       "scripts/run-browser-fixtures.js",
+      "scripts/create-synthetic-fixture-proposal.js",
+      "scripts/validate-publication-record.js",
       "tests/fixtures/support-matrix.json",
       "tests/compatibility-report.test.cjs",
       ".github/workflows/release.yml",
       "docs/ATTRIBUTION.md",
       "docs/COMPATIBILITY.md",
       "docs/INDEPENDENT_REVIEW.md",
-      "docs/SECURITY_REVIEW.md"
+      "docs/PUBLICATION_STATUS.md",
+      "docs/SECURITY_REVIEW.md",
+      "docs/SYNTHETIC_FIXTURES.md"
     ]
   },
   "chrome": {

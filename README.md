@@ -58,6 +58,10 @@ Signed feeds are inert JSON and are never executed. Network feed updates are off
 
 See [docs/PRIVACY.md](docs/PRIVACY.md) for the precise data boundaries.
 
+## Publication status
+
+The verified v0.7 build is published as the immutable GitHub release [`v0.7.0`](https://github.com/djlacavera21/Comb/releases/tag/v0.7.0), pinned to the green source commit after the creator-attribution release gate and real-Chrome preservation contract passed. It has not been submitted to Chrome Web Store or Microsoft Edge Add-ons, so Comb is not yet publicly available from either browser store. [docs/PUBLICATION_STATUS.md](docs/PUBLICATION_STATUS.md) and the machine-validated [`store/publication-record.json`](store/publication-record.json) record the exact commit, workflow runs, four asset checksums, and official store states without treating a GitHub release as browser-store availability.
+
 ## Install the extension locally
 
 1. Clone or download this repository.
@@ -138,7 +142,7 @@ Detailed design notes are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Roadmap
 
-The machine support matrix, independent-review path, and controlled GitHub release workflow are shipped in v0.7. Browser-store dashboard submission and approval remain the next account-level milestone; Comb will not claim public availability before that occurs. Any outcome reporting remains a separate, strictly opt-in future decision. See [docs/ROADMAP.md](docs/ROADMAP.md).
+The machine support matrix, independent-review path, and controlled GitHub release workflow are shipped in v0.7. Browser-store dashboard submission and approval remain the next account-level milestone; Comb will not claim public availability before that occurs. Privacy-safe reports can inform new contracts only through the independently authored process in [docs/SYNTHETIC_FIXTURES.md](docs/SYNTHETIC_FIXTURES.md). Any outcome reporting remains a separate, strictly opt-in future decision. See [docs/ROADMAP.md](docs/ROADMAP.md).
 
 ## Contributing
 
