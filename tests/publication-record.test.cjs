@@ -14,7 +14,7 @@ const {
 const root = path.resolve(__dirname, "..");
 const record = JSON.parse(fs.readFileSync(path.join(root, "store/publication-record.json"), "utf8"));
 
-test("publication record accepts the verified unreleased and unsubmitted candidate", () => {
+test("publication record accepts the verified released and unsubmitted build", () => {
   assert.deepEqual(validatePublicationRecord(record, { version: "0.7.0" }), []);
   const document = fs.readFileSync(path.join(root, "docs/PUBLICATION_STATUS.md"), "utf8");
   assert.deepEqual(validatePublicationDocument(record, document), []);

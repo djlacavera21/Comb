@@ -14,11 +14,23 @@ This page records evidence, not launch intent. [`../store/publication-record.jso
 
 ## Current publication state
 
-- GitHub release: **Not released**
+- GitHub release: **Released**
+- Immutable tag and release: [`v0.7.0`](https://github.com/djlacavera21/Comb/releases/tag/v0.7.0)
+- Release workflow: [successful run 31853787164](https://github.com/djlacavera21/Comb/actions/runs/31853787164)
+- Published at: `2026-08-15T00:30:11Z`
 - Chrome Web Store: **Not submitted**
 - Microsoft Edge Add-ons: **Not submitted**
 
 Comb is not publicly available from either browser store yet. A repository build or GitHub release is not an installable browser-store signature and must never be described as store publication.
+
+### Immutable GitHub release assets
+
+| Asset | SHA-256 |
+| --- | --- |
+| [`comb-0.7.0-store-review-kit.zip`](https://github.com/djlacavera21/Comb/releases/download/v0.7.0/comb-0.7.0-store-review-kit.zip) | `f4f551bbb57e2b67ce377ffb1f91e32ea96f5d16f5f9ddc138cc1c916ae274db` |
+| [`comb-0.7.0-store-review-kit.zip.sha256`](https://github.com/djlacavera21/Comb/releases/download/v0.7.0/comb-0.7.0-store-review-kit.zip.sha256) | `b4cecd81f0b0b84f58203fc49ebe4196075386af34e8557c131a39237b486daf` |
+| [`comb-0.7.0.zip`](https://github.com/djlacavera21/Comb/releases/download/v0.7.0/comb-0.7.0.zip) | `135a6c655cd5cf4e896035a1ee694aaa289e576ca7107307dda463d52c63405f` |
+| [`comb-0.7.0.zip.sha256`](https://github.com/djlacavera21/Comb/releases/download/v0.7.0/comb-0.7.0.zip.sha256) | `82eee052e58fcaff6d326e96bdf824727b6d6932f822050db18b8d1799e6bb5e` |
 
 Chrome's official lifecycle distinguishes pending review, staged, public, trusted-tester, rejected, and cancelled states. Microsoft separately defines draft, review, waiting, in-store, failed, unavailable, removed, and blocked states. The validator maps public availability only to Chrome `published` and Edge `in_store`/`in_store_update_in_review`; every earlier state remains unavailable.
 
@@ -30,8 +42,8 @@ This is bounded synthetic evidence, not a claim that Comb can inspect or certify
 
 ## Updating this record
 
-1. Run the manually authorized release workflow at the exact current green `main` SHA.
-2. Record the release-workflow run, immutable tag, target commit, release URL, timestamp, and SHA-256 of all four release assets.
+1. Treat the recorded `v0.7.0` tag, target commit, release workflow, assets, and checksums as immutable; use a new version for any changed build.
+2. Submit only the recorded `comb-0.7.0.zip` runtime asset to each browser-store dashboard after verifying its SHA-256.
 3. Record each dashboard item/submission ID, submitted version, and official state without copying private reviewer correspondence.
 4. Set `publiclyAvailable` only when the official state permits it and add the official listing URL and publication timestamp.
 5. Link any public review evidence through a repository issue, pull request, or commit.

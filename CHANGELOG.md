@@ -12,10 +12,10 @@ All notable Comb changes are recorded here. At browser-store publication, the re
 
 ### Preserved
 
-- The verified v0.7 candidate remains on `main`, unreleased and unsubmitted, while this work is prepared separately.
+- The verified v0.7 release remains immutably tagged at its green `main` commit while both browser stores remain unsubmitted.
 - No telemetry, outcome upload, live checkout evidence, affiliate identity, or creator-attribution mutation was added.
 
-## [0.7.0] - 2026-08-14
+## [0.7.0] - 2026-08-15
 
 ### Added
 

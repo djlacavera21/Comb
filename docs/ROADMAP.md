@@ -63,7 +63,7 @@
 ## v0.8 — Browser-store publication and field feedback
 
 - Maintain a machine-validated publication record whose official state mapping rejects premature GitHub-release or store-availability claims.
-- Run the verified release workflow for the approved v0.7 source commit and record its immutable tag, release URL, and four artifact checksums.
+- Published the approved v0.7 source commit through the verified release workflow and recorded its immutable tag, release URL, and four artifact checksums.
 - Submit only the runtime ZIP through Chrome Web Store and Microsoft Edge Add-ons developer dashboards; record review outcomes and public listing URLs without claiming availability early.
 - Convert privacy-safe compatibility reports into independently written synthetic fixtures through a strict enum/boolean-only scaffold while retaining safe stops on unknown markup.
 - Link scoped independent reviews and respond to findings with tests or documented rationale before release.

@@ -60,7 +60,7 @@ See [docs/PRIVACY.md](docs/PRIVACY.md) for the precise data boundaries.
 
 ## Publication status
 
-The verified v0.7 candidate is not released and has not been submitted to Chrome Web Store or Microsoft Edge Add-ons. [docs/PUBLICATION_STATUS.md](docs/PUBLICATION_STATUS.md) and the machine-validated [`store/publication-record.json`](store/publication-record.json) record the exact candidate, CI run, checksums, and official store states without treating a repository build as public availability.
+The verified v0.7 build is published as the immutable GitHub release [`v0.7.0`](https://github.com/djlacavera21/Comb/releases/tag/v0.7.0), pinned to the green source commit after the creator-attribution release gate and real-Chrome preservation contract passed. It has not been submitted to Chrome Web Store or Microsoft Edge Add-ons, so Comb is not yet publicly available from either browser store. [docs/PUBLICATION_STATUS.md](docs/PUBLICATION_STATUS.md) and the machine-validated [`store/publication-record.json`](store/publication-record.json) record the exact commit, workflow runs, four asset checksums, and official store states without treating a GitHub release as browser-store availability.
 
 ## Install the extension locally
 

@@ -350,7 +350,10 @@ function main() {
     return;
   }
   process.stdout.write(
-    `Comb publication record passed: v${record.product.version} is verified, unreleased, and not submitted to either store.\n`
+    `Comb publication record passed: v${record.product.version}; ` +
+      `GitHub ${PUBLICATION_LABELS.github[record.githubRelease.status]}; ` +
+      `Chrome ${PUBLICATION_LABELS.chrome[record.stores.chrome.status]}; ` +
+      `Edge ${PUBLICATION_LABELS.edge[record.stores.edge.status]}.\n`
   );
 }
 
