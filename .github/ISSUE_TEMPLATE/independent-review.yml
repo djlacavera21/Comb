@@ -27,6 +27,7 @@ body:
         - Signed-feed verification and source policy
         - Privacy-safe compatibility report
         - Creator attribution and zero-affiliate behavior
+        - Cross-browser runtime and shared checkout contracts
         - Release reproducibility and publication gate
         - Cross-boundary review
     validations:
@@ -37,10 +38,11 @@ body:
       label: Reproduction commands and environment
       description: List the public commands you ran, browser/Node versions where relevant, and whether each command passed. Do not attach live merchant artifacts.
       placeholder: |
-        Node 22.x, Chrome 128.x
+        Node 22.x, Chrome 128.x, Firefox 128.x, geckodriver
         npm run lint — pass
         npm test — pass
         node scripts/run-browser-fixtures.js --require-browser — pass
+        node scripts/run-firefox-fixtures.js --require-browser — pass
     validations:
       required: true
   - type: dropdown

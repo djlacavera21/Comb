@@ -1,4 +1,4 @@
-# Comb v0.7 Privacy Policy and Data-Use Specification
+# Comb Privacy Policy and Data-Use Specification
 
 Effective: August 14, 2026
 
@@ -6,7 +6,7 @@ Comb is an open-source browser extension with no Comb account, developer backend
 
 ## Data handled on-device
 
-The Chrome Web Store and Edge Add-ons submissions conservatively disclose these categories:
+The Chrome Web Store and Edge Add-ons submissions conservatively disclose these categories. Firefox metadata separately declares no collection and transmission of user data outside the extension; it does not erase the on-device handling described here.
 
 | Store category | Exact scope | Purpose | Retention |
 | --- | --- | --- | --- |
@@ -16,7 +16,9 @@ The Chrome Web Store and Edge Add-ons submissions conservatively disclose these 
 
 Comb also stores explicitly trusted public feed keys, verified signed coupon-feed envelopes, and any feed-source URL the user approves. Source records include the pinned feed ID and signer, granted origin, last-check and last-update times, and a short status or error. Signed-feed records contain publisher name, public-key fingerprint, feed identity and sequence, issue/expiry times, exact merchant hostnames, coupon tokens, verification timestamps, and publisher-provided aggregate success/failure counts. Private signing keys never enter the extension.
 
-Messages between the checkout page, service worker, and popup stay inside the browser extension. They contain coupon tokens under test, current merchant hostname, adapter name, a short coupon-related message, and numeric before/after totals.
+The community-catalog search in Comb settings operates only over those already verified local feed records. Search terms remain in the settings page for the current view, are not persisted as browsing history, and are not transmitted to Comb, a feed operator, or any third party. Active/expired filters, ranking, deduplication, and pagination all run in packaged extension code.
+
+Messages between the checkout page, background runtime, and popup stay inside the browser extension. They contain coupon tokens under test, current merchant hostname, adapter name, a short coupon-related message, and numeric before/after totals.
 
 ## User-saved compatibility reports
 
@@ -55,6 +57,8 @@ The creator-tagging issue is fixed by design. Comb neither reads nor writes affi
 - `storage`: keep merchant coupon lists, trusted public keys, verified feeds, and approved-source settings on the device.
 - optional `https://*/*`: allows an origin-specific runtime prompt for the public feed URL entered by the user. No origin is granted at installation, and Comb requests only the exact approved HTTPS origin.
 
+The permission list and data boundary are identical in the Chrome-worker and Firefox-event-page environments. Firefox's `data_collection_permissions.required: ["none"]` means Comb does not collect and transmit user data to the developer or another recipient; the optional user-selected feed request and its ordinary server-visible network metadata remain disclosed above.
+
 ## User controls, retention, and deletion
 
 Open Comb settings to export the local coupon library, delete one merchant, erase the entire library, remove a source, remove a signed feed, or remove a trusted key and the feeds/sources signed by it. Removing the final source on an origin asks the browser to remove that optional origin grant. Uninstalling Comb asks the browser to delete its extension-local storage under the browser's normal uninstall behavior.
@@ -71,7 +75,7 @@ Comb's handling of user data is limited to its disclosed single purpose. The pro
 - not use or transfer user data for personalized advertising; and
 - not allow humans to read user data except at the user's affirmative request, for a specific security/abuse investigation, or where legally required.
 
-Any future analytics, outcome reporting, affiliate model, account, or backend would require a separate public design, new consent where applicable, updated store disclosures and privacy policy, and review of the Creator Attribution Guarantee before implementation. It is not part of v0.7.
+Any future analytics, outcome reporting, affiliate model, account, or backend would require a separate public design, new consent where applicable, updated store disclosures and privacy policy, and review of the Creator Attribution Guarantee before implementation. It is not part of the current build.
 
 ## Security and policy changes
 

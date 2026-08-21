@@ -5,7 +5,7 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: Exact version without the v prefix, for example 0.7.0
+        description: Exact version without the v prefix, for example 0.8.0
         required: true
         type: string
       commit_sha:
@@ -28,7 +28,7 @@ concurrency:
 jobs:
   release:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     env:
       EXPECTED_VERSION: ${{ inputs.version }}
       EXPECTED_SHA: ${{ inputs.commit_sha }}
@@ -55,6 +55,17 @@ jobs:
         with:
           node-version: 22
           package-manager-cache: false
+      - name: Set up Firefox
+        id: firefox
+        uses: browser-actions/setup-firefox@v1
+        with:
+          firefox-version: latest
+      - name: Set up geckodriver
+        uses: browser-actions/setup-geckodriver@latest
+        with:
+          token: ${{ github.token }}
+      - name: Confirm synthetic HTTPS fixture support
+        run: openssl version
       - name: Reject version, commit, branch, worktree, or local-tag drift
         run: node scripts/validate-release-candidate.js --version "$EXPECTED_VERSION" --commit "$EXPECTED_SHA"
       - name: Reject an existing remote release tag
@@ -77,6 +88,10 @@ jobs:
         run: node --test tests/*.test.cjs
       - name: Run required real-browser contracts
         run: node scripts/run-browser-fixtures.js --require-browser
+      - name: Run required real-Firefox checkout, attribution, signed-feed, permission, and alarm contracts
+        env:
+          FIREFOX_PATH: ${{ steps.firefox.outputs.firefox-path }}
+        run: node scripts/run-firefox-fixtures.js --require-browser
       - name: Build deterministic runtime and reviewer kit
         run: npm run release:build
       - name: Verify exact release assets and checksums

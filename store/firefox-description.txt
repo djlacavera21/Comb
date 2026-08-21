@@ -1,0 +1,11 @@
+Comb is an open-source, privacy-first coupon tester for Firefox desktop. Open it on a checkout, enter coupon codes, and Comb tests them one at a time against the visible payable total. It continues only when it can identify coupon-specific controls and verify that the original amount and currency return between attempts. It never clicks a purchase, pay, or place-order control.
+
+The creator-tagging issue is fixed by design. Comb has no affiliate identity and does not redirect the tab, rewrite the checkout URL, intercept requests, or read or write an attribution cookie. Existing affiliate tags, referral parameters, and cookies remain untouched so proper attribution stays with the original creator.
+
+Checkout work happens locally in Firefox after the user opens Comb on the active tab. The Comb developer does not receive the merchant hostname, checkout content, coupon codes, totals, outcomes, creator identifiers, identity, or payment/order data. There is no Comb account, analytics SDK, ad network, outcome telemetry, or automatic support upload.
+
+Comb can optionally use community coupon feeds. A feed is inert, bounded JSON containing coupon tokens and aggregate publisher evidence. It must verify against a public key the user explicitly trusts. A network source remains disabled until the user enters its public HTTPS URL and approves that exact origin. Requests omit credentials and referrers, reject redirects, and cannot deliver code, selectors, affiliate URLs, or executable configuration.
+
+The local compatibility report is also user-triggered. Saving it creates an allowlisted JSON file on the device; Comb never uploads it. The report excludes merchant URL and hostname, page content, selectors, codes, totals and currencies, cookies, affiliate/referral tags, and creator identifiers.
+
+Comb requests only activeTab, scripting, storage, and alarms. The optional HTTPS declaration is not granted at installation. Firefox metadata declares no collection or transmission of user data outside the extension.

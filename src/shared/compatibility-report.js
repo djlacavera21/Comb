@@ -7,7 +7,7 @@
   if (root) root.CombCompatibilityReport = api;
 })(typeof globalThis === "object" ? globalThis : this, () => {
   const SCHEMA = "comb.compatibility-report/v1";
-  const ADAPTERS = new Set(["woocommerce", "bigcommerce", "shopify", "generic"]);
+  const ADAPTERS = new Set(["magento", "woocommerce", "bigcommerce", "shopify", "generic"]);
   const REASONS = new Set([
     "coupon_input_not_found",
     "coupon_apply_button_not_found",

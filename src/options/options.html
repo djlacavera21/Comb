@@ -12,7 +12,7 @@
       <header class="page-header">
         <div class="brand-mark" aria-hidden="true">C</div>
         <div>
-          <p class="eyebrow">Comb v0.7</p>
+          <p class="eyebrow">Comb v0.8</p>
           <h1>Codes and trusted feeds</h1>
           <p>Manage local coupon lists and cryptographically verified community feeds. Comb never uploads checkout data.</p>
         </div>
@@ -99,6 +99,49 @@
         </section>
       </section>
 
+      <section class="catalog card" aria-labelledby="catalogHeading">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Verified and local</p>
+            <h2 id="catalogHeading">Community coupon catalog</h2>
+          </div>
+          <span id="catalogCount">0 matches</span>
+        </div>
+        <p class="catalog-intro">Search coupons from signature-verified feeds installed on this device. Results show merchant, freshness, aggregate outcomes, feed identity, and publisher-key provenance.</p>
+
+        <form class="catalog-controls" id="catalogSearchForm" role="search">
+          <label class="catalog-field catalog-search-field" for="catalogSearchInput">
+            <span>Search catalog</span>
+            <input id="catalogSearchInput" type="search" maxlength="120" autocomplete="off" placeholder="Merchant, code, or publisher">
+          </label>
+          <label class="catalog-field" for="catalogStatusSelect">
+            <span>Feed status</span>
+            <select id="catalogStatusSelect">
+              <option value="active">Active only</option>
+              <option value="all">Active + expired</option>
+              <option value="expired">Expired only</option>
+            </select>
+          </label>
+          <label class="catalog-field" for="catalogSortSelect">
+            <span>Sort</span>
+            <select id="catalogSortSelect">
+              <option value="recommended">Recommended</option>
+              <option value="recent">Recently verified</option>
+              <option value="merchant">Merchant A–Z</option>
+            </select>
+          </label>
+        </form>
+
+        <p class="catalog-summary" id="catalogSummary" role="status" aria-live="polite">No verified coupons installed.</p>
+        <div class="catalog-empty" id="catalogEmpty">
+          <strong id="catalogEmptyHeading">No active catalog entries</strong>
+          <p id="catalogEmptyCopy">Import a trusted publisher key and signed feed above, or change the catalog filters.</p>
+        </div>
+        <div class="catalog-list" id="catalogList" role="list" aria-busy="false"></div>
+        <button class="button button-secondary catalog-more" id="catalogMoreButton" type="button" hidden>Show more verified coupons</button>
+        <p class="catalog-boundary">Catalog search runs inside Comb against already verified local feed data. It makes no request and includes no affiliate URLs, referral metadata, or remote code.</p>
+      </section>
+
       <section class="library card" aria-labelledby="libraryHeading">
         <div class="section-heading">
           <div>
@@ -133,6 +176,7 @@
       <p class="page-status" id="pageStatus" role="status" aria-live="polite"></p>
     </main>
 
+    <script src="../shared/feed-verifier.js"></script>
     <script src="../shared/source-policy.js"></script>
     <script src="options.js"></script>
   </body>

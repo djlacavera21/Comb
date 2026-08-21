@@ -8,6 +8,7 @@ const manifest = JSON.parse(fs.readFileSync(path.join(root, "manifest.json"), "u
 const listingPath = path.join(root, "store/listing.json");
 const listing = JSON.parse(fs.readFileSync(listingPath, "utf8"));
 const errors = [];
+const milestoneLabel = `v${manifest.version.split(".").slice(0, 2).join(".")}`;
 
 function fail(message) {
   errors.push(message);
@@ -55,7 +56,7 @@ function validateAsset(asset, label) {
 
 if (listing.schemaVersion !== 1) fail("store listing schemaVersion must be 1");
 if (listing.extensionVersion !== manifest.version) fail("store listing and manifest versions must match");
-if (listing.lastReviewed !== "2026-08-15") fail("store listing review date must match the current official-policy review");
+if (listing.lastReviewed !== "2026-08-21") fail("store listing review date must match the current official-policy review");
 if (listing.shared?.name !== manifest.name) fail("store name must match the manifest");
 if (listing.shared?.shortDescription !== manifest.description) {
   fail("store short description must match the manifest description");
@@ -150,9 +151,15 @@ for (const evidencePath of listing.creatorAttribution?.verifiedBy || []) read(ev
 
 const chromeDescription = read(listing.chrome?.detailedDescriptionFile);
 const edgeDescription = read(listing.edge?.descriptionFile);
+const firefoxDescription = read(listing.firefox?.descriptionFile);
 const releaseNotes = read(listing.chrome?.releaseNotesFile);
 const reviewNotes = read(listing.chrome?.reviewNotesFile);
-for (const [label, description] of [["Chrome", chromeDescription], ["Edge", edgeDescription]]) {
+const firefoxReviewNotes = read(listing.firefox?.reviewNotesFile);
+for (const [label, description] of [
+  ["Chrome", chromeDescription],
+  ["Edge", edgeDescription],
+  ["Firefox", firefoxDescription]
+]) {
   if (description.length < 250 || description.length > 10_000) {
     fail(`${label} description must contain 250 to 10,000 characters`);
   }
@@ -161,11 +168,12 @@ for (const [label, description] of [["Chrome", chromeDescription], ["Edge", edge
   }
   if (/v0\.4/.test(description)) fail(`${label} description contains stale v0.4 copy`);
 }
-if (!releaseNotes.includes("v0.7") || !releaseNotes.includes("attribution cookies") ||
+if (!releaseNotes.includes(milestoneLabel) || !releaseNotes.includes("Magento") ||
+    !releaseNotes.includes("community coupon catalog") || !releaseNotes.includes("attribution cookies") ||
     !releaseNotes.includes("safe compatibility report") ||
     !releaseNotes.includes("machine-readable synthetic fixture matrix") ||
     !releaseNotes.includes("publication workflow")) {
-  fail("v0.7 release notes must cover the matrix, safe reporting, publication gate, and attribution regression");
+  fail(`${milestoneLabel} release notes must cover Magento, the catalog, the matrix, safe reporting, publication, and attribution`);
 }
 for (const phrase of [
   "affiliate_id=creator-42&utm_source=creator",
@@ -177,15 +185,85 @@ for (const phrase of [
 ]) {
   if (!reviewNotes.includes(phrase)) fail(`review notes are missing: ${phrase}`);
 }
+for (const phrase of [
+  "creator-tagging issue is fixed",
+  "affiliate_id=creator-42&utm_source=creator",
+  "creator_attribution=creator-42",
+  "data_collection_permissions.required",
+  "run-firefox-fixtures.js --require-browser",
+  "temporary-installs the exact runtime ZIP",
+  "optional-origin prompt",
+  "tampered envelope",
+  "remove the newly approved optional origin",
+  "Both observed GETs",
+  "COMB_DELETE_FEED_SOURCE",
+  "no private material is committed",
+  "Only AMO state `public`"
+]) {
+  if (!firefoxReviewNotes.includes(phrase)) fail(`Firefox review notes are missing: ${phrase}`);
+}
+
+if (listing.firefox?.guid !== manifest.browser_specific_settings?.gecko?.id) {
+  fail("Firefox listing GUID must match the manifest add-on ID");
+}
+if (!/^[a-z0-9-]{3,64}$/.test(String(listing.firefox?.slug || ""))) {
+  fail("Firefox listing slug must be a bounded lowercase AMO slug");
+}
+if (listing.firefox?.defaultLocale !== "en-US") fail("Firefox default locale must be en-US");
+if (listing.firefox?.summary !== listing.shared?.shortDescription) {
+  fail("Firefox summary must match the shared manifest description");
+}
+if (String(listing.firefox?.summary || "").length > 250) {
+  fail("Firefox summary must not exceed 250 characters");
+}
+if (JSON.stringify(listing.firefox?.categories) !== JSON.stringify({ firefox: ["shopping"] })) {
+  fail("Firefox category must use the official shopping extension slug");
+}
+if (listing.firefox?.license?.kind !== "custom" ||
+    listing.firefox?.license?.name !== "MIT License" ||
+    listing.firefox?.license?.sourceFile !== "LICENSE") {
+  fail("Firefox listing must bind the custom MIT license to LICENSE");
+} else {
+  const license = read(listing.firefox.license.sourceFile);
+  if (!license.startsWith("MIT License\n")) fail("Firefox custom license source must contain the MIT license");
+}
+if (listing.firefox?.requiresPayment !== false) fail("Firefox listing must declare no required payment");
+if (JSON.stringify(listing.firefox?.dataCollectionPermissions) !==
+    JSON.stringify({ required: ["none"], optional: [] })) {
+  fail("Firefox listing must declare no required or optional external data collection");
+}
+if (JSON.stringify(manifest.browser_specific_settings?.gecko?.data_collection_permissions) !==
+    JSON.stringify({ required: ["none"] })) {
+  fail("Firefox manifest data-collection declaration drifted from the listing");
+}
+if (listing.firefox?.releaseNotesFile !== listing.chrome?.releaseNotesFile) {
+  fail("Firefox and Chrome release notes must use the same version evidence");
+}
 
 validateAsset(listing.chrome?.assets?.icon, "Chrome icon");
 validateAsset(listing.chrome?.assets?.smallPromo, "Chrome small promo tile");
+const marqueePromo = listing.chrome?.assets?.marqueePromo;
+validateAsset(marqueePromo, "Chrome marquee promo tile");
+if (marqueePromo?.width !== 1400 || marqueePromo?.height !== 560) {
+  fail("Chrome marquee promo tile must declare 1400x560 dimensions");
+}
+const marqueeSource = read("store/assets/comb-marquee-promo-1400x560.svg");
+for (const phrase of [
+  "width=\"1400\"",
+  "height=\"560\"",
+  "Creator credit",
+  "THE TAGGING ISSUE IS FIXED",
+  "ATTRIBUTION",
+  "UNCHANGED"
+]) {
+  if (!marqueeSource.includes(phrase)) fail(`marquee promo source is missing: ${phrase}`);
+}
 const chromeScreenshots = listing.chrome?.assets?.screenshots || [];
 const expectedScreenshotPaths = [1, 2, 3, 4, 5]
   .map((number) => `store/assets/comb-screenshot-${String(number).padStart(2, "0")}-1280x800.png`);
 const screenshotSources = expectedScreenshotPaths.map((assetPath, index) => {
   const source = read(assetPath.replace(/\.png$/, ".svg"));
-  for (const phrase of ["width=\"1280\"", "height=\"800\"", "Comb v0.7"]) {
+  for (const phrase of ["width=\"1280\"", "height=\"800\"", `Comb ${milestoneLabel}`]) {
     if (!source.includes(phrase)) fail(`screenshot source ${index + 1} is missing: ${phrase}`);
   }
   return source;
@@ -228,6 +306,13 @@ if (JSON.stringify(edgeScreenshots.map((asset) => asset.caption)) !==
     JSON.stringify(chromeScreenshots.map((asset) => asset.caption))) {
   fail("Chrome and Edge must use the same screenshot captions in the same order");
 }
+validateAsset(listing.firefox?.assets?.icon, "Firefox icon");
+const firefoxScreenshots = listing.firefox?.assets?.screenshots || [];
+validateScreenshotSet(firefoxScreenshots, "Firefox");
+if (JSON.stringify(firefoxScreenshots.map((asset) => asset.caption)) !==
+    JSON.stringify(chromeScreenshots.map((asset) => asset.caption))) {
+  fail("Chrome and Firefox must use the same screenshot captions in the same order");
+}
 
 const searchTerms = listing.edge?.searchTerms || [];
 if (searchTerms.length < 1 || searchTerms.length > 7) fail("Edge must have one to seven search terms");
@@ -244,7 +329,7 @@ const syntheticFixtures = read("docs/SYNTHETIC_FIXTURES.md");
 for (const phrase of ["on-device", "Limited Use commitments", "user-selected feed operator", "Financial and payment information"]) {
   if (!privacy.includes(phrase)) fail(`privacy policy is missing: ${phrase}`);
 }
-for (const phrase of ["not an external audit", "creator URL and cookie", "npm run release:build"]) {
+for (const phrase of ["not an external audit", "creator URL/cookie", "npm run release:build"]) {
   if (!securityReview.includes(phrase)) fail(`security review is missing: ${phrase}`);
 }
 for (const phrase of ["not publicly available", "The creator-tagging issue is fixed", "official publication status"]) {
@@ -261,6 +346,6 @@ if (errors.length) {
   process.exitCode = 1;
 } else {
   process.stdout.write(
-    `Comb store validation passed: ${handling.length} local data disclosures, ${1 + chromeScreenshots.length + 2} upload assets, and creator attribution review notes verified.\n`
+    `Comb store validation passed: ${handling.length} local data disclosures, ${4 + chromeScreenshots.length} upload assets, three store profiles, and creator attribution review notes verified.\n`
   );
 }

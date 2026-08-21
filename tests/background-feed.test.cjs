@@ -49,10 +49,56 @@ function createBackgroundHarness(options = {}) {
   const alarms = {};
   const grantedOrigins = new Set(options.grantedOrigins || []);
   const fetchCalls = [];
+  const apiNamespace = options.apiNamespace === "browser" ? "browser" : "chrome";
+  const backgroundEnvironment = options.backgroundEnvironment === "document" ? "document" : "worker";
+  const extensionScheme = apiNamespace === "browser" ? "moz-extension" : "chrome-extension";
   let messageListener;
   let installedListener;
   let alarmListener;
-  const optionsUrl = "chrome-extension://comb-test/src/options/options.html";
+  const optionsUrl = `${extensionScheme}://comb-test/src/options/options.html`;
+  const extensionApi = {
+    storage: {
+      local: {
+        async get(keys) {
+          const requested = Array.isArray(keys) ? keys : [keys];
+          return Object.fromEntries(requested.filter((key) => key in storage).map((key) => [key, storage[key]]));
+        },
+        async set(values) {
+          Object.assign(storage, values);
+        }
+      }
+    },
+    runtime: {
+      onInstalled: { addListener(listener) { installedListener = listener; } },
+      onMessage: { addListener(listener) { messageListener = listener; } },
+      getURL(relativePath) { return `${extensionScheme}://comb-test/${relativePath}`; },
+      async sendMessage() { return undefined; }
+    },
+    permissions: {
+      async contains(request) {
+        return (request.origins || []).every((origin) => grantedOrigins.has(origin));
+      },
+      async remove(request) {
+        let removed = false;
+        for (const origin of request.origins || []) {
+          removed = grantedOrigins.delete(origin) || removed;
+        }
+        return removed;
+      }
+    },
+    alarms: {
+      onAlarm: { addListener(listener) { alarmListener = listener; } },
+      async get(name) { return alarms[name]; },
+      async create(name, info) { alarms[name] = { name, ...info }; },
+      async clear(name) {
+        const existed = Boolean(alarms[name]);
+        delete alarms[name];
+        return existed;
+      }
+    },
+    tabs: {},
+    scripting: {}
+  };
   const context = vm.createContext({
     console,
     crypto: webcrypto,
@@ -68,58 +114,20 @@ function createBackgroundHarness(options = {}) {
       fetchCalls.push(args);
       if (!options.fetchImpl) throw new Error("Unexpected network request in background test.");
       return options.fetchImpl(...args);
-    },
-    chrome: {
-      storage: {
-        local: {
-          async get(keys) {
-            const requested = Array.isArray(keys) ? keys : [keys];
-            return Object.fromEntries(requested.filter((key) => key in storage).map((key) => [key, storage[key]]));
-          },
-          async set(values) {
-            Object.assign(storage, values);
-          }
-        }
-      },
-      runtime: {
-        onInstalled: { addListener(listener) { installedListener = listener; } },
-        onMessage: { addListener(listener) { messageListener = listener; } },
-        getURL(relativePath) { return `chrome-extension://comb-test/${relativePath}`; },
-        async sendMessage() { return undefined; }
-      },
-      permissions: {
-        async contains(request) {
-          return (request.origins || []).every((origin) => grantedOrigins.has(origin));
-        },
-        async remove(request) {
-          let removed = false;
-          for (const origin of request.origins || []) {
-            removed = grantedOrigins.delete(origin) || removed;
-          }
-          return removed;
-        }
-      },
-      alarms: {
-        onAlarm: { addListener(listener) { alarmListener = listener; } },
-        async get(name) { return alarms[name]; },
-        async create(name, info) { alarms[name] = { name, ...info }; },
-        async clear(name) {
-          const existed = Boolean(alarms[name]);
-          delete alarms[name];
-          return existed;
-        }
-      },
-      tabs: {},
-      scripting: {}
     }
   });
   context.globalThis = context;
-  context.importScripts = (...relativePaths) => {
-    for (const relativePath of relativePaths) {
-      const source = fs.readFileSync(path.join(root, "src", relativePath), "utf8");
-      vm.runInContext(source, context, { filename: relativePath });
-    }
+  context[apiNamespace] = extensionApi;
+  const loadScript = (relativePath) => {
+    const source = fs.readFileSync(path.join(root, "src", relativePath), "utf8");
+    vm.runInContext(source, context, { filename: relativePath });
   };
+  if (backgroundEnvironment === "worker") {
+    context.importScripts = (...relativePaths) => relativePaths.forEach(loadScript);
+  } else {
+    loadScript("shared/feed-verifier.js");
+    loadScript("shared/source-policy.js");
+  }
 
   const backgroundSource = fs.readFileSync(path.join(root, "src/background.js"), "utf8");
   vm.runInContext(backgroundSource, context, { filename: "background.js" });
@@ -168,7 +176,47 @@ test("background imports a trusted key and signed feed without adding network pe
   const stateResponse = await harness.send({ type: "COMB_GET_FEED_STATE" });
   assert.equal(stateResponse.ok, true);
   assert.equal(stateResponse.result.feeds[0].feedId, "background.test");
+  const catalogResponse = await harness.send({
+    type: "COMB_SEARCH_CATALOG",
+    query: "shop signed",
+    status: "active",
+    sort: "recommended",
+    offset: 0,
+    limit: 25
+  });
+  assert.equal(catalogResponse.ok, true);
+  assert.equal(catalogResponse.result.total, 1);
+  assert.equal(catalogResponse.result.items[0].merchant, "shop.example");
+  assert.equal(catalogResponse.result.items[0].code, "SIGNED25");
+  assert.equal(catalogResponse.result.items[0].feedId, "background.test");
+  assert.equal(harness.fetchCalls.length, 0);
   assert.ok(harness.storage.combFeedState);
+});
+
+test("Firefox event-page background uses the promise browser namespace", async () => {
+  const harness = createBackgroundHarness({
+    apiNamespace: "browser",
+    backgroundEnvironment: "document"
+  });
+  const { trustKey, envelope } = await signedFixture();
+  await harness.install();
+
+  assert.equal((await harness.send({ type: "COMB_IMPORT_TRUST_KEY", trustKey })).ok, true);
+  const feedResponse = await harness.send({ type: "COMB_IMPORT_SIGNED_FEED", envelope });
+  assert.equal(feedResponse.ok, true);
+  assert.equal(feedResponse.result.feeds[0].feedId, "background.test");
+  assert.equal(harness.fetchCalls.length, 0);
+});
+
+test("background exposes catalog search only to the packaged settings page", async () => {
+  const harness = createBackgroundHarness();
+  await harness.install();
+  const response = await harness.send(
+    { type: "COMB_SEARCH_CATALOG", query: "shop" },
+    { url: "https://shop.example/checkout", tab: { id: 7 } }
+  );
+  assert.equal(response.ok, false);
+  assert.match(response.error, /Comb settings/i);
 });
 
 test("background refuses a feed whose signing key is not trusted", async () => {

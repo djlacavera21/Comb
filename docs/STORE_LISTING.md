@@ -1,6 +1,6 @@
-# Comb v0.7 Browser Store Submission Record
+# Comb v0.8 Browser Store Submission Record
 
-The copy-ready Chrome Web Store and Microsoft Edge Add-ons fields live in [`../store/listing.json`](../store/listing.json). `npm run lint` validates their version, text boundaries, permissions, privacy categories, Limited Use commitments, URLs, search-term limits, and exact PNG dimensions.
+The copy-ready Chrome Web Store, Microsoft Edge Add-ons, and Firefox Add-ons fields live in [`../store/listing.json`](../store/listing.json). `npm run lint` validates their version, text boundaries, permissions, privacy categories, Firefox no-external-collection metadata, license source, URLs, search-term limits, and exact PNG dimensions.
 
 Current GitHub release and browser-store states are recorded separately in [PUBLICATION_STATUS.md](PUBLICATION_STATUS.md) and [`../store/publication-record.json`](../store/publication-record.json). Neither a green candidate nor a GitHub release is evidence of browser-store availability.
 
@@ -8,7 +8,7 @@ Current GitHub release and browser-store states are recorded separately in [PUBL
 
 > **The creator-tagging issue is fixed.** Comb leaves existing creator affiliate tags, referral parameters, and attribution cookies untouched so the original creator can keep proper attribution.
 
-This is backed by a required real-Chrome checkout transaction, not just listing copy. The test preserves a synthetic creator-tagged URL and attribution cookie byte-for-byte while testing multiple coupons and restoring the winner. Static validation independently blocks cookie, traffic interception, navigation, URL/history mutation, and affiliate-rewrite capabilities.
+This is backed by required real-Chrome and real-Firefox checkout transactions, not just listing copy. Both runners execute one shared contract that preserves a synthetic creator-tagged URL and attribution cookie byte-for-byte while testing multiple coupons and restoring the winner. Firefox additionally temporary-installs the exact built ZIP and requires packaged startup with no pre-granted feed origin, real prompt denial, approved tampered-feed rejection with grant rollback, a credential-free/referrer-free valid signed-feed retry, verified installation, and production 12-hour alarm/origin cleanup. Static validation independently blocks cookie, traffic interception, navigation, URL/history mutation, and affiliate-rewrite capabilities.
 
 ## Copy-ready submission files
 
@@ -17,6 +17,9 @@ This is backed by a required real-Chrome checkout transaction, not just listing 
 | Shared name, short description, category, URLs, purpose, permissions, privacy, assets | [`../store/listing.json`](../store/listing.json) |
 | Chrome detailed description | [`../store/chrome-description.txt`](../store/chrome-description.txt) |
 | Edge localized description | [`../store/edge-description.txt`](../store/edge-description.txt) |
+| Firefox detailed description | [`../store/firefox-description.txt`](../store/firefox-description.txt) |
+| Firefox reviewer notes | [`../store/firefox-review-notes.md`](../store/firefox-review-notes.md) |
+| Firefox custom license source | [`../LICENSE`](../LICENSE) |
 | Release notes | [`../store/release-notes.txt`](../store/release-notes.txt) |
 | Certification/reviewer notes | [`../store/review-notes.md`](../store/review-notes.md) |
 | Submission sequence | [`../store/SUBMISSION.md`](../store/SUBMISSION.md) |
@@ -44,7 +47,7 @@ Select **No remote code**. Signed community feeds are strict, bounded, signature
 
 ## Data-use disclosure
 
-Store policy treats on-device processing as data handling. The submission therefore selects these categories conservatively instead of claiming “no data”:
+Chrome and Edge policy forms treat on-device processing as data handling. Those submissions therefore select these categories conservatively instead of claiming “no data.” Firefox separately declares `data_collection_permissions.required: ["none"]` because Comb does not collect and transmit this locally handled data outside the extension:
 
 | Dashboard category | Local scope | Sent to Comb developer? |
 | --- | --- | --- |
@@ -62,18 +65,19 @@ The popup's **Save safe report** action creates a local allowlisted JSON file on
 
 | Asset | Dimensions | Store use |
 | --- | ---: | --- |
-| `icons/comb-128.png` | 128×128 | Chrome icon; meets Edge minimum |
+| `icons/comb-128.png` | 128×128 | Chrome and Firefox icon; meets Edge minimum |
 | `store/assets/comb-store-logo-300.png` | 300×300 | Edge recommended logo |
 | `store/assets/comb-small-promo-440x280.png` | 440×280 | Chrome small promo / Edge small tile |
+| `store/assets/comb-marquee-promo-1400x560.png` | 1400×560 | Chrome optional marquee promo |
 | `store/assets/comb-screenshot-01-1280x800.png` | 1280×800 | Coupon workflow and protected attribution |
 | `store/assets/comb-screenshot-02-1280x800.png` | 1280×800 | Creator-tagging fix with unchanged synthetic URL and cookie evidence |
 | `store/assets/comb-screenshot-03-1280x800.png` | 1280×800 | Measured results and the best verified code |
 | `store/assets/comb-screenshot-04-1280x800.png` | 1280×800 | Trusted keys and signature-verified community feeds |
 | `store/assets/comb-screenshot-05-1280x800.png` | 1280×800 | Safe stop and privacy-bounded compatibility reporting |
 
-Editable SVG sources sit beside the generated promotional PNGs. The five validated PNGs fill Chrome's five-screenshot allowance and remain within Edge's six-screenshot limit; only those PNGs are placed in the review kit.
+Editable SVG sources sit beside the generated promotional PNGs. The same five validated PNGs and captions are used for Chrome, Edge, and Firefox so the creator-attribution message cannot drift between listings; only those PNGs are placed in the review kit.
 
-## Official policy references rechecked 2026-08-15
+## Official policy references rechecked 2026-08-21
 
 - [Chrome Web Store listing fields and assets](https://developer.chrome.com/docs/webstore/cws-dashboard-listing)
 - [Chrome Web Store image requirements](https://developer.chrome.com/docs/webstore/images)
@@ -85,5 +89,9 @@ Editable SVG sources sit beside the generated promotional PNGs. The five validat
 - [Microsoft Edge Add-ons publication fields](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/publish-extension)
 - [Microsoft Edge Add-ons submission states](https://learn.microsoft.com/en-us/microsoft-edge/extensions/publish/submission-states)
 - [Microsoft Edge extension developer policies](https://learn.microsoft.com/en-us/legal/microsoft-edge/extensions/developer-policies)
+- [Mozilla AMO add-on creation, version, and status fields](https://mozilla.github.io/addons-server/topics/api/addons)
+- [Mozilla AMO extension category slugs](https://mozilla.github.io/addons-server/topics/api/categories.html)
+- [Mozilla AMO license choices](https://mozilla.github.io/addons-server/topics/api/licenses.html)
+- [Firefox signing and data-collection manifest metadata](https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/manifest.json/browser_specific_settings)
 
 Store dashboards can change after this review date. Recheck the official forms before submission and update both metadata and validator together if a requirement changes.

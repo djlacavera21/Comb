@@ -1,5 +1,8 @@
 "use strict";
 
+const extensionApi = globalThis.browser || globalThis.chrome;
+if (!extensionApi) throw new Error("Comb requires the WebExtensions API.");
+
 const elements = {
   merchantCount: document.querySelector("#merchantCount"),
   emptyState: document.querySelector("#emptyState"),
@@ -18,6 +21,17 @@ const elements = {
   connectSourceButton: document.querySelector("#connectSourceButton"),
   sourceEmpty: document.querySelector("#sourceEmpty"),
   sourceList: document.querySelector("#sourceList"),
+  catalogSearchForm: document.querySelector("#catalogSearchForm"),
+  catalogSearchInput: document.querySelector("#catalogSearchInput"),
+  catalogStatusSelect: document.querySelector("#catalogStatusSelect"),
+  catalogSortSelect: document.querySelector("#catalogSortSelect"),
+  catalogCount: document.querySelector("#catalogCount"),
+  catalogSummary: document.querySelector("#catalogSummary"),
+  catalogEmpty: document.querySelector("#catalogEmpty"),
+  catalogEmptyHeading: document.querySelector("#catalogEmptyHeading"),
+  catalogEmptyCopy: document.querySelector("#catalogEmptyCopy"),
+  catalogList: document.querySelector("#catalogList"),
+  catalogMoreButton: document.querySelector("#catalogMoreButton"),
   exportButton: document.querySelector("#exportButton"),
   importInput: document.querySelector("#importInput"),
   importButton: document.querySelector("#importButton"),
@@ -27,6 +41,9 @@ const elements = {
 
 let currentLibrary = { version: 1, merchants: {} };
 let currentFeedState = { version: 2, trustedKeys: [], feeds: [], sources: [] };
+let catalogRenderedCount = 0;
+let catalogRequestId = 0;
+let catalogDebounceTimer = null;
 
 function setStatus(message, error = false) {
   elements.pageStatus.textContent = message;
@@ -34,7 +51,7 @@ function setStatus(message, error = false) {
 }
 
 async function callBackground(message) {
-  const response = await chrome.runtime.sendMessage(message);
+  const response = await extensionApi.runtime.sendMessage(message);
 
   if (!response || response.ok !== true) {
     throw new Error(response && response.error ? response.error : "Comb did not receive a response.");
@@ -89,6 +106,91 @@ function formatDate(value) {
   return Number.isNaN(date.getTime())
     ? "Unknown date"
     : new Intl.DateTimeFormat(undefined, { dateStyle: "medium", timeStyle: "short" }).format(date);
+}
+
+function createCatalogRecord(item) {
+  const article = document.createElement("article");
+  const heading = document.createElement("div");
+  const merchant = document.createElement("strong");
+  const status = document.createElement("span");
+  const code = document.createElement("code");
+  const metrics = document.createElement("p");
+  const provenance = document.createElement("p");
+  const fingerprint = document.createElement("code");
+  article.className = "catalog-record";
+  article.setAttribute("role", "listitem");
+  heading.className = "catalog-record-heading";
+  merchant.textContent = item.merchant;
+  status.className = `catalog-status ${item.expired ? "expired" : "active"}`;
+  status.textContent = item.expired ? "Expired feed" : "Active feed";
+  heading.append(merchant, status);
+  code.className = "catalog-code";
+  code.textContent = item.code;
+  metrics.className = "catalog-metrics";
+  metrics.textContent = `Comb ranking ${Number(item.score).toFixed(1)}/100 · publisher reports ${item.successCount} success${item.successCount === 1 ? "" : "es"} / ${item.failureCount} failure${item.failureCount === 1 ? "" : "s"} · verified ${formatDate(item.lastVerifiedAt)}`;
+  provenance.className = "catalog-provenance";
+  provenance.textContent = `${item.feedName} (${item.feedId}) · sequence ${item.sequence || "unknown"} · expires ${formatDate(item.expiresAt)}${item.sourceCount > 1 ? ` · ${item.sourceCount} verified feeds` : ""}`;
+  fingerprint.className = "catalog-fingerprint";
+  fingerprint.textContent = item.keyId;
+  fingerprint.title = `Trusted publisher key ${item.keyId}`;
+  article.append(heading, code, metrics, provenance, fingerprint);
+  return article;
+}
+
+function renderCatalog(result, append = false) {
+  const items = Array.isArray(result.items) ? result.items : [];
+  const stats = result.stats || {};
+  if (!append) {
+    elements.catalogList.replaceChildren();
+    catalogRenderedCount = 0;
+  }
+  elements.catalogList.append(...items.map(createCatalogRecord));
+  catalogRenderedCount += items.length;
+  elements.catalogCount.textContent = `${result.total} match${result.total === 1 ? "" : "es"}`;
+  elements.catalogSummary.textContent = `Showing ${catalogRenderedCount} of ${result.total} matches · ${stats.activeCouponCount || 0} active · ${stats.expiredCouponCount || 0} expired across ${stats.feedCount || 0} verified feed${stats.feedCount === 1 ? "" : "s"}.`;
+  elements.catalogEmpty.hidden = result.total > 0;
+  if (result.total === 0) {
+    const hasCatalog = (stats.uniqueCouponCount || 0) > 0;
+    elements.catalogEmptyHeading.textContent = hasCatalog ? "No coupons match this search" : "No verified coupons installed";
+    elements.catalogEmptyCopy.textContent = hasCatalog
+      ? "Try another merchant, code, publisher, or feed-status filter."
+      : "Import a trusted publisher key and signed feed above to build the local catalog.";
+  }
+  elements.catalogMoreButton.hidden = !result.hasMore;
+}
+
+async function loadCatalog(options = {}) {
+  const append = options.append === true;
+  const requestId = ++catalogRequestId;
+  const offset = append ? catalogRenderedCount : 0;
+  elements.catalogList.setAttribute("aria-busy", "true");
+  elements.catalogMoreButton.disabled = true;
+
+  try {
+    const result = await callBackground({
+      type: "COMB_SEARCH_CATALOG",
+      query: elements.catalogSearchInput.value,
+      status: elements.catalogStatusSelect.value,
+      sort: elements.catalogSortSelect.value,
+      offset,
+      limit: 25
+    });
+    if (requestId !== catalogRequestId) return;
+    renderCatalog(result, append);
+  } catch (error) {
+    if (requestId !== catalogRequestId) return;
+    setStatus(`Catalog search failed: ${error.message || String(error)}`, true);
+  } finally {
+    if (requestId === catalogRequestId) {
+      elements.catalogList.setAttribute("aria-busy", "false");
+      elements.catalogMoreButton.disabled = false;
+    }
+  }
+}
+
+function scheduleCatalogSearch() {
+  clearTimeout(catalogDebounceTimer);
+  catalogDebounceTimer = setTimeout(() => loadCatalog(), 160);
 }
 
 function createTrustKey(key) {
@@ -184,6 +286,7 @@ function renderFeedState(feedState) {
   elements.signedFeedButton.disabled = keys.length === 0;
   elements.sourceUrlInput.disabled = keys.length === 0;
   elements.connectSourceButton.disabled = keys.length === 0;
+  void loadCatalog();
 }
 
 async function loadLibrary() {
@@ -259,15 +362,15 @@ async function connectFeedSource(event) {
     (source) => source.originPattern === descriptor.originPattern
   );
   try {
-    const permissionRequest = chrome.permissions.request({ origins: [descriptor.originPattern] });
+    const permissionRequest = extensionApi.permissions.request({ origins: [descriptor.originPattern] });
     granted = await permissionRequest;
-    if (!granted) throw new Error("Chrome did not grant access to that feed origin.");
+    if (!granted) throw new Error("The browser did not grant access to that feed origin.");
     renderFeedState(await callBackground({ type: "COMB_ADD_FEED_SOURCE", url: descriptor.url }));
     elements.sourceUrlInput.value = "";
     setStatus("Source approved, signature verified, and secure updates enabled about twice daily.");
   } catch (error) {
     if (granted && !originAlreadyConnected) {
-      await chrome.permissions.remove({ origins: [descriptor.originPattern] }).catch(() => false);
+      await extensionApi.permissions.remove({ origins: [descriptor.originPattern] }).catch(() => false);
     }
     setStatus(`Source connection failed: ${error.message || String(error)}`, true);
   }
@@ -370,5 +473,14 @@ elements.trustKeyInput.addEventListener("change", () => importTrustKey(elements.
 elements.signedFeedButton.addEventListener("click", () => elements.signedFeedInput.click());
 elements.signedFeedInput.addEventListener("change", () => importSignedFeed(elements.signedFeedInput.files[0]));
 elements.sourceForm.addEventListener("submit", connectFeedSource);
+elements.catalogSearchForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  clearTimeout(catalogDebounceTimer);
+  void loadCatalog();
+});
+elements.catalogSearchInput.addEventListener("input", scheduleCatalogSearch);
+elements.catalogStatusSelect.addEventListener("change", () => loadCatalog());
+elements.catalogSortSelect.addEventListener("change", () => loadCatalog());
+elements.catalogMoreButton.addEventListener("click", () => loadCatalog({ append: true }));
 
 loadLibrary();

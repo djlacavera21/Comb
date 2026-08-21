@@ -72,3 +72,10 @@ test("fixture proposal requires a bounded fixture ID", () => {
     /lowercase kebab-case/
   );
 });
+
+test("fixture proposal accepts the coarse Magento adapter enum", () => {
+  const magentoReport = report();
+  magentoReport.compatibility.adapter = "magento";
+  const proposal = createSyntheticFixtureProposal(magentoReport, { fixtureId: "magento-luma-cart" });
+  assert.equal(proposal.sourceContract.compatibility.adapter, "magento");
+});

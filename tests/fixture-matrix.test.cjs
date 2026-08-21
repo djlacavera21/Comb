@@ -13,6 +13,12 @@ const matrix = JSON.parse(
 
 test("the checked-in support matrix covers every synthetic fixture", () => {
   assert.deepEqual(validateFixtureMatrix(matrix, { rootDirectory: root }), []);
+  const magentoFixtures = matrix.fixtures.filter((fixture) => fixture.adapter === "magento");
+  assert.deepEqual(magentoFixtures.map((fixture) => fixture.file), [
+    "magento-luma.html",
+    "magento-checkout.html"
+  ]);
+  assert.equal(magentoFixtures.every((fixture) => fixture.expected.zeroPurchaseClicks), true);
 });
 
 test("the support matrix rejects live URLs and creator identifiers", () => {

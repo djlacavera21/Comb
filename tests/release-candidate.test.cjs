@@ -8,26 +8,26 @@ const sha = "0123456789abcdef0123456789abcdef01234567";
 
 function validCandidate() {
   return {
-    version: "0.7.0",
+    version: "0.8.0",
     commitSha: sha,
     headSha: sha,
     mainSha: sha,
     clean: true,
     localTagExists: false,
     productVersions: {
-      package: "0.7.0",
-      manifest: "0.7.0",
-      listing: "0.7.0",
-      matrix: "0.7.0",
-      engine: "0.7.0"
+      package: "0.8.0",
+      manifest: "0.8.0",
+      listing: "0.8.0",
+      matrix: "0.8.0",
+      engine: "0.8.0"
     },
     textEvidence: {
-      changelog: "## [0.7.0]",
-      "release documentation": "dist/comb-0.7.0.zip and v0.7.0",
-      "submission checklist": "comb-0.7.0.zip",
-      "release notes": "v0.7 release",
-      "options version label": "Comb v0.7",
-      "store screenshot source": "Comb v0.7"
+      changelog: "## [0.8.0]",
+      "release documentation": "dist/comb-0.8.0.zip and v0.8.0",
+      "submission checklist": "comb-0.8.0.zip",
+      "release notes": "v0.8 release",
+      "options version label": "Comb v0.8",
+      "store screenshot source": "Comb v0.8"
     }
   };
 }

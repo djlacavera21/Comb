@@ -1,6 +1,6 @@
 # Comb Signed Coupon Feed v1
 
-Comb v0.7 accepts manually imported or permission-gated, signature-verified coupon data without adding a backend, required host permissions, or executable configuration. This document defines the `comb.coupon-feed/v1`, `comb.signed-feed/v1`, and `comb.trust-key/v1` formats implemented by `src/shared/feed-verifier.js`, plus the separate approved-source policy implemented by `src/shared/source-policy.js`.
+Comb accepts manually imported or permission-gated, signature-verified coupon data without adding a backend, required host permissions, or executable configuration. This document defines the `comb.coupon-feed/v1`, `comb.signed-feed/v1`, and `comb.trust-key/v1` formats implemented by `src/shared/feed-verifier.js`, plus the separate approved-source policy implemented by `src/shared/source-policy.js`.
 
 ## Security and attribution boundary
 
@@ -114,7 +114,7 @@ An approved source must be removed before its installed feed can be removed. For
 
 ## Approved-source layer
 
-Source configuration is not part of any signed feed object. Feed URLs never reach the coupon candidate list or checkout engine and cannot carry affiliate metadata. v0.7 accepts a source only when all of these are true:
+Source configuration is not part of any signed feed object. Feed URLs never reach the coupon candidate list or checkout engine and cannot carry affiliate metadata. Comb accepts a source only when all of these are true:
 
 - the user enters the URL in Comb settings and submits Chrome's origin permission prompt;
 - the URL uses public HTTPS on the default port with a DNS hostname;
@@ -134,7 +134,13 @@ Removing the last source for an origin clears its scheduled work and asks Chrome
 
 Comb deduplicates coupon tokens case-insensitively for the exact current merchant and keeps the strongest candidate. Its v1 score combines a smoothed success rate (65%), a 30-day freshness half-life (25%), and observation-count confidence (10%). At most 20 merged local and signed-feed codes reach a checkout run, with local codes taking precedence.
 
-Outcome counts are publisher-provided evidence, not telemetry from the extension. Comb v0.7 uploads no outcomes.
+Outcome counts are publisher-provided evidence, not telemetry from the extension. Comb uploads no outcomes.
+
+## Local catalog search
+
+Comb settings can search the signed-feed records already installed on the device. The settings page sends a bounded query, active/expired filter, fixed sort mode, offset, and page size to the background runtime. That runtime revalidates stored envelopes through the normal feed-state load, waits for in-flight mutations, and returns at most 100 result records per page. It makes no network request and does not store or upload the search term.
+
+Search matches merchant hostname, coupon token, feed ID/name, or trusted public-key fingerprint. Results deduplicate the same merchant/code pair case-insensitively, prefer an active source and then the highest v1 score, report the number of corroborating feed IDs, and preserve the selected source's feed identity, key fingerprint, sequence, expiry, observation time, and aggregate outcome counts. The default view excludes expired feeds; the expired filter exists for inspection only and does not make those codes eligible at checkout.
 
 ## Publisher workflow
 

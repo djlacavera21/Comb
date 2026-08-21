@@ -1,4 +1,4 @@
-# Comb v0.7 Store-Review Response Playbook
+# Comb v0.8 Store-Review Response Playbook
 
 Use this playbook to answer Chrome Web Store or Microsoft Edge Add-ons questions without weakening the reviewed product boundary. Tailor the greeting and reviewer-specific reference, but keep technical claims exact.
 
@@ -8,15 +8,17 @@ Comb tests user-provided or signature-verified coupon tokens on the active check
 
 ## Creator attribution
 
-The creator-tagging issue is fixed by architecture. Comb has no affiliate identity and does not navigate, redirect, intercept requests, mutate URL/referral parameters, or read/write attribution cookies. Existing creator affiliate tags, referral parameters, and cookies stay untouched so the original creator can keep proper attribution. Required CI verifies a synthetic creator-tagged URL and attribution cookie remain byte-for-byte unchanged through a complete coupon run.
+The creator-tagging issue is fixed by architecture. Comb has no affiliate identity and does not navigate, redirect, intercept requests, mutate URL/referral parameters, or read/write attribution cookies. Existing creator affiliate tags, referral parameters, and cookies stay untouched so the original creator can keep proper attribution. Required Chrome and Firefox CI runners execute one shared contract verifying a synthetic creator-tagged URL and attribution cookie remain byte-for-byte unchanged through a complete coupon run.
 
 ## Optional feed permission
 
-The broad-looking optional HTTPS declaration enables an origin-specific browser prompt only after the user enters a public signed-feed URL. No host is granted at install time. The service worker requests the exact origin, sends one bounded credential-free/referrer-free JSON request, rejects redirects, and installs only a signature/schema/expiry/pin/rollback-valid code-only envelope.
+The broad-looking optional HTTPS declaration enables an origin-specific browser prompt only after the user enters a public signed-feed URL. No host is granted at install time. The background runtime requests the exact origin, sends one bounded credential-free/referrer-free JSON request, rejects redirects, and installs only a signature/schema/expiry/pin/rollback-valid code-only envelope.
+
+Required Firefox CI builds and temporary-installs the exact runtime ZIP, verifies that the synthetic origin starts ungranted, triggers the prompt through the actual settings-form click, denies it, and requires no permission or source to remain. A second click and approval retrieves a tampered envelope; Comb must reject its unchanged signature, roll back the new grant, and keep feed/source/alarm state empty. A third click and approval must produce the valid cookie-free/referrer-free retry, signature-verified feed/source installation, and named 720-minute alarm. The production source-removal path must retain the verified feed while clearing its alarm and unused origin grant.
 
 ## Local data and safe report
 
-Checkout detection and coupon testing happen on-device. The Comb developer receives no merchant history, checkout content, totals, coupon outcomes, creator tags, identity, or payment/order data. The v0.7 compatibility report is user-triggered and saved locally; it is not uploaded. Its fixed schema omits hostname/URL, page content/selectors, coupon codes, total/currency values, cookies, and creator tags.
+Checkout detection and coupon testing happen on-device. The Comb developer receives no merchant history, checkout content, totals, coupon outcomes, creator tags, identity, or payment/order data. The compatibility report is user-triggered and saved locally; it is not uploaded. Its fixed schema omits hostname/URL, page content/selectors, coupon codes, total/currency values, cookies, and creator tags.
 
 ## Unknown checkout markup
 

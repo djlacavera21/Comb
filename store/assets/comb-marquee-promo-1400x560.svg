@@ -1,0 +1,92 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="560" viewBox="0 0 1400 560" role="img" aria-labelledby="title desc">
+  <title id="title">Comb marquee promotional tile</title>
+  <desc id="desc">Comb private coupon tester branding with an intact visual link between a coupon and creator tag, emphasizing that the creator-tagging issue is fixed</desc>
+  <defs>
+    <linearGradient id="background" x1="70" y1="20" x2="1330" y2="540" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#123629"/>
+      <stop offset="0.55" stop-color="#0a291f"/>
+      <stop offset="1" stop-color="#061611"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#f8dfa4"/>
+      <stop offset="0.48" stop-color="#edc66f"/>
+      <stop offset="1" stop-color="#c89438"/>
+    </linearGradient>
+    <linearGradient id="coupon" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#fff0bd"/>
+      <stop offset="0.58" stop-color="#edc66f"/>
+      <stop offset="1" stop-color="#d4a84f"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0" cy="0" r="1" gradientTransform="translate(1120 250) rotate(90) scale(360 470)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#edc66f" stop-opacity="0.24"/>
+      <stop offset="0.7" stop-color="#71d39b" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#071a14" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="honeycomb" width="78" height="90" patternUnits="userSpaceOnUse">
+      <path d="M39 3 73 23v44L39 87 5 67V23z" fill="none" stroke="#edc66f" stroke-opacity="0.13" stroke-width="1.5"/>
+    </pattern>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="18" stdDeviation="18" flood-color="#020b08" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+
+  <rect width="1400" height="560" fill="url(#background)"/>
+  <rect width="1400" height="560" fill="url(#glow)"/>
+  <rect x="4" y="4" width="1392" height="552" rx="26" fill="none" stroke="#edc66f" stroke-opacity="0.18" stroke-width="2"/>
+  <rect x="0" y="0" width="560" height="560" fill="url(#honeycomb)" opacity="0.55"/>
+  <path d="M0 470C260 382 416 420 670 560H0z" fill="#071a14" fill-opacity="0.38"/>
+
+  <g aria-label="Comb logo">
+    <path d="M142 54 204 90v72l-62 36-62-36V90z" fill="#0a241b" stroke="url(#brass)" stroke-width="6"/>
+    <path d="M160 99a34 34 0 1 0 0 54" fill="none" stroke="url(#brass)" stroke-linecap="round" stroke-width="14"/>
+    <path d="m171 91 11 6v13l-11 6-11-6V97zm0 51 11 6v13l-11 6-11-6v-13z" fill="#f8dfa4"/>
+  </g>
+  <text x="234" y="104" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="17" font-weight="800" letter-spacing="3.4">PRIVATE COUPON TESTER</text>
+  <text x="232" y="172" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="78" font-weight="850">Comb</text>
+
+  <text x="80" y="294" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="58" font-weight="850">Creator credit</text>
+  <text x="80" y="356" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="58" font-weight="850">stays theirs.</text>
+  <g transform="translate(80 401)">
+    <rect width="365" height="50" rx="25" fill="#71d39b" fill-opacity="0.12" stroke="#71d39b" stroke-opacity="0.46" stroke-width="2"/>
+    <circle cx="27" cy="25" r="12" fill="#71d39b"/>
+    <path d="m21 25 4 4 8-9" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="3"/>
+    <text x="51" y="31" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="16" font-weight="850" letter-spacing="1.3">THE TAGGING ISSUE IS FIXED</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="762" y="54" width="570" height="452" rx="38" fill="#061812" fill-opacity="0.78" stroke="#edc66f" stroke-opacity="0.2" stroke-width="2"/>
+    <path d="M800 95h494" stroke="#edc66f" stroke-opacity="0.15" stroke-width="2"/>
+    <circle cx="805" cy="78" r="6" fill="#71d39b"/>
+    <circle cx="825" cy="78" r="6" fill="#edc66f" fill-opacity="0.7"/>
+    <circle cx="845" cy="78" r="6" fill="#edc66f" fill-opacity="0.28"/>
+  </g>
+
+  <path d="M916 286c82 0 123 47 178 47 54 0 82-34 137-34" fill="none" stroke="#edc66f" stroke-opacity="0.26" stroke-width="24" stroke-linecap="round"/>
+  <path d="M916 286c82 0 123 47 178 47 54 0 82-34 137-34" fill="none" stroke="url(#brass)" stroke-width="7" stroke-linecap="round"/>
+
+  <g transform="rotate(-6 930 272)" filter="url(#shadow)">
+    <path d="M808 182h242a20 20 0 0 1 20 20v36a24 24 0 0 0 0 48v36a20 20 0 0 1-20 20H808a20 20 0 0 1-20-20v-36a24 24 0 0 0 0-48v-36a20 20 0 0 1 20-20z" fill="url(#coupon)"/>
+    <path d="M1008 193v138" stroke="#604817" stroke-opacity="0.42" stroke-width="2" stroke-dasharray="8 8"/>
+    <text x="834" y="249" fill="#123027" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="850" letter-spacing="2">COUPON</text>
+    <text x="830" y="307" fill="#071a14" font-family="DejaVu Sans, sans-serif" font-size="58" font-weight="900">20%</text>
+    <path d="M1034 242h18m-18 28h18" stroke="#6c531e" stroke-linecap="round" stroke-width="8"/>
+  </g>
+
+  <g transform="rotate(5 1215 320)" filter="url(#shadow)">
+    <path d="M1120 231h141l54 89-54 89h-141a22 22 0 0 1-22-22V253a22 22 0 0 1 22-22z" fill="#10382a" stroke="url(#brass)" stroke-width="4"/>
+    <circle cx="1259" cy="320" r="13" fill="#071a14" stroke="#edc66f" stroke-width="4"/>
+    <circle cx="1150" cy="290" r="25" fill="#71d39b" fill-opacity="0.18" stroke="#71d39b" stroke-opacity="0.7" stroke-width="2"/>
+    <circle cx="1150" cy="282" r="8" fill="#a7ebc1"/>
+    <path d="M1135 306c4-12 26-12 30 0" fill="#a7ebc1"/>
+    <text x="1184" y="289" fill="#edc66f" font-family="DejaVu Sans, sans-serif" font-size="12" font-weight="850" letter-spacing="1.6">CREATOR</text>
+    <text x="1130" y="352" fill="#fff7e2" font-family="DejaVu Sans, sans-serif" font-size="18" font-weight="800">ATTRIBUTION</text>
+    <text x="1130" y="378" fill="#a7ebc1" font-family="DejaVu Sans, sans-serif" font-size="14" font-weight="750">UNCHANGED</text>
+  </g>
+
+  <g transform="translate(1018 257)" filter="url(#shadow)">
+    <path d="M53 0 99 17v38c0 34-21 57-46 70C28 112 7 89 7 55V17z" fill="#71d39b" stroke="#d5f7e2" stroke-width="4"/>
+    <path d="m31 61 15 15 29-35" fill="none" stroke="#071a14" stroke-linecap="round" stroke-linejoin="round" stroke-width="10"/>
+  </g>
+
+  <text x="1047" y="471" text-anchor="middle" fill="#8fa097" font-family="DejaVu Sans, sans-serif" font-size="14">Coupons tested locally · creator attribution left intact</text>
+</svg>

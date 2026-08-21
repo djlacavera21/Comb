@@ -1,5 +1,11 @@
 {
-  "schema": "comb.publication-record/v1",
+  "schema": "comb.publication-record/v3",
+  "development": {
+    "version": "0.8.0",
+    "status": "unreleased",
+    "releaseTag": null,
+    "browserStoreSubmissionAllowed": false
+  },
   "product": {
     "version": "0.7.0",
     "branch": "main",
@@ -56,6 +62,18 @@
       "reviewEvidenceUrls": []
     },
     "edge": {
+      "status": "not_submitted",
+      "version": null,
+      "itemId": null,
+      "submissionId": null,
+      "submittedAt": null,
+      "reviewedAt": null,
+      "publishedAt": null,
+      "listingUrl": null,
+      "publiclyAvailable": false,
+      "reviewEvidenceUrls": []
+    },
+    "firefox": {
       "status": "not_submitted",
       "version": null,
       "itemId": null,

@@ -14,19 +14,109 @@ const {
 const root = path.resolve(__dirname, "..");
 const record = JSON.parse(fs.readFileSync(path.join(root, "store/publication-record.json"), "utf8"));
 
-test("publication record accepts the verified released and unsubmitted build", () => {
-  assert.deepEqual(validatePublicationRecord(record, { version: "0.7.0" }), []);
+test("publication record separates the unreleased build from the verified release", () => {
+  assert.deepEqual(validatePublicationRecord(record, { developmentVersion: "0.8.0" }), []);
   const document = fs.readFileSync(path.join(root, "docs/PUBLICATION_STATUS.md"), "utf8");
   assert.deepEqual(validatePublicationDocument(record, document), []);
+});
+
+test("publication record rejects development version drift", () => {
+  const errors = validatePublicationRecord(record, { developmentVersion: "0.8.1" });
+  assert.ok(errors.some((error) => error.includes("development version must equal 0.8.1")));
+});
+
+test("publication record blocks old or submittable unreleased builds", () => {
+  const unsafe = structuredClone(record);
+  unsafe.development.version = "0.7.0";
+  unsafe.development.browserStoreSubmissionAllowed = true;
+  const errors = validatePublicationRecord(unsafe, { developmentVersion: "0.7.0" });
+  assert.ok(errors.some((error) => error.includes("must not allow browser-store submission")));
+  assert.ok(errors.some((error) => error.includes("must be newer than the latest released product")));
+});
+
+test("publication record permits submission only when the current build matches a release", () => {
+  const releasedCurrentBuild = structuredClone(record);
+  releasedCurrentBuild.development = {
+    version: "0.7.0",
+    status: "released",
+    releaseTag: "v0.7.0",
+    browserStoreSubmissionAllowed: true
+  };
+  assert.deepEqual(
+    validatePublicationRecord(releasedCurrentBuild, { developmentVersion: "0.7.0" }),
+    []
+  );
+
+  releasedCurrentBuild.development.releaseTag = "v0.8.0";
+  const errors = validatePublicationRecord(releasedCurrentBuild, { developmentVersion: "0.7.0" });
+  assert.ok(errors.some((error) => error.includes("tag must match the verified GitHub release")));
 });
 
 test("publication record rejects an availability claim before official publication", () => {
   const claimed = structuredClone(record);
   claimed.stores.chrome.publiclyAvailable = true;
   claimed.stores.chrome.listingUrl = "https://chromewebstore.google.com/detail/comb/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-  const errors = validatePublicationRecord(claimed, { version: "0.7.0" });
+  const errors = validatePublicationRecord(claimed, { developmentVersion: "0.8.0" });
   assert.ok(errors.some((error) => error.includes("availability claim")));
   assert.ok(errors.some((error) => error.includes("not-submitted field must be null")));
+});
+
+test("publication record maps Firefox availability only to the official AMO public state", () => {
+  const awaitingReview = structuredClone(record);
+  awaitingReview.stores.firefox = {
+    status: "nominated",
+    version: "0.7.0",
+    itemId: "@comb-djlacavera21",
+    submissionId: "amo-version-7001",
+    submittedAt: "2026-08-15T01:00:00Z",
+    reviewedAt: null,
+    publishedAt: null,
+    listingUrl: null,
+    publiclyAvailable: false,
+    reviewEvidenceUrls: []
+  };
+  assert.deepEqual(validatePublicationRecord(awaitingReview, { developmentVersion: "0.8.0" }), []);
+
+  awaitingReview.stores.firefox.publiclyAvailable = true;
+  assert.ok(
+    validatePublicationRecord(awaitingReview, { developmentVersion: "0.8.0" })
+      .some((error) => error.includes("Firefox availability claim"))
+  );
+
+  const published = structuredClone(record);
+  published.stores.firefox = {
+    status: "public",
+    version: "0.7.0",
+    itemId: "@comb-djlacavera21",
+    submissionId: "amo-version-7001",
+    submittedAt: "2026-08-15T01:00:00Z",
+    reviewedAt: "2026-08-16T01:00:00Z",
+    publishedAt: "2026-08-16T01:00:00Z",
+    listingUrl: "https://addons.mozilla.org/en-US/firefox/addon/comb-private-coupon-tester/",
+    publiclyAvailable: true,
+    reviewEvidenceUrls: []
+  };
+  assert.deepEqual(validatePublicationRecord(published, { developmentVersion: "0.8.0" }), []);
+});
+
+test("publication record rejects a non-AMO Firefox listing URL", () => {
+  const published = structuredClone(record);
+  published.stores.firefox = {
+    status: "public",
+    version: "0.7.0",
+    itemId: "@comb-djlacavera21",
+    submissionId: "amo-version-7001",
+    submittedAt: "2026-08-15T01:00:00Z",
+    reviewedAt: "2026-08-16T01:00:00Z",
+    publishedAt: "2026-08-16T01:00:00Z",
+    listingUrl: "https://example.com/firefox/comb",
+    publiclyAvailable: true,
+    reviewEvidenceUrls: []
+  };
+  assert.ok(
+    validatePublicationRecord(published, { developmentVersion: "0.8.0" })
+      .some((error) => error.includes("Firefox listing URL must use the official store host"))
+  );
 });
 
 test("publication record requires four exact immutable GitHub release assets", () => {
@@ -44,10 +134,10 @@ test("publication record requires four exact immutable GitHub release assets", (
       downloadUrl: `https://github.com/djlacavera21/Comb/releases/download/v0.7.0/${name}`
     }))
   };
-  assert.deepEqual(validatePublicationRecord(released, { version: "0.7.0" }), []);
+  assert.deepEqual(validatePublicationRecord(released, { developmentVersion: "0.8.0" }), []);
 
   released.githubRelease.assets.pop();
-  const errors = validatePublicationRecord(released, { version: "0.7.0" });
+  const errors = validatePublicationRecord(released, { developmentVersion: "0.8.0" });
   assert.ok(errors.some((error) => error.includes("four exact assets")));
 });
 
@@ -65,7 +155,7 @@ test("publication record requires an official listing host for a public store st
     publiclyAvailable: true,
     reviewEvidenceUrls: []
   };
-  const errors = validatePublicationRecord(published, { version: "0.7.0" });
+  const errors = validatePublicationRecord(published, { developmentVersion: "0.8.0" });
   assert.ok(errors.some((error) => error.includes("official store host")));
 });
 
@@ -96,8 +186,12 @@ test("publication document validation follows later release and store states", (
     publiclyAvailable: true,
     reviewEvidenceUrls: []
   };
-  assert.deepEqual(validatePublicationRecord(transitioned, { version: "0.7.0" }), []);
+  assert.deepEqual(validatePublicationRecord(transitioned, { developmentVersion: "0.8.0" }), []);
   const transitionedDocument = [
+    "Current development version: `0.8.0`",
+    "Development status: **Unreleased**",
+    "Development release tag: **None**",
+    "Browser-store submission allowed: **No**",
     transitioned.product.candidateCommit,
     "Branch: `main`",
     "Verification conclusion: **Success**",
@@ -109,6 +203,7 @@ test("publication document validation follows later release and store states", (
     "Chrome Web Store: **Published**",
     "Chrome submitted version: `0.7.0`",
     "Microsoft Edge Add-ons: **Not submitted**",
+    "Firefox Add-ons (AMO): **Not submitted**",
     transitioned.githubRelease.tag,
     transitioned.githubRelease.releaseUrl,
     transitioned.githubRelease.workflowRunUrl,

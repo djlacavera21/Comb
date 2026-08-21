@@ -5,7 +5,7 @@ const path = require("node:path");
 
 const REPORT_SCHEMA = "comb.compatibility-report/v1";
 const PROPOSAL_SCHEMA = "comb.synthetic-fixture-proposal/v1";
-const ADAPTERS = new Set(["woocommerce", "bigcommerce", "shopify", "generic", "unknown"]);
+const ADAPTERS = new Set(["magento", "woocommerce", "bigcommerce", "shopify", "generic", "unknown"]);
 const REASONS = new Set([
   null,
   "unknown_markup",
