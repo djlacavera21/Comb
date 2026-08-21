@@ -4,7 +4,7 @@
 
 Comb proves the difficult local loop: find the relevant checkout controls, test codes without clicking unrelated controls, measure the real price change, and leave the cart in the best recoverable state.
 
-The v0.7 build optimizes for inspectability, safe failure, privacy-safe support intake, independently reproducible evidence, and a controlled browser-store handoff. It is dependency-free, uses ordinary JavaScript, and can be loaded directly from the repository.
+The current build optimizes for inspectability, safe failure, privacy-safe support intake, independently reproducible evidence, and a controlled browser-store handoff. It is dependency-free, uses ordinary JavaScript, and can be loaded directly from the repository.
 
 ## Components
 
@@ -12,9 +12,9 @@ The v0.7 build optimizes for inspectability, safe failure, privacy-safe support 
 
 The popup is the only primary user interface. Opening it grants temporary `activeTab` access. It shows the detected adapter and total, accepts codes, streams progress, renders a result for every tested code, keeps the creator-attribution guarantee visible, and can save an allowlisted compatibility report locally after a user gesture.
 
-### Service worker
+### Background runtime
 
-The Manifest V3 service worker is the trust boundary between extension UI and checkout page. It:
+The Manifest V3 background runtime is the trust boundary between extension UI and checkout page. Chrome 121+ uses `src/background.js` as a service worker; Firefox 128+ loads the packaged verifier, source policy, and the same background file as ordered event-page scripts. Each packaged context selects Firefox's promise-based `browser` namespace when present and otherwise uses Chromium's `chrome` namespace. It:
 
 - validates and normalizes messages;
 - injects the packaged content scripts after a user gesture;
@@ -24,15 +24,23 @@ The Manifest V3 service worker is the trust boundary between extension UI and ch
 
 It has no API for navigation, cookies, affiliate tags, page requests, or order submission.
 
+The Firefox path adds no API or permission. Static checks pin both background forms, and unit tests execute the event-page path with no `chrome` global. Chrome and Firefox execute the same required checkout contract module, but Firefox remains a development target rather than a published compatibility claim until the exact release commit has green hosted evidence and Mozilla review/signing completes. See [FIREFOX.md](FIREFOX.md).
+
 ### Signed-feed verifier
 
-The service worker loads a packaged verifier that treats community feeds as inert data. A feed becomes eligible only after its ECDSA P-256 signature verifies against a public key the user explicitly imported. Strict schema validation then checks expiry, exact merchant scope, code-token syntax, outcome counts, duplicate entries, and lifetime limits. Sequence numbers provide rollback and substitution resistance.
+The background runtime loads a packaged verifier that treats community feeds as inert data. A feed becomes eligible only after its ECDSA P-256 signature verifies against a public key the user explicitly imported. Strict schema validation then checks expiry, exact merchant scope, code-token syntax, outcome counts, duplicate entries, and lifetime limits. Sequence numbers provide rollback and substitution resistance.
 
 No feed field can select DOM elements, execute logic, supply a URL, or change the Creator Attribution Guarantee. Source URLs live in a separate local configuration guarded by `source-policy.js`; they never enter the feed schema or checkout engine.
 
+### Local community catalog
+
+The options page can search installed, signature-verified feed entries without copying the entire catalog into the page. `COMB_SEARCH_CATALOG` is accepted only from the packaged settings URL, waits behind any in-flight feed mutation, and scans the reverified local feed state in the background runtime. The query is bounded to 120 characters, status and sort values use fixed enums, pages are capped at 100 results, and malformed records are omitted.
+
+Search covers merchant, coupon token, feed identity/name, and public-key fingerprint. Results deduplicate an exact merchant/code pair case-insensitively, retain the strongest eligible feed, count corroborating feed IDs, and expose the publisher-provided evidence needed to interpret the ranking. Active entries are the default; expired signed records can be inspected explicitly but never enter a checkout run. No catalog query is persisted, transmitted, or used to rewrite creator attribution.
+
 ### Approved-source updater
 
-The options page validates a user-entered public HTTPS URL and invokes Chrome's runtime origin prompt directly from the submit gesture. Only after approval does the service worker retrieve the endpoint. Network source messages are rejected unless their sender is Comb's options page.
+The options page validates a user-entered public HTTPS URL and invokes the browser's runtime origin prompt directly from the submit gesture. Only after approval does the background runtime retrieve the endpoint. Network source messages are rejected unless their sender is Comb's options page.
 
 The updater sends a credential-free, referrer-free request with redirects disabled, a 15-second timeout, and a streaming 2 MiB ceiling. Returned bytes must decode as UTF-8 JSON and pass the existing trust-key, signature, strict-schema, expiry, signer-pin, feed-ID-pin, and monotonic-sequence checks. A packaged alarm performs the same check about every 12 hours. Browser sleep may delay it.
 
@@ -42,14 +50,15 @@ All feed-state mutations share one serialized queue, so a scheduled refresh cann
 
 ### Checkout engine
 
-The checkout engine runs in Chrome's isolated content-script world. It has no network client and never reads payment credentials, address fields, or identity data; it handles only the displayed payable amount/currency and coupon-specific UI needed for the run. Its adapter pipeline is:
+The checkout engine runs in the browser's isolated content-script world. It has no network client and never reads payment credentials, address fields, or identity data; it handles only the displayed payable amount/currency and coupon-specific UI needed for the run. Its adapter pipeline is:
 
-1. WooCommerce classic and Blocks selectors;
-2. BigCommerce Cornerstone selectors derived from its public templates;
-3. Shopify-style selectors;
-4. scored generic selectors.
+1. Magento Open Source / Adobe Commerce Luma cart and checkout selectors;
+2. WooCommerce classic and Blocks selectors;
+3. BigCommerce Cornerstone selectors derived from its public templates;
+4. Shopify-style selectors;
+5. scored generic selectors.
 
-An adapter must produce a coupon input and coupon-specific apply control. Known platform selectors can establish structural trust for localized controls only inside narrowly scoped coupon forms; the generic adapter still requires explicit coupon/apply semantics. The total detector ranks visible price elements, strongly favoring grand/order totals and penalizing subtotal, tax, shipping, savings, and line-item labels.
+An adapter must produce a coupon input and coupon-specific apply control. Known platform selectors can establish structural trust for localized controls only inside narrowly scoped coupon forms; the generic adapter still requires explicit coupon/apply semantics. Magento is evaluated before WooCommerce because both platforms use `coupon_code`, while Magento's `discount-coupon-form` / `form-discount` markers are the narrower public contract. The total detector ranks visible price elements, strongly favoring grand/order totals and penalizing subtotal, tax, shipping, savings, and line-item labels.
 
 Money parsing normalizes regional grouping and decimal separators plus Arabic, Persian, and full-width digits. It recognizes a broader ISO/symbol set, but any detected currency change during a transaction invalidates the comparison and causes a safe stop.
 
@@ -74,15 +83,21 @@ Accepted but unmeasured shipping discounts are reported but not ranked as the wi
 
 ### Browser contracts
 
-`scripts/run-browser-fixtures.js` starts a local-only fixture server and drives headless Chrome directly through the Chrome DevTools Protocol, without an automation dependency. `tests/fixtures/support-matrix.json` is the versioned source of fixture expectations; validation requires every synthetic HTML fixture exactly once and allows only the creator-tagged generic fixture to own URL/cookie preservation. Sanitized contracts cover WooCommerce classic/Blocks, two Shopify-style variants, BigCommerce Cornerstone, generic and RTL detection, MXN/EUR/CHF/AED/USD totals, separate subtotal/tax/shipping rows, ambiguous-control refusal, the existing-coupon gate, failed-removal no-stacking behavior, creator URL/cookie preservation, safe-report non-disclosure, popup tab order, accessible control names, progress semantics, and settings file-import controls. CI passes `--require-browser`; a missing browser is therefore a failure rather than a skip.
+`scripts/browser-checkout-contracts.js` is the single source of real-browser checkout expectations. `scripts/run-browser-fixtures.js` drives headless Chrome through the Chrome DevTools Protocol, while `scripts/run-firefox-fixtures.js` drives headless Firefox through geckodriver's W3C WebDriver endpoint; neither project runner adds an npm automation dependency. `tests/fixtures/support-matrix.json` requires every synthetic HTML fixture exactly once and allows only the creator-tagged generic fixture to own URL/cookie preservation. Shared contracts cover Magento Luma, WooCommerce classic/Blocks, two Shopify-style variants, BigCommerce Cornerstone, generic and RTL detection, MXN/EUR/CHF/AED/USD totals, separate subtotal/tax/shipping rows, ambiguous-control refusal, the existing-coupon gate, failed-removal no-stacking behavior, creator URL/cookie preservation, and zero purchase clicks. Chrome additionally executes safe-report non-disclosure, popup tab order, accessible control names, progress semantics, and settings file-import controls with a Firefox-style `browser` namespace.
+
+The Firefox runner also builds and temporary-installs the exact deterministic runtime ZIP. Inside that packaged context it verifies background startup and an initially ungranted optional origin, then triggers the actual settings submit with WebDriver user clicks. Denial must leave permission and source state empty. The first approval retrieves a deliberately tampered envelope; signature rejection must roll back the newly granted origin and leave no feed, source, or alarm. A retry serves the valid in-memory envelope through the same loopback-only CONNECT proxy and short-lived synthetic TLS server. Both bounded GETs must be credential-free and referrer-free; the valid path must install the verified feed/source and exact 720-minute product alarm. Production source deletion must then clear the alarm and unused origin grant while retaining the verified feed until its trust key is removed.
+
+The test profile alone accepts the temporary certificate and proxies HTTPS; the proxy rejects every CONNECT target except the synthetic hostname, TLS material lives only in the operating system's temporary directory, and the signing key never leaves memory. Current Firefox requires geckodriver `--allow-system-access` to inspect browser chrome, so the driver is loopback-only and uses chrome context solely to resolve the permission prompts. None of these test-only privileges or transport overrides is packaged with Comb.
+
+Verification and release CI pass `--require-browser` to both runners; a missing Chrome, Firefox, geckodriver, OpenSSL, packaged prompt, signed-feed result, product alarm, or permission cleanup fails rather than skips.
 
 ### Release package
 
-`scripts/build-release.js` uses a deterministic, stored-entry ZIP writer implemented with Node built-ins. It sorts the exact runtime file list, normalizes every entry timestamp to `SOURCE_DATE_EPOCH` or the Git commit time, fixes file modes, writes no platform-specific extras, builds twice, and emits a SHA-256 sidecar. The manifest stays at the archive root.
+`scripts/build-release.js` uses a deterministic, stored-entry ZIP writer implemented with Node built-ins. It sorts the exact runtime file list, normalizes every entry timestamp to `SOURCE_DATE_EPOCH` or the Git commit time, fixes file modes, writes no platform-specific extras, builds twice, and emits a SHA-256 sidecar. The manifest stays at the archive root and declares the same packaged code for the Chrome worker and Firefox event-page environments.
 
-`scripts/validate-store.js` separately binds copy-ready Chrome/Edge metadata to the manifest, exact permission explanations, conservative on-device data categories, Limited Use commitments, safe-report disclosure, creator-attribution evidence, description/search limits, and PNG dimensions. `scripts/build-store-package.js` runs both validation boundaries and places the runtime ZIP plus listing copy, assets, privacy policy, machine support matrix, independent-review guide, support evidence, and public review in a second deterministic reviewer kit. Required CI uploads both archives and sidecars.
+`scripts/validate-store.js` separately binds copy-ready Chrome, Edge, and Firefox metadata to the manifest, exact permission explanations, conservative on-device data categories, Firefox's no-external-collection declaration, Limited Use commitments, safe-report disclosure, creator-attribution evidence, description/search limits, license source, and PNG dimensions. `scripts/build-store-package.js` runs both validation boundaries and places the runtime ZIP plus listing copy, assets, privacy policy, machine support matrix, independent-review guide, cross-browser runner evidence, support evidence, and public review in a second deterministic reviewer kit. Required CI uploads both archives and sidecars.
 
-Publication uses a separate manual `workflow_dispatch` workflow. It checks out the supplied full SHA, requires it to equal current `origin/main`, validates every product version, rejects existing tags, reruns lint/unit/real-Chrome/build gates, verifies the exact artifact checksums, and creates `vX.Y.Z` plus a GitHub release only after an explicit creator-attribution authorization. Browser-store dashboard submission remains a maintainer account action and supplies the installable extension signature.
+Publication uses a separate manual `workflow_dispatch` workflow. It checks out the supplied full SHA, requires it to equal current `origin/main`, validates every product version, rejects existing tags, reruns lint/unit/real-Chrome/real-Firefox/build gates, verifies the exact artifact checksums, and creates `vX.Y.Z` plus a GitHub release only after an explicit creator-attribution authorization. Chrome, Edge, and AMO dashboard submission remain maintainer account actions and supply the installable extension signature.
 
 ## Message protocol
 
@@ -96,6 +111,7 @@ Publication uses a separate manual `workflow_dispatch` workflow. It checks out t
 | `COMB_GET_LIBRARY` | Options → worker | Read local merchant-code records |
 | `COMB_REPLACE_LIBRARY` | Options → worker | Import a validated local library |
 | `COMB_GET_FEED_STATE` | Options → worker | List trusted keys and installed feed metadata |
+| `COMB_SEARCH_CATALOG` | Options → worker | Search paginated, reverified local feed entries with publisher provenance |
 | `COMB_IMPORT_TRUST_KEY` | Options → worker | Fingerprint and add an explicit public trust anchor |
 | `COMB_IMPORT_SIGNED_FEED` | Options → worker | Verify and install a bounded signed coupon feed |
 | `COMB_DELETE_TRUST_KEY` | Options → worker | Remove a key and cascade-delete feeds signed by it |
@@ -109,6 +125,7 @@ Publication uses a separate manual `workflow_dispatch` workflow. It checks out t
 | Risk | Release control |
 | --- | --- |
 | Persistent observation of browsing | `activeTab`; no `host_permissions` |
+| Cross-browser permission drift | One manifest permission set, exact dual-background validation, and native-namespace regression tests |
 | Creator commission diversion | Zero-affiliate design; no cookie/navigation/traffic APIs |
 | Poisoned community codes | Explicit trust keys, signatures, strict schema, expiry, evidence scoring |
 | Feed rollback/substitution | Monotonic sequence and payload-hash checks |

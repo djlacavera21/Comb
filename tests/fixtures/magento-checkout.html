@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <title>Magento Luma checkout fixture</title>
+    <link rel="stylesheet" href="fixture.css">
+  </head>
+  <body data-baseline="132.95" data-shipping="7.95" data-currency="EUR" data-locale="fr-FR">
+    <main>
+      <h1>Magento Open Source Luma checkout fixture</h1>
+      <div class="payment-option _collapsible opc-payment-additional discount-code">
+        <div class="payment-option-title field choice" data-role="title">
+          <span class="action action-toggle" id="checkout-discount-heading">Appliquer un code de réduction</span>
+        </div>
+        <div class="payment-option-content" data-role="content" aria-labelledby="checkout-discount-heading">
+          <form class="form form-discount" id="discount-form">
+            <div class="payment-option-inner">
+              <div class="field">
+                <label class="label" for="discount-code">Saisissez le code de réduction</label>
+                <div class="control">
+                  <input class="input-text" id="discount-code" name="discount_code" type="text" data-fixture-input>
+                </div>
+              </div>
+            </div>
+            <div class="actions-toolbar">
+              <button class="action action-apply" type="submit" data-fixture-apply>Appliquer la réduction</button>
+            </div>
+            <p class="message" role="alert" data-fixture-status hidden></p>
+            <div class="coupon-result" data-fixture-applied hidden>
+              <span data-fixture-applied-code></span>
+              <button class="action action-cancel" type="submit" data-fixture-remove>Annuler le coupon</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      <table class="data table totals">
+        <tbody>
+          <tr class="totals sub">
+            <th>Sous-total</th>
+            <td class="amount"><span class="price">120,00 €</span></td>
+          </tr>
+          <tr class="totals shipping excl">
+            <th>Livraison</th>
+            <td class="amount"><span class="price">7,95 €</span></td>
+          </tr>
+          <tr class="totals-tax">
+            <th>Taxe</th>
+            <td class="amount"><span class="price">5,00 €</span></td>
+          </tr>
+          <tr class="grand totals">
+            <th class="mark"><strong>Total de la commande</strong></th>
+            <td class="amount"><strong><span class="price" data-fixture-total>132,95 €</span></strong></td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="danger-zone">
+        <button class="action primary checkout" type="button" data-fixture-danger>Passer la commande</button>
+      </div>
+    </main>
+    <script src="../../src/content/checkout-engine.js"></script>
+    <script src="fixture-runtime.js"></script>
+  </body>
+</html>

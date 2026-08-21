@@ -4,10 +4,13 @@
   if (root.__combRunnerInstalled) return;
   root.__combRunnerInstalled = true;
 
+  const extensionApi = root.browser || root.chrome;
+  if (!extensionApi) throw new Error("Comb requires the WebExtensions API.");
+
   let activeRun = null;
 
   function sendProgress(progress) {
-    return chrome.runtime.sendMessage({
+    return extensionApi.runtime.sendMessage({
       type: "COMB_PROGRESS",
       progress
     }).catch(() => undefined);
@@ -25,7 +28,7 @@
       });
   }
 
-  chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  extensionApi.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (!message || typeof message.type !== "string") return false;
 
     if (message.type === "COMB_PING") {

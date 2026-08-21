@@ -21,12 +21,13 @@ The status output should be empty. A review must identify this commit so later c
 
 ## Reproduce the release gates
 
-Use Node 22 or newer and a Chrome-family browser:
+Use Node 22 or newer, a Chrome-family browser, Firefox 138+, current geckodriver, and OpenSSL:
 
 ```bash
 npm run lint
 npm test
 node scripts/run-browser-fixtures.js --require-browser
+node scripts/run-firefox-fixtures.js --require-browser
 npm run release:build
 ```
 
@@ -37,7 +38,8 @@ Record the environment and result of each command. The release build validates a
 | Boundary | Primary implementation | Required evidence |
 | --- | --- | --- |
 | Permissions and page access | `manifest.json`, `src/background.js`, `scripts/validate-extension.js` | No required host permission or static content script; injection follows an explicit toolbar action. |
-| Creator attribution | `docs/ATTRIBUTION.md`, `src/content/checkout-engine.js`, `scripts/run-browser-fixtures.js` | Static URL/cookie/navigation prohibitions plus the real-Chrome creator URL and cookie byte-preservation contract. |
+| Cross-browser runtime | `manifest.json`, `src/background.js`, both browser runners | Chrome 121+ uses the service worker and Firefox 128+ uses event-page scripts with the same code and permission boundary; both checkout runners consume one shared contract implementation. Current Firefox 138+ automation also installs the exact ZIP and requires packaged startup, prompt denial, approved tampered-envelope rejection with grant rollback, valid signed-feed installation, and production alarm/origin cleanup. |
+| Creator attribution | `docs/ATTRIBUTION.md`, `src/content/checkout-engine.js`, `scripts/browser-checkout-contracts.js` | Static URL/cookie/navigation prohibitions plus creator URL and cookie byte-preservation required in real Chrome and Firefox. |
 | Signed feeds | `src/shared/feed-verifier.js`, `src/shared/source-policy.js`, feed/background unit tests | Strict signed code-only data, signer/feed pinning, rollback protection, exact approved origin, no credentials/referrer/redirect. |
 | Compatibility reports | `src/shared/compatibility-report.js`, compatibility-report tests, compatibility issue form | A newly constructed allowlisted object; no URL/host, page content, codes, totals/currency, cookies, affiliate tags, or creator identifiers; no automatic upload. |
 | Checkout state safety | `src/content/checkout-engine.js`, `tests/fixtures/support-matrix.json` | Every fixture executes one versioned synthetic contract; unknown markup, existing coupons, removal mismatch, and currency drift stop safely with zero purchase clicks. |
@@ -50,10 +52,12 @@ Treat the tagging fix as a release-blocking contract:
 1. Does any packaged path add or replace an affiliate, referral, click, or publisher identifier?
 2. Can packaged code navigate, rewrite URL/history, create/update a merchant tab, intercept traffic, or mutate a cookie?
 3. Can signed-feed or compatibility-report data carry executable or affiliate behavior?
-4. Does the real-Chrome `generic.html` contract preserve the exact creator-tagged URL and attribution cookie through a complete coupon run?
+4. Do the real-Chrome and real-Firefox `generic.html` contracts preserve the exact creator-tagged URL and attribution cookie through a complete coupon run?
 5. Does every synthetic checkout contract leave its purchase control untouched?
+6. Does the Firefox runtime use the same implementation without adding permissions or weakening creator-attribution protections?
+7. Does the packaged Firefox gate begin with the synthetic feed origin ungranted, expose a browser permission prompt only after each settings-form user click, preserve denial, reject an approved tampered envelope while rolling back that grant and keeping state empty, then install the valid envelope through a cookie-free/referrer-free retry and clear the exact 720-minute alarm and unused grant when the source is removed?
 
-The expected answer is no to the first three and yes to the final two. A contrary result blocks release.
+The expected answer is no to the first three and yes to the final four. A contrary result blocks release.
 
 ## Reporting a public conclusion
 

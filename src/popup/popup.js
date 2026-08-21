@@ -1,5 +1,8 @@
 "use strict";
 
+const extensionApi = globalThis.browser || globalThis.chrome;
+if (!extensionApi) throw new Error("Comb requires the WebExtensions API.");
+
 const elements = {
   shell: document.querySelector("#combShell"),
   storeHeading: document.querySelector("#storeHeading"),
@@ -64,7 +67,7 @@ function formatMoney(amount, currency) {
 }
 
 async function callBackground(message) {
-  const response = await chrome.runtime.sendMessage(message);
+  const response = await extensionApi.runtime.sendMessage(message);
 
   if (!response || response.ok !== true) {
     throw new Error(response && response.error ? response.error : "Comb did not receive a response.");
@@ -174,7 +177,7 @@ function saveCompatibilityReport() {
   if (!state.scan || !globalThis.CombCompatibilityReport) return;
 
   const content = globalThis.CombCompatibilityReport.stringifyCompatibilityReport(state.scan, {
-    extensionVersion: chrome.runtime.getManifest().version
+    extensionVersion: extensionApi.runtime.getManifest().version
   });
   const objectUrl = URL.createObjectURL(new Blob([content], { type: "application/json" }));
   const anchor = document.createElement("a");
@@ -290,7 +293,7 @@ function renderResult(result) {
 
 async function initialize() {
   try {
-    const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+    const tabs = await extensionApi.tabs.query({ active: true, currentWindow: true });
     const tab = tabs[0];
 
     if (!tab || !Number.isInteger(tab.id)) {
@@ -350,7 +353,7 @@ async function cancelRun() {
   }
 }
 
-chrome.runtime.onMessage.addListener((message) => {
+extensionApi.runtime.onMessage.addListener((message) => {
   if (
     message &&
     message.type === "COMB_PROGRESS_UPDATE" &&
@@ -363,8 +366,8 @@ chrome.runtime.onMessage.addListener((message) => {
 elements.codesInput.addEventListener("input", refreshRunButton);
 elements.runButton.addEventListener("click", startRun);
 elements.cancelButton.addEventListener("click", cancelRun);
-elements.optionsButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
+elements.optionsButton.addEventListener("click", () => extensionApi.runtime.openOptionsPage());
 elements.reportButton.addEventListener("click", saveCompatibilityReport);
-elements.privacyButton.addEventListener("click", () => chrome.runtime.openOptionsPage());
+elements.privacyButton.addEventListener("click", () => extensionApi.runtime.openOptionsPage());
 
 initialize();

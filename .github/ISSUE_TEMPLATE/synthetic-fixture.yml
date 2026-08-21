@@ -32,6 +32,7 @@ body:
         - woocommerce
         - shopify
         - bigcommerce
+        - magento
         - unknown
     validations:
       required: true

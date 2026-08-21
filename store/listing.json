@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "extensionVersion": "0.7.0",
-  "lastReviewed": "2026-08-15",
+  "extensionVersion": "0.8.0",
+  "lastReviewed": "2026-08-21",
   "shared": {
     "name": "Comb — Private Coupon Tester",
     "shortDescription": "Test coupons with verified checkout restoration, trusted feed updates, and protected creator attribution.",
@@ -89,7 +89,9 @@
     "publicMessage": "The creator-tagging issue is fixed: Comb leaves existing creator affiliate tags, referral parameters, and cookies untouched so the original creator can keep proper attribution.",
     "verifiedBy": [
       "scripts/validate-extension.js",
+      "scripts/browser-checkout-contracts.js",
       "scripts/run-browser-fixtures.js",
+      "scripts/run-firefox-fixtures.js",
       "scripts/create-synthetic-fixture-proposal.js",
       "scripts/validate-publication-record.js",
       "tests/fixtures/support-matrix.json",
@@ -97,6 +99,7 @@
       ".github/workflows/release.yml",
       "docs/ATTRIBUTION.md",
       "docs/COMPATIBILITY.md",
+      "docs/FIREFOX.md",
       "docs/INDEPENDENT_REVIEW.md",
       "docs/PUBLICATION_STATUS.md",
       "docs/SECURITY_REVIEW.md",
@@ -117,6 +120,11 @@
         "path": "store/assets/comb-small-promo-440x280.png",
         "width": 440,
         "height": 280
+      },
+      "marqueePromo": {
+        "path": "store/assets/comb-marquee-promo-1400x560.png",
+        "width": 1400,
+        "height": 560
       },
       "screenshots": [
         {
@@ -172,6 +180,71 @@
         "path": "store/assets/comb-small-promo-440x280.png",
         "width": 440,
         "height": 280
+      },
+      "screenshots": [
+        {
+          "path": "store/assets/comb-screenshot-01-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb testing coupon codes on a synthetic checkout while keeping creator attribution protected."
+        },
+        {
+          "path": "store/assets/comb-screenshot-02-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "The creator-tagging issue is fixed: synthetic URL parameters and an attribution cookie remain unchanged after coupon testing."
+        },
+        {
+          "path": "store/assets/comb-screenshot-03-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb measures every code against the payable total, restores between attempts, and leaves the best verified code applied."
+        },
+        {
+          "path": "store/assets/comb-screenshot-04-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb verifies trusted P-256 public keys and signed coupon feeds while rejecting affiliate URLs and remote code."
+        },
+        {
+          "path": "store/assets/comb-screenshot-05-1280x800.png",
+          "width": 1280,
+          "height": 800,
+          "caption": "Comb stops on ambiguous controls and can save a local compatibility report that excludes checkout and creator data."
+        }
+      ]
+    }
+  },
+  "firefox": {
+    "guid": "@comb-djlacavera21",
+    "slug": "comb-private-coupon-tester",
+    "defaultLocale": "en-US",
+    "summary": "Test coupons with verified checkout restoration, trusted feed updates, and protected creator attribution.",
+    "descriptionFile": "store/firefox-description.txt",
+    "reviewNotesFile": "store/firefox-review-notes.md",
+    "releaseNotesFile": "store/release-notes.txt",
+    "categories": {
+      "firefox": [
+        "shopping"
+      ]
+    },
+    "license": {
+      "kind": "custom",
+      "name": "MIT License",
+      "sourceFile": "LICENSE"
+    },
+    "requiresPayment": false,
+    "dataCollectionPermissions": {
+      "required": [
+        "none"
+      ],
+      "optional": []
+    },
+    "assets": {
+      "icon": {
+        "path": "icons/comb-128.png",
+        "width": 128,
+        "height": 128
       },
       "screenshots": [
         {

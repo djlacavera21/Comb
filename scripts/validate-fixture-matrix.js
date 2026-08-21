@@ -31,7 +31,7 @@ const expectedKeys = [
   "tested",
   "zeroPurchaseClicks"
 ];
-const adapters = new Set(["bigcommerce", "generic", "shopify", "woocommerce"]);
+const adapters = new Set(["bigcommerce", "generic", "magento", "shopify", "woocommerce"]);
 const contracts = new Set(["happy-path", "safe-stop"]);
 const statuses = new Set(["blocked", "complete", "partial", "stopped"]);
 const reasons = new Set([

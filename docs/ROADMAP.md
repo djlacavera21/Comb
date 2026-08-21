@@ -62,19 +62,19 @@
 
 ## v0.8 — Browser-store publication and field feedback
 
-- Maintain a machine-validated publication record whose official state mapping rejects premature GitHub-release or store-availability claims.
+- Maintain a machine-validated publication record whose official Chrome, Edge, and AMO state mappings reject premature GitHub-release or store-availability claims.
 - Published the approved v0.7 source commit through the verified release workflow and recorded its immutable tag, release URL, and four artifact checksums.
-- Submit only the runtime ZIP through Chrome Web Store and Microsoft Edge Add-ons developer dashboards; record review outcomes and public listing URLs without claiming availability early.
+- Submit only the runtime ZIP through Chrome Web Store, Microsoft Edge Add-ons, or AMO dashboards after each browser's release gates; record review outcomes and public listing URLs without claiming availability early.
 - Convert privacy-safe compatibility reports into independently written synthetic fixtures through a strict enum/boolean-only scaffold while retaining safe stops on unknown markup.
 - Link scoped independent reviews and respond to findings with tests or documented rationale before release.
 - Keep outcome reporting absent unless a separate consent, minimization, and abuse-control design is approved.
 
 ## v1.0 — Trustworthy shopping assistant
 
-- Mature adapter coverage and rollback behavior.
-- Searchable community coupon catalog.
+- Mature adapter coverage and rollback behavior (Magento Open Source / Adobe Commerce Luma contract added to the existing WooCommerce, BigCommerce, Shopify-style, and generic matrix).
+- Searchable community coupon catalog (local verified-feed search, filters, ranking, pagination, and publisher provenance completed; publisher discovery remains future work).
 - Price-history features only where provenance and consumer benefit can be verified.
-- Firefox package where browser API behavior can meet the same safety boundary.
+- Firefox desktop package foundation, shared checkout gate, exact-ZIP prompt denial, tampered-feed grant rollback, valid synthetic signed-feed interoperability, production alarm/origin cleanup, AMO materials, and publication-state mapping completed; a green hosted result at the release commit, release authorization, Mozilla review, and signing remain before availability.
 
 ## Non-goals
 

@@ -1,6 +1,6 @@
 # Privacy-Safe Synthetic Fixture Workflow
 
-Comb improves compatibility without collecting live checkout captures. A safe compatibility report can identify a coarse missing contract, but it is never a source of merchant markup. Every new fixture must be independently written from public platform documentation and invented values.
+Comb improves compatibility without collecting live checkout captures. A planned adapter may begin with an official public platform template contract; a safe compatibility report may identify a coarse missing contract, but it is never a source of merchant markup. Every new fixture must be independently written from public platform documentation and invented values.
 
 ## Separation boundary
 
@@ -34,8 +34,8 @@ The command refuses to overwrite either the source report or an existing proposa
 3. Keep all resources local. The matrix validator rejects remote fixture resources, live hosts, URLs, emails, affiliate IDs, creator IDs, and tracking metadata.
 4. Define the expected adapter, status, reason, payable total, code result, click counts, and zero purchase clicks in the matrix.
 5. Preserve the global creator-attribution invariant. Only the dedicated `generic.html` contract owns the byte-for-byte URL/cookie assertion so that attribution evidence cannot silently fragment.
-6. Run `npm run lint`, `npm test`, and the required real-Chrome suite. Unknown or ambiguous markup must remain a safe stop.
+6. Run `npm run lint`, `npm test`, and both required real-browser suites. Unknown or ambiguous markup must remain a safe stop.
 
 ## Review evidence
 
-Link the originating public compatibility issue and the implementation pull request, but do not repost a report if it contains anything outside the exact safe schema. Reviewer reasoning should cite public documentation, invented fixture elements, matrix expectations, and executed tests. Never attach a live screenshot, HAR, source dump, console log, cookie, checkout URL, or private store-review correspondence.
+Link the originating official public template or safe compatibility issue and the implementation pull request, but do not repost a report if it contains anything outside the exact safe schema. Reviewer reasoning should cite public documentation, invented fixture elements, matrix expectations, and executed tests. Never attach a live screenshot, HAR, source dump, console log, cookie, checkout URL, or private store-review correspondence.

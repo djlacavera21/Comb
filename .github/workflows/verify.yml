@@ -11,7 +11,7 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
@@ -28,6 +28,21 @@ jobs:
         env:
           CHROME_PATH: /usr/bin/google-chrome
         run: node scripts/run-browser-fixtures.js --require-browser
+      - name: Set up Firefox
+        id: firefox
+        uses: browser-actions/setup-firefox@v1
+        with:
+          firefox-version: latest
+      - name: Set up geckodriver
+        uses: browser-actions/setup-geckodriver@latest
+        with:
+          token: ${{ github.token }}
+      - name: Confirm synthetic HTTPS fixture support
+        run: openssl version
+      - name: Run real-Firefox checkout, attribution, signed-feed, permission, and alarm fixtures
+        env:
+          FIREFOX_PATH: ${{ steps.firefox.outputs.firefox-path }}
+        run: node scripts/run-firefox-fixtures.js --require-browser
       - name: Build reproducible runtime and store review kit
         run: npm run release:build
       - name: Upload verified runtime and store review kit

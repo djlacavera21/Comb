@@ -479,6 +479,149 @@
       .slice(0, limit);
   }
 
+  function compareCatalogCandidates(left, right) {
+    if (left.expired !== right.expired) return left.expired ? 1 : -1;
+    return right.score - left.score ||
+      Date.parse(right.lastVerifiedAt) - Date.parse(left.lastVerifiedAt) ||
+      left.feedId.localeCompare(right.feedId) ||
+      left.code.localeCompare(right.code);
+  }
+
+  function catalogIdentity(candidate) {
+    return `${candidate.merchant}\u0000${candidate.code.toLocaleUpperCase("en-US")}`;
+  }
+
+  function catalogMatchesQuery(candidate, queryTokens) {
+    if (!queryTokens.length) return true;
+    const searchable = [
+      candidate.merchant,
+      candidate.code,
+      candidate.feedId,
+      candidate.feedName,
+      candidate.keyId
+    ].join(" ").toLocaleLowerCase("en-US");
+    return queryTokens.every((token) => searchable.includes(token));
+  }
+
+  function groupCatalogCandidates(candidates, queryTokens = []) {
+    const grouped = new Map();
+
+    for (const candidate of candidates) {
+      const identity = catalogIdentity(candidate);
+      const existing = grouped.get(identity);
+      if (!existing) {
+        grouped.set(identity, {
+          candidates: [candidate],
+          feedIds: new Set([candidate.feedId])
+        });
+        continue;
+      }
+      existing.candidates.push(candidate);
+      existing.feedIds.add(candidate.feedId);
+    }
+
+    return Array.from(grouped.values()).flatMap((group) => {
+      const matching = group.candidates.filter((candidate) => catalogMatchesQuery(candidate, queryTokens));
+      if (!matching.length) return [];
+      matching.sort(compareCatalogCandidates);
+      return [{
+        ...matching[0],
+        sourceCount: group.feedIds.size
+      }];
+    });
+  }
+
+  function searchCatalog(feedRecords, options = {}) {
+    const now = Number.isFinite(options.now) ? options.now : Date.now();
+    const rawStatus = cleanText(options.status).toLowerCase();
+    const rawSort = cleanText(options.sort).toLowerCase();
+    const status = ["active", "expired", "all"].includes(rawStatus) ? rawStatus : "active";
+    const sort = ["recommended", "recent", "merchant"].includes(rawSort) ? rawSort : "recommended";
+    const query = cleanText(options.query).slice(0, 120).toLocaleLowerCase("en-US");
+    const queryTokens = query.split(" ").filter(Boolean);
+    const requestedLimit = Number.isSafeInteger(options.limit) ? options.limit : 25;
+    const requestedOffset = Number.isSafeInteger(options.offset) ? options.offset : 0;
+    const limit = Math.max(1, Math.min(requestedLimit, 100));
+    const offset = Math.max(0, Math.min(requestedOffset, 100000));
+    const candidates = [];
+
+    if (Array.isArray(feedRecords)) {
+      for (const record of feedRecords) {
+        const payload = record && record.payload;
+        const expiresAtMs = Date.parse(payload && payload.expiresAt);
+        if (!payload || !Number.isFinite(expiresAtMs) || !Array.isArray(payload.entries)) continue;
+        const feedId = cleanText(payload.feedId).toLowerCase();
+        const feedName = cleanText(payload.name);
+        const keyId = cleanText(payload.keyId);
+        if (!/^[a-z0-9][a-z0-9._-]{2,63}$/.test(feedId) || !feedName ||
+            !/^sha256-[A-Za-z0-9_-]{43}$/.test(keyId)) continue;
+
+        for (const entry of payload.entries) {
+          const merchant = normalizeHostname(entry && entry.merchant);
+          const code = normalizeCode(entry && entry.code);
+          const lastVerifiedAtMs = Date.parse(entry && entry.lastVerifiedAt);
+          if (!merchant || merchant !== entry.merchant || !code || code !== entry.code ||
+              !Number.isFinite(lastVerifiedAtMs) || !Number.isSafeInteger(entry.successCount) ||
+              !Number.isSafeInteger(entry.failureCount) || entry.successCount < 0 || entry.failureCount < 0) {
+            continue;
+          }
+          candidates.push({
+            merchant,
+            code,
+            score: scoreEntry(entry, now),
+            feedId,
+            feedName,
+            keyId,
+            sequence: Number.isSafeInteger(payload.sequence) ? payload.sequence : null,
+            lastVerifiedAt: new Date(lastVerifiedAtMs).toISOString(),
+            successCount: entry.successCount,
+            failureCount: entry.failureCount,
+            expiresAt: new Date(expiresAtMs).toISOString(),
+            expired: expiresAtMs <= now
+          });
+        }
+      }
+    }
+
+    const activeCandidates = candidates.filter((candidate) => !candidate.expired);
+    const expiredCandidates = candidates.filter((candidate) => candidate.expired);
+    const statusCandidates = status === "all"
+      ? candidates
+      : status === "expired" ? expiredCandidates : activeCandidates;
+    const grouped = groupCatalogCandidates(statusCandidates, queryTokens);
+
+    grouped.sort((left, right) => {
+      if (sort === "merchant") {
+        return left.merchant.localeCompare(right.merchant) ||
+          left.code.localeCompare(right.code) || compareCatalogCandidates(left, right);
+      }
+      if (sort === "recent") {
+        if (left.expired !== right.expired) return left.expired ? 1 : -1;
+        return Date.parse(right.lastVerifiedAt) - Date.parse(left.lastVerifiedAt) ||
+          right.score - left.score || left.merchant.localeCompare(right.merchant);
+      }
+      return compareCatalogCandidates(left, right) || left.merchant.localeCompare(right.merchant);
+    });
+
+    const total = grouped.length;
+    return {
+      query,
+      status,
+      sort,
+      offset,
+      limit,
+      total,
+      hasMore: offset + limit < total,
+      stats: {
+        feedCount: new Set(candidates.map((candidate) => candidate.feedId)).size,
+        uniqueCouponCount: groupCatalogCandidates(candidates).length,
+        activeCouponCount: groupCatalogCandidates(activeCandidates).length,
+        expiredCouponCount: groupCatalogCandidates(expiredCandidates).length
+      },
+      items: grouped.slice(offset, offset + limit)
+    };
+  }
+
   function classifyFeedUpdate(existingRecord, incomingVerification) {
     if (!existingRecord) return "new";
 
@@ -518,6 +661,7 @@
     signPayload,
     scoreEntry,
     selectCodesForMerchant,
+    searchCatalog,
     classifyFeedUpdate
   });
 });

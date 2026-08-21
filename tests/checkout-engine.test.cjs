@@ -150,6 +150,87 @@ test("apply-button scoring rejects order submission controls", () => {
   assert.equal(engine.scoreApplyButton(ambiguousContinueButton, input), -1000);
 });
 
+test("Magento's scoped form marker outranks the overlapping WooCommerce coupon_code marker", () => {
+  const form = fakeElement({ id: "discount-coupon-form" }, { tagName: "FORM" });
+  const input = fakeElement(
+    { id: "coupon_code", name: "coupon_code", placeholder: "Inserisci codice sconto" },
+    { tagName: "INPUT", form, parentElement: form }
+  );
+  const applyButton = fakeElement(
+    { class: "action apply primary" },
+    { tagName: "BUTTON", textContent: "Applica sconto", form, parentElement: form }
+  );
+  const total = fakeElement(
+    { class: "price" },
+    { tagName: "SPAN", textContent: "€ 132,95" }
+  );
+  form.contains = (candidate) => candidate === form || candidate === input || candidate === applyButton;
+
+  const selectors = new Map([
+    ["form#discount-coupon-form", [form]],
+    ["#discount-coupon-form input#coupon_code", [input]],
+    ["#discount-coupon-form input[name='coupon_code']", [input]],
+    ["#discount-coupon-form button.action.apply", [applyButton]],
+    ["tr.grand.totals .price", [total]],
+    ["input#coupon_code", [input]],
+    ["input[name='coupon_code']", [input]]
+  ]);
+  const documentRef = {
+    querySelectorAll(selector) {
+      return selectors.get(selector) || [];
+    }
+  };
+
+  const scan = engine.scanCheckout(documentRef);
+  assert.equal(engine.ADAPTERS[0].id, "magento");
+  assert.equal(scan.detected, true);
+  assert.equal(scan.adapter, "magento");
+  assert.equal(scan.adapterLabel, "Magento / Adobe Commerce");
+  assert.equal(scan.total.amount, 132.95);
+  assert.equal(scan.total.currency, "EUR");
+});
+
+test("Magento's localized Luma checkout form uses its scoped controls", () => {
+  const form = fakeElement(
+    { id: "discount-form", class: "form form-discount" },
+    { tagName: "FORM" }
+  );
+  const input = fakeElement(
+    { id: "discount-code", name: "discount_code", placeholder: "Saisissez le code de réduction" },
+    { tagName: "INPUT", form, parentElement: form }
+  );
+  const applyButton = fakeElement(
+    { class: "action action-apply" },
+    { tagName: "BUTTON", textContent: "Appliquer la réduction", form, parentElement: form }
+  );
+  const total = fakeElement(
+    { class: "price" },
+    { tagName: "SPAN", textContent: "132,95 €" }
+  );
+  form.contains = (candidate) => candidate === form || candidate === input || candidate === applyButton;
+
+  const selectors = new Map([
+    ["form#discount-form.form-discount", [form]],
+    ["#discount-form input#discount-code", [input]],
+    ["#discount-form input[name='discount_code']", [input]],
+    ["#discount-form button.action-apply", [applyButton]],
+    ["tr.grand.totals .price", [total]]
+  ]);
+  const documentRef = {
+    querySelectorAll(selector) {
+      return selectors.get(selector) || [];
+    }
+  };
+
+  const scan = engine.scanCheckout(documentRef);
+  assert.equal(scan.detected, true);
+  assert.equal(scan.adapter, "magento");
+  assert.equal(scan.input.id, "discount-code");
+  assert.equal(scan.applyButton.label, "Appliquer la réduction");
+  assert.equal(scan.total.amount, 132.95);
+  assert.equal(scan.total.currency, "EUR");
+});
+
 test("total scoring favors order total over subtotal and savings", () => {
   const total = fakeElement(
     { class: "order-total" },

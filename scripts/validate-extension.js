@@ -29,7 +29,27 @@ function walk(directory) {
 if (manifest.manifest_version !== 3) fail("manifest_version must be 3");
 const packageJson = JSON.parse(fs.readFileSync(path.join(root, "package.json"), "utf8"));
 if (manifest.version !== packageJson.version) fail("manifest and package versions must match");
-if (!/^0\.7\./.test(manifest.version)) fail("manifest version must match the v0.7 milestone");
+if (!/^\d+\.\d+\.\d+$/.test(manifest.version)) fail("manifest version must use X.Y.Z");
+const milestoneLabel = `v${manifest.version.split(".").slice(0, 2).join(".")}`;
+const expectedBackgroundScripts = [
+  "src/shared/feed-verifier.js",
+  "src/shared/source-policy.js",
+  "src/background.js"
+];
+if (manifest.background?.service_worker !== "src/background.js" ||
+    JSON.stringify(manifest.background?.scripts) !== JSON.stringify(expectedBackgroundScripts)) {
+  fail("cross-browser background must declare the exact Chrome worker and ordered Firefox scripts");
+}
+if (manifest.minimum_chrome_version !== "121") {
+  fail("dual Manifest V3 background fallback requires minimum Chrome 121");
+}
+const gecko = manifest.browser_specific_settings?.gecko || {};
+if (gecko.id !== "@comb-djlacavera21" || gecko.strict_min_version !== "128.0") {
+  fail("Firefox packaging must pin the Comb add-on ID and Firefox 128 minimum");
+}
+if (JSON.stringify(gecko.data_collection_permissions) !== JSON.stringify({ required: ["none"] })) {
+  fail("Firefox packaging must declare that Comb collects and transmits no user data");
+}
 if (manifest.homepage_url !== "https://github.com/djlacavera21/Comb") {
   fail("manifest homepage must identify the public source repository");
 }
@@ -46,22 +66,23 @@ for (const permission of permissions) {
 }
 
 if (Array.isArray(manifest.host_permissions) && manifest.host_permissions.length) {
-  fail("v0.7 must not declare permanent host permissions");
+  fail(`${milestoneLabel} must not declare permanent host permissions`);
 }
 
 const optionalHosts = Array.isArray(manifest.optional_host_permissions)
   ? manifest.optional_host_permissions
   : [];
 if (optionalHosts.length !== 1 || optionalHosts[0] !== "https://*/*") {
-  fail("v0.7 must declare only runtime-approved HTTPS feed origins");
+  fail(`${milestoneLabel} must declare only runtime-approved HTTPS feed origins`);
 }
 
 if (manifest.content_scripts) {
-  fail("v0.7 must inject only after a user gesture, not through static content scripts");
+  fail(`${milestoneLabel} must inject only after a user gesture, not through static content scripts`);
 }
 
 const requiredFiles = [
   manifest.background && manifest.background.service_worker,
+  ...(Array.isArray(manifest.background?.scripts) ? manifest.background.scripts : []),
   manifest.action && manifest.action.default_popup,
   manifest.options_page,
   ...Object.values((manifest.action && manifest.action.default_icon) || {}),
@@ -76,12 +97,12 @@ const sourceFiles = walk(path.join(root, "src"));
 const executableFiles = sourceFiles.filter((file) => file.endsWith(".js"));
 const packageFiles = sourceFiles.filter((file) => /\.(?:html|css|js)$/.test(file));
 const forbiddenRuntimePatterns = [
-  ["cookie API", /chrome\s*\.\s*cookies\b/],
+  ["cookie API", /(?:chrome|browser|extensionApi)\s*\.\s*cookies\b/],
   ["cookie mutation", /document\s*\.\s*cookie\b/],
-  ["request interception", /chrome\s*\.\s*webRequest\b/],
-  ["declarative request rewriting", /chrome\s*\.\s*declarativeNetRequest\b/],
+  ["request interception", /(?:chrome|browser|extensionApi)\s*\.\s*webRequest\b/],
+  ["declarative request rewriting", /(?:chrome|browser|extensionApi)\s*\.\s*declarativeNetRequest\b/],
   ["new-window referral path", /\bwindow\s*\.\s*open\s*\(/],
-  ["tab creation or navigation", /chrome\s*\.\s*tabs\s*\.\s*(?:create|update)\s*\(/],
+  ["tab creation or navigation", /(?:chrome|browser|extensionApi)\s*\.\s*tabs\s*\.\s*(?:create|update)\s*\(/],
   ["page navigation", /\blocation\s*\.\s*(?:assign|replace)\s*\(/],
   ["page URL assignment", /\blocation\s*\.\s*(?:href|search)\s*=/],
   ["history rewrite", /\bhistory\s*\.\s*(?:pushState|replaceState)\s*\(/],
@@ -108,14 +129,14 @@ for (const file of executableFiles) {
 
 const fetchUsers = executableFiles.filter((file) => /\bfetch\s*\(/.test(fs.readFileSync(file, "utf8")));
 if (fetchUsers.length !== 1 || path.relative(root, fetchUsers[0]) !== "src/background.js") {
-  fail("only the service worker may retrieve a user-approved signed feed");
+  fail("only the background runtime may retrieve a user-approved signed feed");
 } else {
   const backgroundSource = fs.readFileSync(fetchUsers[0], "utf8");
   const fetchCount = (backgroundSource.match(/\bfetch\s*\(/g) || []).length;
-  if (fetchCount !== 1) fail("service worker must contain exactly one bounded feed retrieval call");
+  if (fetchCount !== 1) fail("background runtime must contain exactly one bounded feed retrieval call");
   for (const requiredBoundary of [
     "CombSourcePolicy.normalizeSourceUrl",
-    "chrome.permissions.contains",
+    "extensionApi.permissions.contains",
     'credentials: "omit"',
     'redirect: "error"',
     'referrerPolicy: "no-referrer"',
@@ -127,6 +148,28 @@ if (fetchUsers.length !== 1 || path.relative(root, fetchUsers[0]) !== "src/backg
     }
   }
 }
+const backgroundRuntimeSource = fs.readFileSync(path.join(root, "src/background.js"), "utf8");
+for (const compatibilityBoundary of [
+  'typeof importScripts === "function"',
+  "globalThis.browser || globalThis.chrome",
+  "extensionApi.scripting.executeScript"
+]) {
+  if (!backgroundRuntimeSource.includes(compatibilityBoundary)) {
+    fail(`cross-browser worker boundary is missing: ${compatibilityBoundary}`);
+  }
+}
+for (const catalogBoundary of [
+  'case "COMB_SEARCH_CATALOG"',
+  "assertOptionsSender(sender)",
+  "CombFeed.searchCatalog",
+  "query: message.query",
+  "status: message.status",
+  "sort: message.sort"
+]) {
+  if (!backgroundRuntimeSource.includes(catalogBoundary)) {
+    fail(`local catalog worker boundary is missing: ${catalogBoundary}`);
+  }
+}
 
 for (const file of packageFiles) {
   const source = fs.readFileSync(file, "utf8");
@@ -136,11 +179,11 @@ for (const file of packageFiles) {
 }
 
 if (packageJson.dependencies && Object.keys(packageJson.dependencies).length) {
-  fail("v0.7 must remain dependency-free");
+  fail(`${milestoneLabel} must remain dependency-free`);
 }
 
 if (packageJson.devDependencies && Object.keys(packageJson.devDependencies).length) {
-  fail("v0.7 must remain dependency-free");
+  fail(`${milestoneLabel} must remain dependency-free`);
 }
 
 if (!fs.existsSync(path.join(root, "src/shared/feed-verifier.js"))) {
@@ -157,6 +200,8 @@ if (!checkoutEngineVersion || checkoutEngineVersion[1] !== manifest.version) {
 }
 
 for (const requiredAdapterBoundary of [
+  'id: "magento"',
+  "form#discount-coupon-form",
   'id: "bigcommerce"',
   "wc-block-components-totals-coupon__form",
   "coupon_removal_unverified",
@@ -164,12 +209,22 @@ for (const requiredAdapterBoundary of [
   "totalsMatch(restoredTotal, expectedTotal)"
 ]) {
   if (!checkoutEngineSource.includes(requiredAdapterBoundary)) {
-    fail(`v0.7 checkout reliability boundary is missing: ${requiredAdapterBoundary}`);
+    fail(`${milestoneLabel} checkout reliability boundary is missing: ${requiredAdapterBoundary}`);
   }
 }
 
 const popupHtml = fs.readFileSync(path.join(root, "src/popup/popup.html"), "utf8");
 const optionsHtml = fs.readFileSync(path.join(root, "src/options/options.html"), "utf8");
+const popupSource = fs.readFileSync(path.join(root, "src/popup/popup.js"), "utf8");
+const optionsSource = fs.readFileSync(path.join(root, "src/options/options.js"), "utf8");
+const runnerSource = fs.readFileSync(path.join(root, "src/content/runner.js"), "utf8");
+for (const [label, source, boundary] of [
+  ["popup", popupSource, "globalThis.browser || globalThis.chrome"],
+  ["settings", optionsSource, "globalThis.browser || globalThis.chrome"],
+  ["content runner", runnerSource, "root.browser || root.chrome"]
+]) {
+  if (!source.includes(boundary)) fail(`${label} cross-browser API boundary is missing`);
+}
 if (!popupHtml.includes('role="progressbar"') || !popupHtml.includes('aria-describedby="inputHelp"')) {
   fail("popup keyboard and progress accessibility contract is missing");
 }
@@ -201,6 +256,32 @@ for (const requiredImportButton of ["trustKeyButton", "signedFeedButton", "impor
     fail(`settings keyboard import control is missing: ${requiredImportButton}`);
   }
 }
+for (const catalogControl of [
+  'id="catalogHeading"',
+  'id="catalogSearchInput"',
+  'id="catalogStatusSelect"',
+  'id="catalogSortSelect"',
+  'id="catalogList"',
+  "Catalog search runs inside Comb",
+  "../shared/feed-verifier.js"
+]) {
+  if (!optionsHtml.includes(catalogControl)) {
+    fail(`settings catalog contract is missing: ${catalogControl}`);
+  }
+}
+const feedVerifierSource = fs.readFileSync(path.join(root, "src/shared/feed-verifier.js"), "utf8");
+for (const catalogBoundary of [
+  "function searchCatalog",
+  'status = ["active", "expired", "all"]',
+  'sort = ["recommended", "recent", "merchant"]',
+  "sourceCount: group.feedIds.size",
+  "queryTokens.every",
+  "searchCatalog,"
+]) {
+  if (!feedVerifierSource.includes(catalogBoundary)) {
+    fail(`verified catalog search boundary is missing: ${catalogBoundary}`);
+  }
+}
 for (const privacyDisclosure of [
   'id="privacyHeading"',
   "The Comb developer receives none of that checkout data",
@@ -213,7 +294,9 @@ for (const privacyDisclosure of [
 }
 
 for (const requiredTool of [
+  "scripts/browser-checkout-contracts.js",
   "scripts/run-browser-fixtures.js",
+  "scripts/run-firefox-fixtures.js",
   "scripts/build-release.js",
   "scripts/build-store-package.js",
   "scripts/deterministic-zip.js",
@@ -224,8 +307,10 @@ for (const requiredTool of [
   "scripts/create-synthetic-fixture-proposal.js",
   "scripts/verify-release-artifacts.js",
   "tests/deterministic-zip.test.cjs",
+  "tests/browser-compatibility.test.cjs",
   "tests/compatibility-report.test.cjs",
   "tests/fixture-matrix.test.cjs",
+  "tests/firefox-webdriver.test.cjs",
   "tests/release-artifacts.test.cjs",
   "tests/release-candidate.test.cjs",
   "tests/publication-record.test.cjs",
@@ -238,22 +323,29 @@ for (const requiredTool of [
   ".github/workflows/release.yml",
   ".github/workflows/verify.yml",
   "docs/COMPATIBILITY.md",
+  "docs/FIREFOX.md",
   "docs/INDEPENDENT_REVIEW.md",
   "docs/PUBLICATION_STATUS.md",
   "docs/SYNTHETIC_FIXTURES.md",
   "docs/SUPPORT_TRIAGE.md",
+  "store/firefox-description.txt",
+  "store/firefox-review-notes.md",
   "store/REVIEW_RESPONSE_PLAYBOOK.md",
   "tests/fixtures/woocommerce-blocks.html",
   "tests/fixtures/woocommerce-classic-es.html",
   "tests/fixtures/shopify-swiss.html",
   "tests/fixtures/generic-rtl-aed.html",
   "tests/fixtures/bigcommerce.html",
+  "tests/fixtures/magento-luma.html",
+  "tests/fixtures/magento-checkout.html",
   "tests/fixtures/removal-failure.html",
   "tests/fixtures/restoration-mismatch.html",
   "tests/fixtures/currency-drift.html",
   "tests/fixtures/support-matrix.json"
 ]) {
-  if (!fs.existsSync(path.join(root, requiredTool))) fail(`v0.7 verification tool is missing: ${requiredTool}`);
+  if (!fs.existsSync(path.join(root, requiredTool))) {
+    fail(`${milestoneLabel} verification tool is missing: ${requiredTool}`);
+  }
 }
 const issueConfigSource = fs.readFileSync(path.join(root, ".github/ISSUE_TEMPLATE/config.yml"), "utf8");
 if (!issueConfigSource.includes("https://github.com/djlacavera21/Comb/security/policy") ||
@@ -349,6 +441,10 @@ for (const releaseBoundary of [
   "npm run lint",
   "node --test tests/*.test.cjs",
   "run-browser-fixtures.js --require-browser",
+  "browser-actions/setup-firefox@v1",
+  "browser-actions/setup-geckodriver@latest",
+  "openssl version",
+  "run-firefox-fixtures.js --require-browser",
   "npm run release:build",
   "verify-release-artifacts.js",
   "gh release create",
@@ -366,6 +462,10 @@ for (const currentAction of [
   "actions/checkout@v7",
   "actions/setup-node@v7",
   "actions/upload-artifact@v7",
+  "browser-actions/setup-firefox@v1",
+  "browser-actions/setup-geckodriver@latest",
+  "openssl version",
+  "run-firefox-fixtures.js --require-browser",
   "package-manager-cache: false"
 ]) {
   if (!verifyWorkflowSource.includes(currentAction)) {
@@ -375,7 +475,10 @@ for (const currentAction of [
 if (verifyWorkflowSource.includes("contents: write")) {
   fail("push and pull-request verification must remain read-only");
 }
-const browserFixtureSource = fs.readFileSync(path.join(root, "scripts/run-browser-fixtures.js"), "utf8");
+const checkoutContractSource = fs.readFileSync(
+  path.join(root, "scripts/browser-checkout-contracts.js"),
+  "utf8"
+);
 for (const requiredBrowserBoundary of [
   "creator_attribution=creator-42",
   "creator URL tags and attribution cookie must remain unchanged",
@@ -383,25 +486,89 @@ for (const requiredBrowserBoundary of [
   "fixtureMatrix.fixtures.filter",
   "assertFixtureState",
   "assertSafeStopResult",
-  "privacy-safe compatibility report contract",
   "dangerClicks"
 ]) {
+  if (!checkoutContractSource.includes(requiredBrowserBoundary)) {
+    fail(`${milestoneLabel} shared browser safety boundary is missing: ${requiredBrowserBoundary}`);
+  }
+}
+const browserFixtureSource = fs.readFileSync(path.join(root, "scripts/run-browser-fixtures.js"), "utf8");
+for (const requiredBrowserBoundary of [
+  "runCheckoutFixtureSuite",
+  "privacy-safe compatibility report contract",
+  "settings catalog, keyboard, and file-import contract",
+  "catalogStatusSelect",
+  "globalThis.browser ="
+]) {
   if (!browserFixtureSource.includes(requiredBrowserBoundary)) {
-    fail(`v0.7 browser safety boundary is missing: ${requiredBrowserBoundary}`);
+    fail(`${milestoneLabel} browser safety boundary is missing: ${requiredBrowserBoundary}`);
+  }
+}
+const firefoxFixtureSource = fs.readFileSync(path.join(root, "scripts/run-firefox-fixtures.js"), "utf8");
+for (const requiredFirefoxBoundary of [
+  "class WebDriverClient",
+  'browserName: "firefox"',
+  'args: ["-headless"]',
+  'AbortSignal.timeout(500)',
+  '["--allow-system-access", "--host", "127.0.0.1", "--port", String(port)]',
+  '/moz/addon/install',
+  "temporary: true",
+  '/moz/context',
+  '"addon-webext-permissions"',
+  "browser.permissions.contains",
+  "Comb Synthetic Test Only",
+  "acceptInsecureCerts: true",
+  '"network.proxy.ssl": "127.0.0.1"',
+  'type: "COMB_DELETE_FEED_SOURCE"',
+  'type: "COMB_DELETE_TRUST_KEY"',
+  'tamperedEnvelope.payload.entries[0].code = "TAMPERED10"',
+  "feedService.setEnvelope(tamperedEnvelope)",
+  "source connection failed: feed signature verification failed",
+  "feedRequest.headers.cookie",
+  "feedRequest.headers.referer",
+  'const FEED_REFRESH_ALARM = "comb-signed-feed-refresh"',
+  "packaged Firefox invalid-feed origin rollback",
+  "packaged Firefox signed-feed acceptance and bounded request",
+  "packaged Firefox production alarm, source, and origin cleanup",
+  "Comb packaged Firefox extension suite passed",
+  "runCheckoutFixtureSuite",
+  "Comb real-Firefox checkout suite passed",
+  "Firefox fixtures did not run"
+]) {
+  if (!firefoxFixtureSource.includes(requiredFirefoxBoundary)) {
+    fail(`${milestoneLabel} Firefox browser boundary is missing: ${requiredFirefoxBoundary}`);
+  }
+}
+const storePackageSource = fs.readFileSync(path.join(root, "scripts/build-store-package.js"), "utf8");
+for (const requiredReviewKitEvidence of [
+  'entry("evidence/verify-workflow.yml", ".github/workflows/verify.yml")',
+  'entry("evidence/browser-checkout-contracts.js", "scripts/browser-checkout-contracts.js")',
+  'entry("evidence/run-browser-fixtures.js", "scripts/run-browser-fixtures.js")',
+  'entry("evidence/run-firefox-fixtures.js", "scripts/run-firefox-fixtures.js")',
+  'entry("evidence/firefox-webdriver.test.cjs", "tests/firefox-webdriver.test.cjs")',
+  'entry("listing/firefox-description.txt", "store/firefox-description.txt")',
+  'entry("listing/firefox-review-notes.md", "store/firefox-review-notes.md")',
+  'entry("listing/LICENSE", "LICENSE")'
+]) {
+  if (!storePackageSource.includes(requiredReviewKitEvidence)) {
+    fail(`${milestoneLabel} reviewer kit evidence is missing: ${requiredReviewKitEvidence}`);
   }
 }
 if (!packageJson.engines || packageJson.engines.node !== ">=22") {
-  fail("v0.7 tooling requires the stable WebSocket API in Node 22 or newer");
+  fail(`${milestoneLabel} tooling requires the stable WebSocket API in Node 22 or newer`);
 }
 if (packageJson.scripts?.["release:build"] !== "node scripts/build-store-package.js --verify") {
-  fail("v0.7 release build must produce the validated store review kit");
+  fail(`${milestoneLabel} release build must produce the validated store review kit`);
 }
 if (packageJson.scripts?.lint !==
     "node scripts/validate-fixture-matrix.js && node scripts/validate-extension.js && node scripts/validate-store.js && node scripts/validate-publication-record.js") {
-  fail("v0.7 lint must validate the matrix, runtime/workflow, store, and publication boundaries");
+  fail(`${milestoneLabel} lint must validate the matrix, runtime/workflow, store, and publication boundaries`);
 }
 if (packageJson.scripts?.["fixture:proposal"] !== "node scripts/create-synthetic-fixture-proposal.js") {
   fail("fixture proposal command must use the privacy-safe offline scaffold");
+}
+if (packageJson.scripts?.["test:firefox"] !== "node scripts/run-firefox-fixtures.js") {
+  fail("Firefox fixture command must use the dependency-free WebDriver runner");
 }
 
 for (const file of walk(root).filter((entry) => entry.endsWith(".json") && !entry.includes(`${path.sep}.git${path.sep}`))) {

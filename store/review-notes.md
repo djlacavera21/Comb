@@ -1,10 +1,10 @@
-# Comb v0.7 reviewer notes
+# Comb v0.8 reviewer notes
 
 Comb has one purpose: test coupon-code tokens on the user-authorized active checkout and preserve the best measurable discount without changing creator affiliate attribution.
 
 ## Important creator-attribution fix
 
-The creator-tagging issue is fixed by architecture. Comb has no affiliate identity and does not navigate, redirect, intercept requests, mutate URL query parameters, or read/write cookies. The popup keeps **Creator attribution protected** visible. Required CI runs a complete coupon transaction at a synthetic URL containing `affiliate_id=creator-42&utm_source=creator`, sets `creator_attribution=creator-42`, and asserts that the URL and cookie are byte-for-byte unchanged afterward.
+The creator-tagging issue is fixed by architecture. Comb has no affiliate identity and does not navigate, redirect, intercept requests, mutate URL query parameters, or read/write cookies. The popup keeps **Creator attribution protected** visible. Required Chrome and Firefox CI runners execute one shared complete coupon contract at a synthetic URL containing `affiliate_id=creator-42&utm_source=creator`, set `creator_attribution=creator-42`, and assert that the URL and cookie are byte-for-byte unchanged afterward.
 
 ## Permission review
 
@@ -13,6 +13,8 @@ The creator-tagging issue is fixed by architecture. Comb has no affiliate identi
 - `storage`: stores merchant-scoped coupon tokens, trusted public keys, verified signed feeds, and approved-source settings locally.
 - `alarms`: checks only sources already connected by the user, approximately every 12 hours while the browser can run the task.
 - optional `https://*/*`: declares the shape of runtime feed-origin grants. Comb requests only the exact public HTTPS origin derived from the URL the user enters; no site is granted at installation.
+
+Required Firefox CI also temporary-installs the exact runtime ZIP, confirms the optional origin is absent at startup, triggers and denies Firefox's real permission prompt from the actual settings-form click, and verifies denial records no source. A second click and approval retrieves a deliberately tampered envelope; rejection must roll back the new origin grant and keep feed/source/alarm state empty. A third click and approval retries the valid cookie-free/referrer-free feed, requires signature-verified feed/source installation and the exact 720-minute alarm, and proves production source removal clears both the alarm and unused origin grant.
 
 ## Remote-code declaration
 

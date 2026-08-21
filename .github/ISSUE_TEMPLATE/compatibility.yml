@@ -45,7 +45,7 @@ body:
     id: platform
     attributes:
       label: Checkout platform
-      description: Optional. Use only a generic platform name such as WooCommerce, Shopify, or BigCommerce.
+      description: Optional. Use only a generic platform name such as WooCommerce, Shopify, BigCommerce, or Magento / Adobe Commerce.
       placeholder: "WooCommerce"
   - type: input
     id: theme-version

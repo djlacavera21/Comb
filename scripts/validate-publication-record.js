@@ -4,8 +4,12 @@ const fs = require("node:fs");
 const path = require("node:path");
 
 const root = path.resolve(__dirname, "..");
-const SCHEMA = "comb.publication-record/v1";
+const SCHEMA = "comb.publication-record/v3";
 const REPOSITORY = "djlacavera21/Comb";
+const DEVELOPMENT_LABELS = Object.freeze({
+  unreleased: "Unreleased",
+  released: "Released"
+});
 const CHROME_STATES = new Set([
   "not_submitted",
   "draft",
@@ -29,6 +33,15 @@ const EDGE_STATES = new Set([
   "unpublished_from_store",
   "removed_from_store",
   "blocked"
+]);
+const FIREFOX_STATES = new Set([
+  "not_submitted",
+  "incomplete",
+  "nominated",
+  "public",
+  "rejected",
+  "disabled",
+  "deleted"
 ]);
 const PUBLICATION_LABELS = Object.freeze({
   github: Object.freeze({
@@ -58,6 +71,15 @@ const PUBLICATION_LABELS = Object.freeze({
     unpublished_from_store: "Unpublished from store",
     removed_from_store: "Removed from store",
     blocked: "Blocked"
+  }),
+  firefox: Object.freeze({
+    not_submitted: "Not submitted",
+    incomplete: "Incomplete",
+    nominated: "Awaiting review",
+    public: "Public",
+    rejected: "Rejected",
+    disabled: "Disabled by Mozilla",
+    deleted: "Deleted"
   })
 });
 const STORE_KEYS = [
@@ -82,10 +104,20 @@ function expectedReleaseAssetNames(version) {
   ];
 }
 
+function compareSemver(left, right) {
+  const leftParts = String(left || "").match(/^(\d+)\.(\d+)\.(\d+)$/)?.slice(1).map(Number);
+  const rightParts = String(right || "").match(/^(\d+)\.(\d+)\.(\d+)$/)?.slice(1).map(Number);
+  if (!leftParts || !rightParts) return null;
+  for (let index = 0; index < leftParts.length; index += 1) {
+    if (leftParts[index] !== rightParts[index]) return leftParts[index] - rightParts[index];
+  }
+  return 0;
+}
+
 function validatePublicationRecord(record, options = {}) {
   const errors = [];
   const fail = (message) => errors.push(message);
-  const expectedVersion = options.version;
+  const expectedDevelopmentVersion = options.developmentVersion;
   const repository = options.repository || REPOSITORY;
 
   function exactKeys(value, expected, label) {
@@ -121,8 +153,37 @@ function validatePublicationRecord(record, options = {}) {
     }
   }
 
-  exactKeys(record, ["claimBoundary", "githubRelease", "product", "schema", "stores"], "publication record");
+  exactKeys(
+    record,
+    ["claimBoundary", "development", "githubRelease", "product", "schema", "stores"],
+    "publication record"
+  );
   if (record?.schema !== SCHEMA) fail(`publication schema must be ${SCHEMA}`);
+
+  const development = record?.development || {};
+  exactKeys(
+    development,
+    ["browserStoreSubmissionAllowed", "releaseTag", "status", "version"],
+    "development"
+  );
+  if (!/^\d+\.\d+\.\d+$/.test(String(development.version || ""))) {
+    fail("development version must use X.Y.Z");
+  }
+  if (expectedDevelopmentVersion && development.version !== expectedDevelopmentVersion) {
+    fail(`development version must equal ${expectedDevelopmentVersion}`);
+  }
+  if (!Object.hasOwn(DEVELOPMENT_LABELS, development.status)) {
+    fail("development status must be unreleased or released");
+  }
+  if (typeof development.browserStoreSubmissionAllowed !== "boolean") {
+    fail("development browserStoreSubmissionAllowed must be boolean");
+  }
+  if (development.status === "unreleased") {
+    if (development.releaseTag !== null) fail("unreleased development releaseTag must be null");
+    if (development.browserStoreSubmissionAllowed !== false) {
+      fail("unreleased development must not allow browser-store submission");
+    }
+  }
 
   const product = record?.product || {};
   exactKeys(product, [
@@ -135,7 +196,6 @@ function validatePublicationRecord(record, options = {}) {
     "version"
   ], "product");
   if (!/^\d+\.\d+\.\d+$/.test(String(product.version || ""))) fail("product version must use X.Y.Z");
-  if (expectedVersion && product.version !== expectedVersion) fail(`publication version must equal ${expectedVersion}`);
   if (!/^[0-9a-f]{40}$/.test(String(product.candidateCommit || ""))) {
     fail("candidate commit must be a full lowercase 40-character SHA-1");
   }
@@ -194,11 +254,36 @@ function validatePublicationRecord(record, options = {}) {
     }
   }
 
-  exactKeys(record?.stores || {}, ["chrome", "edge"], "stores");
+  const developmentOrder = compareSemver(development.version, product.version);
+  if (development.status === "unreleased" && release.status === "released" &&
+      developmentOrder !== null && developmentOrder <= 0) {
+    fail("unreleased development version must be newer than the latest released product");
+  }
+  if (development.status === "unreleased" && release.status === "not_released" &&
+      developmentOrder !== null && developmentOrder < 0) {
+    fail("unreleased development version must not be older than the verified product candidate");
+  }
+  if (development.status === "released") {
+    if (development.version !== product.version) {
+      fail("released development version must match the verified product version");
+    }
+    if (release.status !== "released" || development.releaseTag !== release.tag) {
+      fail("released development tag must match the verified GitHub release");
+    }
+    if (development.browserStoreSubmissionAllowed !== true) {
+      fail("released development must explicitly allow browser-store submission");
+    }
+  }
+
+  exactKeys(record?.stores || {}, ["chrome", "edge", "firefox"], "stores");
 
   function validateStore(store, browser) {
-    const label = browser === "chrome" ? "Chrome" : "Edge";
-    const states = browser === "chrome" ? CHROME_STATES : EDGE_STATES;
+    const label = browser === "chrome" ? "Chrome" : browser === "edge" ? "Edge" : "Firefox";
+    const states = browser === "chrome"
+      ? CHROME_STATES
+      : browser === "edge"
+        ? EDGE_STATES
+        : FIREFOX_STATES;
     exactKeys(store, STORE_KEYS, `${label} publication record`);
     if (!states.has(store?.status)) fail(`${label} publication status is not allowlisted`);
     if (typeof store?.publiclyAvailable !== "boolean") fail(`${label} publiclyAvailable must be boolean`);
@@ -213,13 +298,18 @@ function validatePublicationRecord(record, options = {}) {
     }
     const publicStates = browser === "chrome"
       ? new Set(["published"])
-      : new Set(["in_store", "in_store_update_in_review"]);
+      : browser === "edge"
+        ? new Set(["in_store", "in_store_update_in_review"])
+        : new Set(["public"]);
     const expectedAvailability = publicStates.has(store?.status);
     if (store?.publiclyAvailable !== expectedAvailability) {
       fail(`${label} availability claim does not match its official publication status`);
     }
     for (const field of ["itemId", "submissionId"]) {
-      if (store?.[field] !== null && !/^[A-Za-z0-9._-]{3,128}$/.test(String(store[field]))) {
+      const identifierPattern = browser === "firefox"
+        ? /^[A-Za-z0-9@{}._-]{3,128}$/
+        : /^[A-Za-z0-9._-]{3,128}$/;
+      if (store?.[field] !== null && !identifierPattern.test(String(store[field]))) {
         fail(`${label} ${field} must be null or a bounded dashboard identifier`);
       }
     }
@@ -229,7 +319,9 @@ function validatePublicationRecord(record, options = {}) {
     if (store?.listingUrl !== null) {
       const pattern = browser === "chrome"
         ? /^https:\/\/(?:chromewebstore\.google\.com|chrome\.google\.com)\//
-        : /^https:\/\/microsoftedge\.microsoft\.com\/addons\//;
+        : browser === "edge"
+          ? /^https:\/\/microsoftedge\.microsoft\.com\/addons\//
+          : /^https:\/\/addons\.mozilla\.org\/[^/]+\/firefox\/addon\//;
       if (!pattern.test(String(store.listingUrl))) fail(`${label} listing URL must use the official store host`);
     }
     if (store?.status === "not_submitted") {
@@ -240,7 +332,11 @@ function validatePublicationRecord(record, options = {}) {
     } else {
       if (store?.version !== product.version) fail(`${label} submitted version must match the verified product version`);
       if (!store?.itemId) fail(`${label} submitted or draft record requires an item ID`);
-      const draftState = browser === "chrome" ? "draft" : "in_draft";
+      const draftState = browser === "chrome"
+        ? "draft"
+        : browser === "edge"
+          ? "in_draft"
+          : "incomplete";
       if (store.status !== draftState) {
         if (!store?.submissionId) fail(`${label} non-draft record requires a submission ID`);
         timestamp(store?.submittedAt, `${label} submission timestamp`, true);
@@ -252,27 +348,31 @@ function validatePublicationRecord(record, options = {}) {
     }
     const reviewedStates = browser === "chrome"
       ? new Set(["staged", "published", "published_to_testers", "rejected", "taken_down"])
-      : new Set([
-          "waiting_to_publish",
-          "in_store",
-          "in_store_update_in_review",
-          "review_failed",
-          "unavailable_in_store",
-          "unpublished_from_store",
-          "removed_from_store",
-          "blocked"
-        ]);
+      : browser === "edge"
+        ? new Set([
+            "waiting_to_publish",
+            "in_store",
+            "in_store_update_in_review",
+            "review_failed",
+            "unavailable_in_store",
+            "unpublished_from_store",
+            "removed_from_store",
+            "blocked"
+          ])
+        : new Set(["public", "rejected", "disabled"]);
     if (reviewedStates.has(store?.status)) timestamp(store?.reviewedAt, `${label} review timestamp`, true);
     const publishedHistoryStates = browser === "chrome"
       ? new Set(["published", "published_to_testers", "taken_down"])
-      : new Set([
-          "in_store",
-          "in_store_update_in_review",
-          "unavailable_in_store",
-          "unpublished_from_store",
-          "removed_from_store",
-          "blocked"
-        ]);
+      : browser === "edge"
+        ? new Set([
+            "in_store",
+            "in_store_update_in_review",
+            "unavailable_in_store",
+            "unpublished_from_store",
+            "removed_from_store",
+            "blocked"
+          ])
+        : new Set(["public"]);
     if (publishedHistoryStates.has(store?.status)) {
       timestamp(store?.publishedAt, `${label} publication timestamp`, true);
     }
@@ -283,6 +383,7 @@ function validatePublicationRecord(record, options = {}) {
 
   validateStore(record?.stores?.chrome || {}, "chrome");
   validateStore(record?.stores?.edge || {}, "edge");
+  validateStore(record?.stores?.firefox || {}, "firefox");
 
   const boundary = record?.claimBoundary || {};
   exactKeys(boundary, [
@@ -306,6 +407,10 @@ function validatePublicationRecord(record, options = {}) {
 function validatePublicationDocument(record, source) {
   const errors = [];
   const required = [
+    `Current development version: \`${record.development.version}\``,
+    `Development status: **${DEVELOPMENT_LABELS[record.development.status]}**`,
+    `Development release tag: **${record.development.releaseTag || "None"}**`,
+    `Browser-store submission allowed: **${record.development.browserStoreSubmissionAllowed ? "Yes" : "No"}**`,
     record.product.candidateCommit,
     `Branch: \`${record.product.branch}\``,
     `Verification conclusion: **${record.product.verificationConclusion === "success" ? "Success" : record.product.verificationConclusion}**`,
@@ -315,18 +420,21 @@ function validatePublicationDocument(record, source) {
     "The creator-tagging issue is fixed",
     `GitHub release: **${PUBLICATION_LABELS.github[record.githubRelease.status]}**`,
     `Chrome Web Store: **${PUBLICATION_LABELS.chrome[record.stores.chrome.status]}**`,
-    `Microsoft Edge Add-ons: **${PUBLICATION_LABELS.edge[record.stores.edge.status]}**`
+    `Microsoft Edge Add-ons: **${PUBLICATION_LABELS.edge[record.stores.edge.status]}**`,
+    `Firefox Add-ons (AMO): **${PUBLICATION_LABELS.firefox[record.stores.firefox.status]}**`
   ];
   if (record.githubRelease.status === "released") {
     required.push(record.githubRelease.tag, record.githubRelease.releaseUrl, record.githubRelease.workflowRunUrl);
     for (const asset of record.githubRelease.assets) required.push(asset.name, asset.sha256, asset.downloadUrl);
   }
-  const publicStores = [record.stores.chrome, record.stores.edge].filter((store) => store.publiclyAvailable);
-  if (publicStores.length === 0) required.push("Comb is not publicly available from either browser store yet.");
+  const publicStores = [record.stores.chrome, record.stores.edge, record.stores.firefox]
+    .filter((store) => store.publiclyAvailable);
+  if (publicStores.length === 0) required.push("Comb is not publicly available from any browser store yet.");
   else for (const store of publicStores) required.push(store.listingUrl);
   for (const [label, store] of [
     ["Chrome", record.stores.chrome],
-    ["Microsoft Edge", record.stores.edge]
+    ["Microsoft Edge", record.stores.edge],
+    ["Firefox", record.stores.firefox]
   ]) {
     if (store.status !== "not_submitted") required.push(`${label} submitted version: \`${store.version}\``);
   }
@@ -341,7 +449,7 @@ function main() {
   const record = JSON.parse(fs.readFileSync(path.join(root, "store/publication-record.json"), "utf8"));
   const statusDocument = fs.readFileSync(path.join(root, "docs/PUBLICATION_STATUS.md"), "utf8");
   const errors = [
-    ...validatePublicationRecord(record, { version: manifest.version }),
+    ...validatePublicationRecord(record, { developmentVersion: manifest.version }),
     ...validatePublicationDocument(record, statusDocument)
   ];
   if (errors.length) {
@@ -350,10 +458,12 @@ function main() {
     return;
   }
   process.stdout.write(
-    `Comb publication record passed: v${record.product.version}; ` +
+    `Comb publication record passed: development v${record.development.version} ` +
+      `${DEVELOPMENT_LABELS[record.development.status]}; latest verified v${record.product.version}; ` +
       `GitHub ${PUBLICATION_LABELS.github[record.githubRelease.status]}; ` +
       `Chrome ${PUBLICATION_LABELS.chrome[record.stores.chrome.status]}; ` +
-      `Edge ${PUBLICATION_LABELS.edge[record.stores.edge.status]}.\n`
+      `Edge ${PUBLICATION_LABELS.edge[record.stores.edge.status]}; ` +
+      `Firefox ${PUBLICATION_LABELS.firefox[record.stores.firefox.status]}.\n`
   );
 }
 
@@ -368,7 +478,9 @@ if (require.main === module) {
 
 module.exports = {
   CHROME_STATES,
+  DEVELOPMENT_LABELS,
   EDGE_STATES,
+  FIREFOX_STATES,
   PUBLICATION_LABELS,
   SCHEMA,
   expectedReleaseAssetNames,

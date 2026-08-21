@@ -1,6 +1,11 @@
 "use strict";
 
-importScripts("shared/feed-verifier.js", "shared/source-policy.js");
+if (typeof importScripts === "function") {
+  importScripts("shared/feed-verifier.js", "shared/source-policy.js");
+}
+
+const extensionApi = globalThis.browser || globalThis.chrome;
+if (!extensionApi) throw new Error("Comb requires the WebExtensions API.");
 
 const CONTENT_FILES = [
   "src/content/checkout-engine.js",
@@ -113,13 +118,13 @@ function validateLibrary(value) {
 }
 
 async function getLibrary() {
-  const stored = await chrome.storage.local.get(LIBRARY_KEY);
+  const stored = await extensionApi.storage.local.get(LIBRARY_KEY);
   return validateLibrary(stored[LIBRARY_KEY]);
 }
 
 async function setLibrary(library) {
   const validated = validateLibrary(library);
-  await chrome.storage.local.set({ [LIBRARY_KEY]: validated });
+  await extensionApi.storage.local.set({ [LIBRARY_KEY]: validated });
   return validated;
 }
 
@@ -160,7 +165,7 @@ function normalizeStoredTimestamp(value) {
 }
 
 async function getFeedState() {
-  const stored = await chrome.storage.local.get(FEED_STATE_KEY);
+  const stored = await extensionApi.storage.local.get(FEED_STATE_KEY);
   const raw = stored[FEED_STATE_KEY];
   const state = emptyFeedState();
 
@@ -228,7 +233,7 @@ async function getFeedState() {
 }
 
 async function setFeedState(state) {
-  await chrome.storage.local.set({ [FEED_STATE_KEY]: state });
+  await extensionApi.storage.local.set({ [FEED_STATE_KEY]: state });
   return state;
 }
 
@@ -371,7 +376,7 @@ async function deleteTrustKey(rawKeyId) {
     !Object.values(state.sources).some((source) => source.originPattern === originPattern)
   );
   await Promise.all(removableOrigins.map((originPattern) =>
-    chrome.permissions.remove({ origins: [originPattern] }).catch(() => false)
+    extensionApi.permissions.remove({ origins: [originPattern] }).catch(() => false)
   ));
   return {
     state: summarizeFeedState(state),
@@ -380,7 +385,7 @@ async function deleteTrustKey(rawKeyId) {
 }
 
 function assertOptionsSender(sender) {
-  const expectedUrl = chrome.runtime.getURL("src/options/options.html");
+  const expectedUrl = extensionApi.runtime.getURL("src/options/options.html");
   if (!sender || sender.tab || sender.url !== expectedUrl) {
     throw new Error("Feed trust and source changes are allowed only from Comb settings.");
   }
@@ -388,15 +393,15 @@ function assertOptionsSender(sender) {
 
 async function syncFeedAlarm(state) {
   if (Object.keys(state.sources).length) {
-    const existing = await chrome.alarms.get(FEED_REFRESH_ALARM);
+    const existing = await extensionApi.alarms.get(FEED_REFRESH_ALARM);
     if (!existing) {
-      await chrome.alarms.create(FEED_REFRESH_ALARM, {
+      await extensionApi.alarms.create(FEED_REFRESH_ALARM, {
         delayInMinutes: FEED_REFRESH_MINUTES,
         periodInMinutes: FEED_REFRESH_MINUTES
       });
     }
   } else {
-    await chrome.alarms.clear(FEED_REFRESH_ALARM);
+    await extensionApi.alarms.clear(FEED_REFRESH_ALARM);
   }
 }
 
@@ -451,7 +456,7 @@ async function readBoundedFeedResponse(response) {
 
 async function fetchFeedEnvelope(source) {
   const descriptor = CombSourcePolicy.normalizeSourceUrl(source.url);
-  const permitted = await chrome.permissions.contains({ origins: [descriptor.originPattern] });
+  const permitted = await extensionApi.permissions.contains({ origins: [descriptor.originPattern] });
   if (!permitted) {
     const error = new Error("Feed source access is no longer approved. Reconnect it from Comb settings.");
     error.code = "permission_needed";
@@ -565,7 +570,7 @@ async function deleteFeedSource(rawFeedId) {
   await syncFeedAlarm(state);
   const permissionRemoved = originStillUsed
     ? false
-    : await chrome.permissions.remove({ origins: [source.originPattern] }).catch(() => false);
+    : await extensionApi.permissions.remove({ origins: [source.originPattern] }).catch(() => false);
   return {
     state: summarizeFeedState(state),
     removedOriginPattern: source.originPattern,
@@ -581,20 +586,27 @@ async function communityCodesForMerchant(hostname) {
   });
 }
 
+async function searchCommunityCatalog(options) {
+  return afterFeedMutations(async () => {
+    const state = await getFeedState();
+    return CombFeed.searchCatalog(Object.values(state.feeds), options);
+  });
+}
+
 async function ensureCheckoutRunner(tabId) {
   try {
-    const response = await chrome.tabs.sendMessage(tabId, { type: "COMB_PING" });
+    const response = await extensionApi.tabs.sendMessage(tabId, { type: "COMB_PING" });
     if (response && response.ready) return;
   } catch (_error) {
     // Expected on the first run for a tab.
   }
 
-  await chrome.scripting.executeScript({
+  await extensionApi.scripting.executeScript({
     target: { tabId },
     files: CONTENT_FILES
   });
 
-  const response = await chrome.tabs.sendMessage(tabId, { type: "COMB_PING" });
+  const response = await extensionApi.tabs.sendMessage(tabId, { type: "COMB_PING" });
   if (!response || !response.ready) {
     throw new Error("Comb could not start its checkout engine on this page.");
   }
@@ -643,7 +655,7 @@ async function initializePopup(message) {
     throw new Error("Comb could not identify the active tab.");
   }
 
-  const tab = await chrome.tabs.get(tabId);
+  const tab = await extensionApi.tabs.get(tabId);
   const hostname = hostnameFromTab(tab);
 
   if (!hostname) {
@@ -651,7 +663,7 @@ async function initializePopup(message) {
   }
 
   await ensureCheckoutRunner(tabId);
-  const scan = await chrome.tabs.sendMessage(tabId, { type: "COMB_SCAN" });
+  const scan = await extensionApi.tabs.sendMessage(tabId, { type: "COMB_SCAN" });
   const [library, communityCodes] = await Promise.all([
     getLibrary(),
     communityCodesForMerchant(hostname)
@@ -685,7 +697,7 @@ async function runCouponJob(message) {
   if (!Number.isInteger(tabId)) throw new Error("Comb could not identify the active tab.");
   if (!codes.length) throw new Error("Enter at least one valid coupon code.");
 
-  const tab = await chrome.tabs.get(tabId);
+  const tab = await extensionApi.tabs.get(tabId);
   const hostname = hostnameFromTab(tab);
 
   if (!hostname) throw new Error("This is not a supported checkout page.");
@@ -696,7 +708,7 @@ async function runCouponJob(message) {
   }
 
   await ensureCheckoutRunner(tabId);
-  return chrome.tabs.sendMessage(tabId, {
+  return extensionApi.tabs.sendMessage(tabId, {
     type: "COMB_RUN",
     codes
   });
@@ -713,12 +725,12 @@ async function routeMessage(message, sender) {
     case "COMB_CANCEL": {
       const tabId = Number(message.tabId);
       if (!Number.isInteger(tabId)) throw new Error("Comb could not identify the active tab.");
-      return chrome.tabs.sendMessage(tabId, { type: "COMB_CANCEL" });
+      return extensionApi.tabs.sendMessage(tabId, { type: "COMB_CANCEL" });
     }
     case "COMB_PROGRESS": {
       if (!sender.tab || !Number.isInteger(sender.tab.id)) return { ignored: true };
       const progress = sanitizeProgress(message.progress);
-      await chrome.runtime.sendMessage({
+      await extensionApi.runtime.sendMessage({
         type: "COMB_PROGRESS_UPDATE",
         tabId: sender.tab.id,
         progress
@@ -736,6 +748,15 @@ async function routeMessage(message, sender) {
     case "COMB_GET_FEED_STATE":
       assertOptionsSender(sender);
       return afterFeedMutations(getFeedStateSummary);
+    case "COMB_SEARCH_CATALOG":
+      assertOptionsSender(sender);
+      return searchCommunityCatalog({
+        query: message.query,
+        status: message.status,
+        sort: message.sort,
+        offset: message.offset,
+        limit: message.limit
+      });
     case "COMB_IMPORT_TRUST_KEY":
       assertOptionsSender(sender);
       return queueFeedMutation(() => importTrustKey(message.trustKey));
@@ -762,25 +783,25 @@ async function routeMessage(message, sender) {
   }
 }
 
-chrome.runtime.onInstalled.addListener(() => queueFeedMutation(async () => {
-  const stored = await chrome.storage.local.get([LIBRARY_KEY, FEED_STATE_KEY]);
+extensionApi.runtime.onInstalled.addListener(() => queueFeedMutation(async () => {
+  const stored = await extensionApi.storage.local.get([LIBRARY_KEY, FEED_STATE_KEY]);
   if (!stored[LIBRARY_KEY]) {
-    await chrome.storage.local.set({ [LIBRARY_KEY]: emptyLibrary() });
+    await extensionApi.storage.local.set({ [LIBRARY_KEY]: emptyLibrary() });
   }
   if (!stored[FEED_STATE_KEY]) {
-    await chrome.storage.local.set({ [FEED_STATE_KEY]: emptyFeedState() });
+    await extensionApi.storage.local.set({ [FEED_STATE_KEY]: emptyFeedState() });
   }
   await syncFeedAlarm(await getFeedState());
 }));
 
-chrome.alarms.onAlarm.addListener((alarm) => {
+extensionApi.alarms.onAlarm.addListener((alarm) => {
   if (alarm && alarm.name === FEED_REFRESH_ALARM) {
     return queueFeedMutation(refreshAllFeedSources).catch(() => undefined);
   }
   return undefined;
 });
 
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+extensionApi.runtime.onMessage.addListener((message, sender, sendResponse) => {
   routeMessage(message, sender)
     .then((result) => sendResponse({ ok: true, result }))
     .catch((error) => {

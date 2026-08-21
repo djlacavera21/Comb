@@ -93,3 +93,21 @@ test("compatibility report collapses untrusted adapter and reason strings", () =
   assert.equal(report.compatibility.reason, "unknown_markup");
   assert.equal(report.compatibility.existingCouponDetected, true);
 });
+
+test("compatibility report preserves the coarse Magento adapter enum", () => {
+  const report = createCompatibilityReport({
+    detected: true,
+    adapter: "magento",
+    reason: null,
+    input: {},
+    applyButton: {},
+    total: { amount: 100 },
+    existingCouponCount: 0
+  }, {
+    extensionVersion: "0.7.0",
+    generatedAt: "2026-08-15T12:00:00.000Z"
+  });
+
+  assert.equal(report.compatibility.adapter, "magento");
+  assert.equal(report.compatibility.reason, null);
+});

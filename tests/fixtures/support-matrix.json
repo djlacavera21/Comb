@@ -1,7 +1,7 @@
 {
   "schema": "comb.fixture-support-matrix/v1",
   "syntheticOnly": true,
-  "engineVersion": "0.7.0",
+  "engineVersion": "0.8.0",
   "sourcePolicy": "Synthetic markup based only on public platform semantics or privacy-safe reports; no live checkout captures.",
   "fixtures": [
     {
@@ -110,6 +110,54 @@
       "locale": "de-DE",
       "currency": "EUR",
       "baseline": 1234.5,
+      "expected": {
+        "detected": true,
+        "status": "complete",
+        "reason": null,
+        "bestCode": "BEST20",
+        "bestCandidateCode": null,
+        "savings": 20,
+        "tested": 3,
+        "applyClicks": 4,
+        "removeClicks": 2,
+        "zeroPurchaseClicks": true,
+        "creatorAttributionPreserved": false
+      }
+    },
+    {
+      "file": "magento-luma.html",
+      "contract": "happy-path",
+      "adapter": "magento",
+      "publicPlatform": "Magento Open Source / Adobe Commerce",
+      "publicPlatformVersion": "2.4-develop-011a4d0",
+      "publicThemeVersion": "luma-cart-synthetic-v1",
+      "locale": "it-IT",
+      "currency": "EUR",
+      "baseline": 132.95,
+      "expected": {
+        "detected": true,
+        "status": "complete",
+        "reason": null,
+        "bestCode": "BEST20",
+        "bestCandidateCode": null,
+        "savings": 20,
+        "tested": 3,
+        "applyClicks": 4,
+        "removeClicks": 2,
+        "zeroPurchaseClicks": true,
+        "creatorAttributionPreserved": false
+      }
+    },
+    {
+      "file": "magento-checkout.html",
+      "contract": "happy-path",
+      "adapter": "magento",
+      "publicPlatform": "Magento Open Source / Adobe Commerce",
+      "publicPlatformVersion": "2.4-develop-011a4d0",
+      "publicThemeVersion": "luma-checkout-synthetic-v1",
+      "locale": "fr-FR",
+      "currency": "EUR",
+      "baseline": 132.95,
       "expected": {
         "detected": true,
         "status": "complete",

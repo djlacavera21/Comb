@@ -13,7 +13,7 @@
 })(typeof globalThis !== "undefined" ? globalThis : this, function createCombCheckout() {
   "use strict";
 
-  const VERSION = "0.7.0";
+  const VERSION = "0.8.0";
   const MAX_CODES = 20;
   const MAX_CODE_LENGTH = 64;
 
@@ -117,6 +117,34 @@
   });
 
   const ADAPTERS = Object.freeze([
+    Object.freeze({
+      id: "magento",
+      label: "Magento / Adobe Commerce",
+      markers: [
+        "form#discount-coupon-form",
+        "form#discount-form.form-discount",
+        ".payment-option.discount-code form.form-discount"
+      ],
+      inputs: [
+        "#discount-coupon-form input#coupon_code",
+        "#discount-coupon-form input[name='coupon_code']",
+        "#discount-form input#discount-code",
+        "#discount-form input[name='discount_code']"
+      ],
+      applyButtons: [
+        "#discount-coupon-form button.action.apply",
+        "#discount-form button.action-apply"
+      ],
+      totals: [
+        "tr.grand.totals .price",
+        ".grand.totals .price",
+        "tr.grand.totals .amount"
+      ],
+      removeButtons: [
+        "#discount-coupon-form button.action.cancel",
+        "#discount-form button.action-cancel"
+      ]
+    }),
     Object.freeze({
       id: "woocommerce",
       label: "WooCommerce",

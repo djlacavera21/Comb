@@ -7,13 +7,13 @@ const http = require("node:http");
 const os = require("node:os");
 const path = require("node:path");
 const { spawn } = require("node:child_process");
+const {
+  fixtureMatrix,
+  runCheckoutFixtureSuite
+} = require("./browser-checkout-contracts.js");
 
 const root = path.resolve(__dirname, "..");
 const requireBrowser = process.argv.includes("--require-browser");
-const fixtureMatrix = JSON.parse(
-  fs.readFileSync(path.join(root, "tests/fixtures/support-matrix.json"), "utf8")
-);
-const fixturesByFile = new Map(fixtureMatrix.fixtures.map((fixture) => [fixture.file, fixture]));
 const mimeTypes = {
   ".css": "text/css; charset=utf-8",
   ".html": "text/html; charset=utf-8",
@@ -224,148 +224,7 @@ function openPage(client, url) {
   );
 }
 
-async function browserRun(client, codes) {
-  return evaluate(client, `globalThis.CombCheckout.runCoupons(document, ${JSON.stringify(codes)}, {
-    settle: { minimumMs: 250, maximumMs: 600, quietMs: 150 }
-  })`, 30_000);
-}
-
-function assertFixtureState(state, expected) {
-  assert.equal(state.applyClicks, expected.applyClicks, "synthetic Apply click count changed");
-  assert.equal(state.removeClicks, expected.removeClicks, "synthetic removal click count changed");
-  if (expected.zeroPurchaseClicks) {
-    assert.equal(state.dangerClicks, 0, "purchase controls must never be clicked");
-  }
-}
-
-function assertSafeStopResult(result, specification) {
-  const expected = specification.expected;
-  assert.equal(result.status, expected.status, `${specification.file} status contract changed`);
-  assert.equal(result.reason, expected.reason, `${specification.file} reason contract changed`);
-  assert.equal(result.scan.adapter, specification.adapter, `${specification.file} adapter contract changed`);
-  assert.equal(result.scan.detected, expected.detected, `${specification.file} detection contract changed`);
-  assert.equal(result.scan.engineVersion, fixtureMatrix.engineVersion);
-  assert.equal(result.scan.total.currency, specification.currency);
-  assert.ok(Math.abs(result.scan.total.amount - specification.baseline) < 0.01);
-  if (expected.tested === null) {
-    assert.equal(result.results.length, 0, `${specification.file} must stop before a coupon attempt`);
-  } else {
-    assert.equal(result.tested, expected.tested, `${specification.file} attempt count changed`);
-  }
-  assert.equal(result.best?.code || null, expected.bestCode);
-  assert.equal(result.bestCandidate?.code || null, expected.bestCandidateCode);
-  if (expected.savings !== null) {
-    const measured = result.best?.savings ?? result.bestCandidate?.savings;
-    assert.ok(Math.abs(measured - expected.savings) < 0.01);
-  }
-}
-
-async function verifyHappyFixture(client, baseUrl, specification) {
-  const expected = specification.expected;
-  const attributionQuery = expected.creatorAttributionPreserved
-    ? "?affiliate_id=creator-42&utm_source=creator"
-    : "";
-  await openPage(client, `${baseUrl}/tests/fixtures/${specification.file}${attributionQuery}`);
-  const attributionBefore = expected.creatorAttributionPreserved
-    ? await evaluate(client, `(() => {
-        document.cookie = "creator_attribution=creator-42; Path=/; SameSite=Lax";
-        return { href: location.href, cookie: document.cookie };
-      })()`)
-    : null;
-  const scan = await evaluate(client, "globalThis.CombCheckout.scanCheckout(document)");
-  assert.equal(scan.detected, expected.detected, `${specification.file} detection contract changed`);
-  assert.equal(scan.adapter, specification.adapter);
-  assert.equal(scan.engineVersion, fixtureMatrix.engineVersion);
-  assert.equal(scan.total.currency, specification.currency);
-  assert.ok(Math.abs(scan.total.amount - specification.baseline) < 0.01);
-  assert.equal(scan.existingCouponCount, 0);
-
-  const result = await browserRun(client, ["SHIPFREE", "BEST20", "NOTREAL"]);
-  assert.equal(result.status, expected.status);
-  assert.equal(result.reason, expected.reason);
-  assert.equal(result.best.code, expected.bestCode);
-  assert.equal(result.tested, expected.tested);
-  assert.ok(Math.abs(result.finalTotal - (specification.baseline - expected.savings)) < 0.01);
-  const state = await evaluate(client, "globalThis.fixtureState");
-  assertFixtureState(state, expected);
-  assert.equal(state.appliedCode, expected.bestCode);
-  if (expected.creatorAttributionPreserved) {
-    const attributionAfter = await evaluate(client, "({ href: location.href, cookie: document.cookie })");
-    assert.deepEqual(attributionAfter, attributionBefore, "creator URL tags and attribution cookie must remain unchanged");
-    process.stdout.write("✓ creator URL and cookie attribution preservation\n");
-  }
-}
-
-async function runFixtureSuite(client, baseUrl) {
-  const happyFixtures = fixtureMatrix.fixtures.filter((fixture) => fixture.contract === "happy-path");
-  const expectedSafeStopFiles = [
-    "ambiguous.html",
-    "currency-drift.html",
-    "existing-coupon.html",
-    "removal-failure.html",
-    "restoration-mismatch.html"
-  ];
-  assert.deepEqual(
-    fixtureMatrix.fixtures
-      .filter((fixture) => fixture.contract === "safe-stop")
-      .map((fixture) => fixture.file)
-      .sort(),
-    expectedSafeStopFiles,
-    "every matrix safe-stop contract must have an executed specialized assertion"
-  );
-
-  for (const specification of happyFixtures) {
-    await verifyHappyFixture(client, baseUrl, specification);
-    process.stdout.write(`✓ ${specification.adapter} browser contract\n`);
-  }
-
-  const ambiguous = fixturesByFile.get("ambiguous.html");
-  await openPage(client, `${baseUrl}/tests/fixtures/${ambiguous.file}`);
-  const ambiguousScan = await evaluate(client, "globalThis.CombCheckout.scanCheckout(document)");
-  assert.equal(ambiguousScan.detected, ambiguous.expected.detected);
-  assert.equal(ambiguousScan.reason, ambiguous.expected.reason);
-  const ambiguousRun = await browserRun(client, ["SAVE10"]);
-  assertSafeStopResult(ambiguousRun, ambiguous);
-  assertFixtureState(await evaluate(client, "globalThis.fixtureState"), ambiguous.expected);
-  process.stdout.write("✓ ambiguous purchase control refusal\n");
-
-  const existing = fixturesByFile.get("existing-coupon.html");
-  await openPage(client, `${baseUrl}/tests/fixtures/${existing.file}`);
-  const existingRun = await browserRun(client, ["SAVE10"]);
-  assertSafeStopResult(existingRun, existing);
-  assertFixtureState(await evaluate(client, "globalThis.fixtureState"), existing.expected);
-  process.stdout.write("✓ existing-coupon safety gate\n");
-
-  const removalFailure = fixturesByFile.get("removal-failure.html");
-  await openPage(client, `${baseUrl}/tests/fixtures/${removalFailure.file}`);
-  const failedRemoval = await browserRun(client, ["SAVE10", "BEST20"]);
-  assertSafeStopResult(failedRemoval, removalFailure);
-  const failureState = await evaluate(client, "globalThis.fixtureState");
-  assertFixtureState(failureState, removalFailure.expected);
-  assert.equal(failureState.appliedCode, removalFailure.expected.bestCode);
-  process.stdout.write("✓ failed-removal stop and no stacking\n");
-
-  const restorationMismatch = fixturesByFile.get("restoration-mismatch.html");
-  await openPage(client, `${baseUrl}/tests/fixtures/${restorationMismatch.file}`);
-  const incompleteRestoration = await browserRun(client, ["SAVE10", "BEST20"]);
-  assertSafeStopResult(incompleteRestoration, restorationMismatch);
-  assert.equal(incompleteRestoration.best, null, "an unverified partial removal must not be reported as applied");
-  assert.equal(incompleteRestoration.bestCandidate.code, restorationMismatch.expected.bestCandidateCode);
-  const incompleteState = await evaluate(client, "globalThis.fixtureState");
-  assertFixtureState(incompleteState, restorationMismatch.expected);
-  assert.equal(incompleteState.appliedCode, null);
-  process.stdout.write("✓ marker removal without baseline restoration stops safely\n");
-
-  const currencyDriftFixture = fixturesByFile.get("currency-drift.html");
-  await openPage(client, `${baseUrl}/tests/fixtures/${currencyDriftFixture.file}`);
-  const currencyDrift = await browserRun(client, ["NOTREAL", "BEST20"]);
-  assertSafeStopResult(currencyDrift, currencyDriftFixture);
-  const driftState = await evaluate(client, "globalThis.fixtureState");
-  assertFixtureState(driftState, currencyDriftFixture.expected);
-  process.stdout.write("✓ checkout currency drift stop\n");
-}
-
-const chromeUiStub = `(() => {
+const extensionUiStub = `(() => {
   const feedState = {
     version: 2,
     trustedKeys: [{
@@ -377,7 +236,37 @@ const chromeUiStub = `(() => {
     feeds: [],
     sources: []
   };
-  globalThis.chrome = {
+  const catalogResult = {
+    query: "",
+    status: "active",
+    sort: "recommended",
+    offset: 0,
+    limit: 25,
+    total: 1,
+    hasMore: false,
+    stats: {
+      feedCount: 1,
+      uniqueCouponCount: 1,
+      activeCouponCount: 1,
+      expiredCouponCount: 0
+    },
+    items: [{
+      merchant: "fixture-shop.example",
+      code: "FIXTURE20",
+      score: 94.2,
+      feedId: "accessibility.fixture",
+      feedName: "Accessibility Fixture Feed",
+      keyId: "sha256-AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+      sequence: 3,
+      lastVerifiedAt: "2026-08-14T12:00:00.000Z",
+      successCount: 24,
+      failureCount: 1,
+      expiresAt: "2026-08-28T12:00:00.000Z",
+      expired: false,
+      sourceCount: 1
+    }]
+  };
+  globalThis.browser = {
     runtime: {
       onMessage: { addListener() {} },
       openOptionsPage() {},
@@ -388,6 +277,9 @@ const chromeUiStub = `(() => {
         }
         if (message.type === "COMB_GET_FEED_STATE") {
           return { ok: true, result: feedState };
+        }
+        if (message.type === "COMB_SEARCH_CATALOG") {
+          return { ok: true, result: catalogResult };
         }
         if (message.type === "COMB_INIT") {
           return {
@@ -464,7 +356,7 @@ async function pressTab(client) {
 }
 
 async function verifyUiAccessibility(client, baseUrl) {
-  await client.send("Page.addScriptToEvaluateOnNewDocument", { source: chromeUiStub });
+  await client.send("Page.addScriptToEvaluateOnNewDocument", { source: extensionUiStub });
 
   await openUrl(
     client,
@@ -515,22 +407,37 @@ async function verifyUiAccessibility(client, baseUrl) {
   await openUrl(
     client,
     `${baseUrl}/src/options/options.html`,
-    "document.readyState === 'complete' && document.querySelector('#feedSummaryCount').textContent.includes('1 key')"
+    "document.readyState === 'complete' && document.querySelector('#catalogList .catalog-record')"
   );
   assert.deepEqual(await evaluate(client, accessibleControlAudit), []);
   assert.equal(
     await evaluate(client, "Array.from(document.querySelectorAll('input[type=file]')).every((input) => input.tabIndex === -1)"),
     true
   );
+  assert.equal(
+    await evaluate(client, "document.querySelector('.catalog-code').textContent"),
+    "FIXTURE20"
+  );
+  assert.match(
+    await evaluate(client, "document.querySelector('.catalog-provenance').textContent"),
+    /Accessibility Fixture Feed/
+  );
+  assert.match(
+    await evaluate(client, "document.querySelector('.catalog-metrics').textContent"),
+    /publisher reports 24 successes \/ 1 failure/
+  );
   await evaluate(client, "document.activeElement && document.activeElement.blur()");
   const optionsFocusOrder = [];
-  for (let index = 0; index < 6; index += 1) optionsFocusOrder.push(await pressTab(client));
+  for (let index = 0; index < 9; index += 1) optionsFocusOrder.push(await pressTab(client));
   assert.deepEqual(optionsFocusOrder.map((entry) => entry.id), [
     "trustKeyButton",
     "",
     "signedFeedButton",
     "sourceUrlInput",
     "connectSourceButton",
+    "catalogSearchInput",
+    "catalogStatusSelect",
+    "catalogSortSelect",
     "importButton"
   ]);
   assert.match(optionsFocusOrder[1].ariaLabel, /^Remove trusted key /);
@@ -538,7 +445,7 @@ async function verifyUiAccessibility(client, baseUrl) {
     assert.notEqual(entry.outlineStyle, "none", `${entry.id || entry.ariaLabel} must show keyboard focus`);
     assert.notEqual(entry.outlineWidth, "0px", `${entry.id || entry.ariaLabel} must show keyboard focus`);
   }
-  process.stdout.write("✓ settings keyboard and file-import contract\n");
+  process.stdout.write("✓ settings catalog, keyboard, and file-import contract\n");
 }
 
 function waitForProcessExit(chromeProcess, timeoutMs) {
@@ -615,7 +522,11 @@ async function main() {
     client = await CdpClient.connect(target.webSocketDebuggerUrl);
     await client.send("Page.enable");
     await client.send("Runtime.enable");
-    await runFixtureSuite(client, startedServer.baseUrl);
+    await runCheckoutFixtureSuite({
+      baseUrl: startedServer.baseUrl,
+      evaluate: (expression, timeoutMs) => evaluate(client, expression, timeoutMs),
+      openPage: (url) => openPage(client, url)
+    });
     await verifyUiAccessibility(client, startedServer.baseUrl);
     process.stdout.write("Comb real-browser fixture suite passed.\n");
   } finally {

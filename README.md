@@ -1,6 +1,6 @@
 # Comb
 
-**A privacy-first, creator-respecting, open-source coupon tester for Chrome and Edge.**
+**A privacy-first, creator-respecting, open-source coupon tester for Chrome, Edge, and Firefox.**
 
 Comb is being built as a transparent alternative to Honey-style coupon extensions. It remains user-controlled: you open Comb on a checkout page, use your own codes or signature-verified community codes, and it tests them one at a time while preserving the best verified discount.
 
@@ -16,12 +16,12 @@ This is enforced in the product, not merely promised in policy:
 - Comb accepts coupon-code tokens, never affiliate URLs;
 - the packaged-code validator rejects attribution-changing browser APIs and URL/cookie mutation patterns;
 - the popup displays **Creator attribution protected** during every run;
-- required real-Chrome CI runs a full coupon transaction on a synthetic creator-tagged checkout and verifies that both its URL tags and attribution cookie are byte-for-byte unchanged; and
+- required real-Chrome and real-Firefox CI run the same full coupon transaction on a synthetic creator-tagged checkout and verify that both its URL tags and attribution cookie are byte-for-byte unchanged; and
 - the public store copy, privacy policy, reviewer notes, and security review all carry the same exact guarantee.
 
 See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) for the invariant and its limits.
 
-## What works in v0.7
+## Released v0.7 baseline
 
 - Detects coupon fields, apply buttons, totals, and existing coupons.
 - Includes targeted adapters for WooCommerce classic/Blocks, BigCommerce Cornerstone, and Shopify-style checkouts plus a conservative generic adapter.
@@ -45,12 +45,22 @@ See [docs/ATTRIBUTION.md](docs/ATTRIBUTION.md) for the invariant and its limits.
 - Validates copy-ready Chrome Web Store and Edge Add-ons listing fields, conservative local data-use disclosures, Limited Use commitments, reviewer notes, and exact image dimensions.
 - Produces a deterministic runtime ZIP plus a deterministic store review kit with SHA-256 sidecars, then uploads all four files from successful CI.
 - Provides a public-evidence-only independent-review path and a manual release workflow that rejects version, commit, tag, checksum, test, or creator-attribution authorization drift before publication.
-- Uses Chrome's temporary `activeTab` access instead of permanent access to every website.
+- Uses the browser's temporary `activeTab` access instead of permanent access to every website.
 - Includes a local demo checkout and dependency-free automated tests.
+
+## v0.8 development
+
+- Adds a Magento Open Source / Adobe Commerce adapter for the public Luma cart and checkout coupon contracts. Narrow form markers take priority over the overlapping WooCommerce `coupon_code` field, and synthetic Italian/French EUR contracts verify removal, baseline restoration, best-code reapplication, and zero purchase clicks.
+- Adds a searchable, local-only community coupon catalog in Comb settings. Users can search installed signature-verified feeds by merchant, code, publisher, or public-key fingerprint; filter active and expired data; and inspect ranking, freshness, aggregate outcomes, sequence, expiry, and publisher provenance.
+- Keeps catalog queries inside the extension. Searching does not contact a feed operator, upload a term, add a browsing-history database, or introduce affiliate URLs, remote code, or outcome telemetry.
+- Adds the optional 1400×560 Chrome marquee artwork alongside the complete five-screenshot store set.
+- Adds one permission-equivalent Manifest V3 runtime for Chrome 121+, Edge, and Firefox 128+ desktop, with a dual background declaration and native `browser`/`chrome` API selection.
+- Adds a no-npm-dependency geckodriver runner that executes the same checkout, safe-stop, purchase-control, and creator URL/cookie contracts in real Firefox. It also builds and temporary-installs the exact runtime ZIP, verifies background startup with no pre-granted feed origin, drives prompt denial, rejects a deliberately tampered signed feed after approval while rolling back its new origin grant, then approves and installs the valid in-memory feed through an isolated synthetic HTTPS endpoint. The gate checks that both requests omit cookies and referrers and proves the production alarm and unused origin grant are cleared with the source. Verification and release CI require the complete gate.
+- Upgrades the fail-closed publication record with official AMO states and adds validated Firefox listing, license, screenshot, privacy, and reviewer materials. Firefox remains unsigned and unavailable until the hosted gate succeeds at a releasable commit and Mozilla review/signing completes.
 
 ## Privacy model
 
-Comb v0.7 has no backend, analytics, affiliate links, accounts, tracking, or remote code. It does handle limited data on-device: the current merchant hostname, coupon tokens, visible coupon controls/messages, and displayed payable amount/currency. The developer receives none of that checkout data. Store disclosures conservatively select the corresponding Web history, Website content, and Financial/payment categories even though the processing stays local.
+The current Comb build has no backend, analytics, affiliate links, accounts, tracking, or remote code. It does handle limited data on-device: the current merchant hostname, coupon tokens, visible coupon controls/messages, and displayed payable amount/currency. The developer receives none of that checkout data. Store disclosures conservatively select the corresponding Web history, Website content, and Financial/payment categories even though the processing stays local.
 
 The optional **Save safe report** action creates a local JSON file only after a user chooses it. It extracts coarse allowlisted detection signals rather than redacting a checkout capture, and it makes no request. See [docs/COMPATIBILITY.md](docs/COMPATIBILITY.md).
 
@@ -60,7 +70,7 @@ See [docs/PRIVACY.md](docs/PRIVACY.md) for the precise data boundaries.
 
 ## Publication status
 
-The verified v0.7 build is published as the immutable GitHub release [`v0.7.0`](https://github.com/djlacavera21/Comb/releases/tag/v0.7.0), pinned to the green source commit after the creator-attribution release gate and real-Chrome preservation contract passed. It has not been submitted to Chrome Web Store or Microsoft Edge Add-ons, so Comb is not yet publicly available from either browser store. [docs/PUBLICATION_STATUS.md](docs/PUBLICATION_STATUS.md) and the machine-validated [`store/publication-record.json`](store/publication-record.json) record the exact commit, workflow runs, four asset checksums, and official store states without treating a GitHub release as browser-store availability.
+The current source is v0.8 development: it is unreleased and explicitly blocked from browser-store submission. The earlier verified v0.7 build remains published as the immutable GitHub release [`v0.7.0`](https://github.com/djlacavera21/Comb/releases/tag/v0.7.0), pinned to the green source commit after the creator-attribution release gate and real-Chrome preservation contract passed. Neither version has been submitted to Chrome Web Store, Microsoft Edge Add-ons, or Firefox Add-ons, so Comb is not yet publicly available from any browser store. [docs/PUBLICATION_STATUS.md](docs/PUBLICATION_STATUS.md) and the machine-validated [`store/publication-record.json`](store/publication-record.json) keep the development build, latest verified release, four historical asset checksums, and official store states separate.
 
 ## Install the extension locally
 
@@ -71,6 +81,8 @@ The verified v0.7 build is published as the immutable GitHub release [`v0.7.0`](
 5. Open a checkout page, click the Comb icon, enter one or more codes, and select **Try codes**.
 
 Comb cannot run on browser-internal pages such as `chrome://extensions`.
+
+Firefox temporary-install instructions and the explicit pre-AMO limitations are in [docs/FIREFOX.md](docs/FIREFOX.md).
 
 ## Run the safe demo
 
@@ -97,9 +109,9 @@ npm run check
 npm run release:build
 ```
 
-The project has no runtime or development dependencies and uses Node 22 or newer for its browser-test transport. The validation script checks the manifest, packaged files, permission and creator-attribution boundaries, checkout restoration guardrails, signing-key leakage, accessibility hooks, and JavaScript syntax. `npm run check` runs browser contracts when Chrome is installed; CI requires Chrome and cannot skip them.
+The project has no npm runtime or development dependencies and uses Node 22 or newer for its Chrome DevTools and Firefox WebDriver transports. The validation script checks the manifest, packaged files, permission and creator-attribution boundaries, checkout restoration guardrails, signing-key leakage, accessibility hooks, and JavaScript syntax. `npm run check` runs Chrome and Firefox contracts when their local browser/driver binaries are installed; CI installs and requires both and cannot skip either gate. The complete packaged Firefox gate requires Firefox 138+, current geckodriver, and OpenSSL for a short-lived test-only certificate. Those automation requirements do not raise the extension's Firefox 128 minimum or add a runtime dependency.
 
-`npm run release:build` writes `dist/comb-0.7.0.zip`, `dist/comb-0.7.0-store-review-kit.zip`, and their `.sha256` sidecars. Both archives are built twice to prove identical output. Upload only the minimal runtime ZIP as the extension. See [docs/RELEASE.md](docs/RELEASE.md).
+`npm run release:build` writes `dist/comb-0.8.0.zip`, `dist/comb-0.8.0-store-review-kit.zip`, and their `.sha256` sidecars. Both archives are built twice to prove identical output. These remain development artifacts until the publication record identifies a verified v0.8 release and allows store submission; when authorized, only the minimal runtime ZIP is the extension upload. See [docs/RELEASE.md](docs/RELEASE.md).
 
 ## Publish or verify a signed feed
 
@@ -118,7 +130,7 @@ Keep the private key offline and outside source control. Import the `.public.jso
 
 ```text
 Popup (user gesture)
-  -> Manifest V3 service worker
+  -> Manifest V3 background runtime
      -> local trust store -> signature + expiry + rollback verification
         -> ranked, affiliate-neutral community codes
      -> optional approved HTTPS origin -> bounded JSON -> same verifier
@@ -132,13 +144,13 @@ Detailed design notes are in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## Current limits
 
-- Comb ships with no default feed or feed server. Manual import works offline; network updates require a trusted public key, a user-supplied HTTPS URL, and Chrome's origin approval prompt.
+- Comb ships with no default feed or feed server. Manual import works offline; network updates require a trusted public key, a user-supplied HTTPS URL, and the browser's origin approval prompt.
 - Feed checks are best-effort while the browser is running and may be delayed while a device sleeps.
 - Checkout markup varies and can change without notice. The real-browser fixtures cover sanitized contracts, not every live merchant; the generic adapter deliberately refuses ambiguous pages.
 - Some merchants block extensions, use cross-origin checkout frames, or do not expose a safe way to remove a coupon.
 - Shipping-only discounts may not be measurable until an address and shipping method have been selected.
 - Comb does not read protected or HttpOnly attribution cookies. Its guarantee comes from having no mechanism or financial incentive to change them—not from inspecting their value.
-- Firefox packaging is planned but not included in the first Manifest V3 build.
+- The real-Firefox checkout and packaged-extension gates, AMO listing materials, and publication-state mapping are implemented, but this local source tree has not established a green hosted Firefox result for its exact commit. A verified release, explicit publication authorization, Mozilla review, and Mozilla signing remain pre-submission/publication gates.
 
 ## Roadmap
 
